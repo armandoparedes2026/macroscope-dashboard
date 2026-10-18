@@ -1,0 +1,55 @@
+name: Deploy MacroScope to Vercel
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macroscope-vercel-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy static dashboard
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERCEL_ORG_ID: team_2SUUXoaYVzUfyptfKrG51Of9
+      VERCEL_PROJECT_ID: prj_ynewA8npY6iYShQpYA6vYe13wZzg
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Check deployment authorization
+        shell: bash
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error title=Missing VERCEL_TOKEN::Add a Vercel API token in Settings > Secrets and variables > Actions under the name VERCEL_TOKEN."
+            exit 1
+          fi
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate dashboard
+        run: node tests/smoke.mjs
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull production configuration
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN" --scope=cs-corp
+
+      - name: Build static deployment
+        run: vercel build --prod --token="$VERCEL_TOKEN" --scope=cs-corp
+
+      - name: Publish to Vercel
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" --scope=cs-corp
