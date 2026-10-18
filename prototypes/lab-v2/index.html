@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1526">
+  <meta name="description" content="Prototipo visual v2 del Laboratorio Macroeconómico IS–LM–BP y Mundell–Fleming en pestaña única para MacroScope.">
+  <title>MacroScope · Laboratorio IS–LM–BP (Prototipo v2)</title>
+  <script>
+    try {
+      const saved = localStorage.getItem('macroscope_lab_v2_theme');
+      if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="lab.css">
+</head>
+<body>
+  <a href="#mainStage" class="skip-link">Saltar a los diagramas y resultados</a>
+
+  <!-- Barra superior académica y compacta -->
+  <header class="lab-topbar" role="banner">
+    <div class="topbar-brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 19V5M3 19h18"/>
+          <path d="M6 15l4-5 4 3 5-7"/>
+          <circle cx="14" cy="13" r="2"/>
+        </svg>
+      </div>
+      <div class="brand-copy">
+        <div class="brand-eyebrow">
+          <span>MACROSCOPE · LABORATORIO DOCENTE</span>
+          <span class="sep" aria-hidden="true">·</span>
+          <span class="illustrative-pill" title="Calibración por defecto del modelo sin datos inventados">Valores ilustrativos (i₀ = 4%, i*₀ = 3%, CC₀ = −2%)</span>
+        </div>
+        <h1 class="brand-title">Simulador Simultáneo IS–LM–BP y Mundell–Fleming</h1>
+      </div>
+    </div>
+
+    <div class="topbar-actions" role="toolbar" aria-label="Herramientas principales del laboratorio">
+      <button type="button" class="btn-tool" id="btnReplayAnim" title="Reproducir animación de desplazamiento desde E₀ hasta E₂">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+        <span>Animar ajuste</span>
+      </button>
+
+      <div class="compare-group" role="group" aria-label="Comparación de escenarios A y B">
+        <button type="button" class="btn-tool" id="btnCompareToggle" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="8" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="16" rx="1.5"/></svg>
+          <span id="compareBtnText">Fijar Escenario A</span>
+        </button>
+        <button type="button" class="btn-tool btn-subtle" id="btnClearCompare" hidden title="Descartar escenario A guardado">
+          Limpiar A
+        </button>
+      </div>
+
+      <button type="button" class="btn-tool btn-why-main" id="btnWhyGlobal" aria-expanded="false" aria-controls="whyDrawer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5"/><circle cx="12" cy="17" r="0.8" fill="currentColor"/></svg>
+        <span>¿Por qué?</span>
+      </button>
+
+      <button type="button" class="btn-tool btn-reset" id="btnResetAll" title="Restaurar parámetros y volver al equilibrio inicial E₀">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        <span>Restaurar</span>
+      </button>
+
+      <button type="button" class="btn-icon" id="btnThemeToggle" aria-label="Cambiar entre modo claro y oscuro" title="Cambiar tema claro/oscuro">
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" hidden><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Barra móvil/tablet para abrir hoja de parámetros sin solapar controles -->
+  <div class="mobile-control-strip" aria-label="Resumen rápido y acceso a parámetros">
+    <button type="button" class="mobile-sheet-trigger" id="btnMobileParams" aria-expanded="false" aria-controls="labSidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2" fill="currentColor"/><circle cx="15" cy="12" r="2" fill="currentColor"/><circle cx="10" cy="18" r="2" fill="currentColor"/></svg>
+      <span>Parámetros y shocks</span>
+      <span class="active-badge" id="mobileActiveCount">1 activo</span>
+    </button>
+    <div class="mobile-quick-status" id="mobileRegimeSummary">Abierta · Flexible · Movilidad alta</div>
+  </div>
+
+  <!-- Contenedor principal en pestaña única -->
+  <div class="lab-workspace">
+    <!-- PANEL LATERAL IZQUIERDO: PARÁMETROS -->
+    <aside class="lab-sidebar" id="labSidebar" aria-label="Panel de configuración y experimentación">
+      <div class="sidebar-mobile-header">
+        <strong>Configuración y Experimentación</strong>
+        <button type="button" class="btn-close-sheet" id="btnCloseMobileParams" aria-label="Cerrar hoja de parámetros">✕ Listo</button>
+      </div>
+
+      <!-- SECCIÓN A: CONFIGURACIÓN DE LA ECONOMÍA -->
+      <section class="panel-block config-block" aria-labelledby="headingConfig">
+        <div class="block-header">
+          <div>
+            <span class="block-kicker">SECCIÓN A · ESTRUCTURA INSTITUCIONAL</span>
+            <h2 id="headingConfig" class="block-title">Configuración de la economía</h2>
+          </div>
+          <span class="regime-pill" id="regimeBadge">FLEXIBLE</span>
+        </div>
+
+        <div class="config-grid">
+          <div class="field-row">
+            <label for="cfgCountry" class="field-label">Referencia institucional / País</label>
+            <select id="cfgCountry" class="field-select">
+              <option value="STD">Estándar académico (i₀=4%, i*₀=3%, CC=−2%)</option>
+              <option value="PER" selected>Perú · Contexto BCRP (valores ilustrativos)</option>
+              <option value="CHL">Chile · Contexto BCCh (valores ilustrativos)</option>
+              <option value="COL">Colombia · Contexto BanRep (valores ilustrativos)</option>
+              <option value="MEX">México · Contexto Banxico (valores ilustrativos)</option>
+              <option value="BRA">Brasil · Contexto BCB (valores ilustrativos)</option>
+              <option value="USA">Estados Unidos · Economía grande (valores ilustrativos)</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <label for="cfgRegime" class="field-label">Régimen cambiario</label>
+            <select id="cfgRegime" class="field-select">
+              <option value="flex" selected>Abierta · Tipo de cambio flexible</option>
+              <option value="fixed">Abierta · Tipo de cambio fijo (ē)</option>
+              <option value="closed">Economía cerrada (solo IS–LM)</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <label for="cfgMobility" class="field-label">Movilidad internacional de capital (κ)</label>
+            <select id="cfgMobility" class="field-select">
+              <option value="none">Nula (κ = 0 · BP vertical)</option>
+              <option value="low">Baja (κ = 0.5 · BP más empinada que LM)</option>
+              <option value="high" selected>Alta (κ = 10 · BP más plana que LM)</option>
+              <option value="perfect">Perfecta (κ → ∞ · BP horizontal, i = i* + ρ)</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <label for="cfgInstrument" class="field-label">Instrumento de política monetaria</label>
+            <select id="cfgInstrument" class="field-select">
+              <option value="money" selected>Agregado monetario (M/P exógena · LM con pendiente)</option>
+              <option value="rate">Regla de tasa de interés (i pol. · LM horizontal)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="trilemma-callout" id="trilemmaCallout" role="status" aria-live="polite">
+          <!-- Rellenado dinámicamente -->
+        </div>
+
+        <div class="calibration-footnote" id="calibrationFootnote">
+          Calibración base del motor <code>js/islm-model.js</code>: <strong>Y₀ = 100</strong>, <strong>e₀ = 100</strong>, <strong>i₀ = 4,0%</strong>, <strong>i*₀ = 3,0%</strong>, <strong>ρ₀ = 1,0 pp</strong>, <strong>CC₀ = −2,0</strong> (valores ilustrativos, P = 1).
+        </div>
+      </section>
+
+      <!-- ESCENARIOS GUIADOS RÁPIDOS -->
+      <section class="panel-block presets-block" aria-labelledby="headingPresets">
+        <div class="block-header compact">
+          <div>
+            <span class="block-kicker">ATAJOS DIDÁCTICOS</span>
+            <h2 id="headingPresets" class="block-title">Escenarios de referencia</h2>
+          </div>
+        </div>
+        <div class="presets-grid" id="presetsContainer" role="group" aria-label="Escenarios preconfigurados"></div>
+      </section>
+
+      <!-- SECCIÓN B: EXPERIMENTACIÓN (AGRUPADA Y PLEGABLE) -->
+      <section class="panel-block experiment-block" aria-labelledby="headingExperiment">
+        <div class="block-header">
+          <div>
+            <span class="block-kicker">SECCIÓN B · PERTURBACIONES Y PARÁMETROS</span>
+            <h2 id="headingExperiment" class="block-title">Experimentación interactiva</h2>
+          </div>
+          <span class="active-shocks-pill" id="activeShocksBadge">1 cambio activo</span>
+        </div>
+
+        <div class="accordion-stack" id="experimentAccordion">
+          <!-- 1. Política Fiscal -->
+          <details class="exp-details" id="group-fiscal" open>
+            <summary class="exp-summary">
+              <span class="exp-summary-left">
+                <span class="curve-dot is-dot" aria-hidden="true"></span>
+                <strong>1. Política fiscal</strong>
+                <span class="role-badge control">Controlable · IS</span>
+              </span>
+              <span class="exp-count" id="count-fiscal">0</span>
+            </summary>
+            <div class="exp-body" id="inputs-fiscal"></div>
+          </details>
+
+          <!-- 2. Política Monetaria -->
+          <details class="exp-details" id="group-monetary" open>
+            <summary class="exp-summary">
+              <span class="exp-summary-left">
+                <span class="curve-dot lm-dot" aria-hidden="true"></span>
+                <strong>2. Política monetaria</strong>
+                <span class="role-badge control">Controlable · LM</span>
+              </span>
+              <span class="exp-count" id="count-monetary">0</span>
+            </summary>
+            <div class="exp-body" id="inputs-monetary"></div>
+          </details>
+
+          <!-- 3. Política Cambiaria -->
+          <details class="exp-details" id="group-exchange">
+            <summary class="exp-summary">
+              <span class="exp-summary-left">
+                <span class="curve-dot bp-dot" aria-hidden="true"></span>
+                <strong>3. Política cambiaria</strong>
+                <span class="role-badge control">Régimen fijo · ē</span>
+              </span>
+              <span class="exp-count" id="count-exchange">0</span>
+            </summary>
+            <div class="exp-body" id="inputs-exchange"></div>
+          </details>
+
+          <!-- 4. Shocks Externos y Expectativas -->
+          <details class="exp-details" id="group-external">
+            <summary class="exp-summary">
+              <span class="exp-summary-left">
+                <span class="curve-dot bp-dot" aria-hidden="true"></span>
+                <strong>4. Shocks externos y confianza</strong>
+                <span class="role-badge external">Exógeno · BP / IS</span>
+              </span>
+              <span class="exp-count" id="count-external">0</span>
+            </summary>
+            <div class="exp-body" id="inputs-external"></div>
+          </details>
+
+          <!-- 5. Parámetros Estructurales -->
+          <details class="exp-details" id="group-structural">
+            <summary class="exp-summary">
+              <span class="exp-summary-left">
+                <span class="curve-dot param-dot" aria-hidden="true"></span>
+                <strong>5. Parámetros estructurales</strong>
+                <span class="role-badge structural">Pendientes y sensibilidad</span>
+              </span>
+              <span class="exp-count" id="count-structural">0</span>
+            </summary>
+            <div class="exp-body" id="inputs-structural"></div>
+          </details>
+        </div>
+      </section>
+    </aside>
+
+    <!-- ZONA CENTRAL: 4 DIAGRAMAS EN REJILLA 2x2 + FRANJA DE RESULTADOS -->
+    <main class="lab-stage" id="mainStage">
+      <!-- Barra de control visual de curvas, leyenda y modo de vista móvil -->
+      <section class="canvas-toolbar" aria-label="Controles de visibilidad de curvas y leyenda">
+        <div class="layer-toggles" role="group" aria-label="Mostrar u ocultar curvas en los diagramas">
+          <span class="toolbar-label">Capas visibles:</span>
+          <button type="button" class="layer-chip is-active" data-layer="IS" aria-pressed="true">
+            <span class="swatch is-swatch"></span>IS / IS* / DA
+          </button>
+          <button type="button" class="layer-chip is-active" data-layer="LM" aria-pressed="true">
+            <span class="swatch lm-swatch"></span>LM / LM* / M
+          </button>
+          <button type="button" class="layer-chip is-active" data-layer="BP" aria-pressed="true">
+            <span class="swatch bp-swatch"></span>BP / Paridad
+          </button>
+          <button type="button" class="layer-chip is-active" data-layer="initial" aria-pressed="true">
+            <span class="swatch dashed-swatch"></span>Inicial (E₀)
+          </button>
+          <button type="button" class="layer-chip is-active" data-layer="impact" aria-pressed="true">
+            <span class="swatch hollow-swatch"></span>Impacto (E₁)
+          </button>
+          <button type="button" class="layer-chip is-active" data-layer="arrows" aria-pressed="true">
+            <span class="swatch arrow-swatch">→</span>Flechas causales
+          </button>
+          <button type="button" class="layer-chip is-active" data-layer="scenA" id="chipLayerScenA" aria-pressed="true" hidden>
+            <span class="swatch scena-swatch"></span>Escenario A
+          </button>
+        </div>
+
+        <div class="legend-inline" aria-label="Convención gráfica">
+          <span class="legend-item"><i class="line-sample dashed"></i>Inicial (₀)</span>
+          <span class="legend-item"><i class="line-sample solid"></i>Final (₁)</span>
+          <span class="legend-item"><i class="dot-sample e0"></i>E₀ base</span>
+          <span class="legend-item"><i class="dot-sample e1"></i>E₁ impacto</span>
+          <span class="legend-item"><i class="dot-sample e2"></i>E₂ final</span>
+        </div>
+      </section>
+
+      <!-- Conmutador de carrusel / pila visible en tablet y móvil -->
+      <div class="mobile-diagrams-bar" aria-label="Navegación de diagramas en pantallas pequeñas">
+        <div class="mobile-diagram-tabs" id="mobileDiagramTabs" role="tablist" aria-label="Seleccionar diagrama">
+          <button type="button" role="tab" class="mob-diag-tab is-active" data-diag-index="0" aria-selected="true">1 · IS–LM–BP</button>
+          <button type="button" role="tab" class="mob-diag-tab" data-diag-index="1" aria-selected="false">2 · IS*–LM*</button>
+          <button type="button" role="tab" class="mob-diag-tab" data-diag-index="2" aria-selected="false">3 · Dinero</button>
+          <button type="button" role="tab" class="mob-diag-tab" data-diag-index="3" aria-selected="false">4 · Cruz</button>
+        </div>
+        <button type="button" class="btn-layout-mode" id="btnMobileLayoutMode" data-mode="carousel" aria-label="Alternar entre vista de carrusel y pila vertical">
+          Ver los 4 en pila
+        </button>
+      </div>
+
+      <!-- REJILLA 2x2 DE LOS 4 DIAGRAMAS -->
+      <section class="diagrams-grid" id="diagramsGrid" data-mobile-mode="carousel" aria-label="Cuatro diagramas macroeconómicos enlazados">
+        <!-- Diagrama 1: IS-LM-BP -->
+        <figure class="diagram-card is-current-slide" data-slide="0" id="cardISLM">
+          <figcaption class="diagram-header">
+            <div class="diagram-title-group">
+              <div class="diagram-step-row">
+                <span class="diagram-num">DIAGRAMA 1</span>
+                <span class="shift-pill" id="shiftBadgeISLM">IS se desplaza</span>
+              </div>
+              <h3 class="diagram-title">Equilibrio IS–LM–BP</h3>
+              <p class="diagram-sub">Tasa de interés doméstica <strong>i (%)</strong> vs. Producto <strong>Y (índice 100)</strong></p>
+            </div>
+            <button type="button" class="btn-why-card" data-why="islm" aria-label="Explicación detallada del diagrama IS-LM-BP">
+              ¿Por qué?
+            </button>
+          </figcaption>
+          <div class="canvas-box">
+            <canvas id="canvasISLM" role="img" aria-label="Diagrama IS-LM-BP"></canvas>
+          </div>
+          <div class="diagram-footer" id="footISLM">
+            Ecuaciones: <code>Y = C(Y−T) + I(i) + G + NX(Y,e,Y*)</code> · <code>M/P = kY − hi</code> · <code>NX + KF(i−i*−ρ) = 0</code>
+          </div>
+        </figure>
+
+        <!-- Diagrama 2: Mundell-Fleming IS*-LM* -->
+        <figure class="diagram-card" data-slide="1" id="cardMF">
+          <figcaption class="diagram-header">
+            <div class="diagram-title-group">
+              <div class="diagram-step-row">
+                <span class="diagram-num">DIAGRAMA 2</span>
+                <span class="shift-pill" id="shiftBadgeMF">IS* se desplaza</span>
+              </div>
+              <h3 class="diagram-title">Mundell–Fleming (IS*–LM*)</h3>
+              <p class="diagram-sub">Tipo de cambio <strong>e (índice 100, ↑ = depreciación)</strong> vs. Producto <strong>Y (índice 100)</strong></p>
+            </div>
+            <button type="button" class="btn-why-card" data-why="mf" aria-label="Explicación detallada del diagrama Mundell-Fleming">
+              ¿Por qué?
+            </button>
+          </figcaption>
+          <div class="canvas-box">
+            <canvas id="canvasMF" role="img" aria-label="Diagrama Mundell-Fleming IS*-LM*"></canvas>
+          </div>
+          <div class="diagram-footer" id="footMF">
+            En el plano <code>(Y, e)</code>: una subida de <code>e</code> deprecia la moneda local y mejora <code>NX</code> (condición Marshall–Lerner).
+          </div>
+        </figure>
+
+        <!-- Diagrama 3: Mercado Monetario -->
+        <figure class="diagram-card" data-slide="2" id="cardMoney">
+          <figcaption class="diagram-header">
+            <div class="diagram-title-group">
+              <div class="diagram-step-row">
+                <span class="diagram-num">DIAGRAMA 3</span>
+                <span class="shift-pill" id="shiftBadgeMoney">L(Y) se desplaza</span>
+              </div>
+              <h3 class="diagram-title">Mercado Monetario</h3>
+              <p class="diagram-sub">Tasa de interés <strong>i (%)</strong> vs. Saldos reales <strong>M/P (índice)</strong></p>
+            </div>
+            <button type="button" class="btn-why-card" data-why="money" aria-label="Explicación detallada del mercado monetario">
+              ¿Por qué?
+            </button>
+          </figcaption>
+          <div class="canvas-box">
+            <canvas id="canvasMoney" role="img" aria-label="Diagrama del mercado monetario"></canvas>
+          </div>
+          <div class="diagram-footer" id="footMoney">
+            Demanda de liquidez <code>L(Y, i) = k·Y − h·i</code> frente a oferta real <code>Mˢ/P</code> (o regla de tasa <code>i = i_pol</code>).
+          </div>
+        </figure>
+
+        <!-- Diagrama 4: Cruz Keynesiana -->
+        <figure class="diagram-card" data-slide="3" id="cardCross">
+          <figcaption class="diagram-header">
+            <div class="diagram-title-group">
+              <div class="diagram-step-row">
+                <span class="diagram-num">DIAGRAMA 4</span>
+                <span class="shift-pill" id="shiftBadgeCross">DA se desplaza</span>
+              </div>
+              <h3 class="diagram-title">Cruz Keynesiana (Bienes)</h3>
+              <p class="diagram-sub">Demanda agregada <strong>DA (índice 100)</strong> vs. Producto <strong>Y (índice 100)</strong></p>
+            </div>
+            <button type="button" class="btn-why-card" data-why="cross" aria-label="Explicación detallada de la cruz keynesiana">
+              ¿Por qué?
+            </button>
+          </figcaption>
+          <div class="canvas-box">
+            <canvas id="canvasCross" role="img" aria-label="Diagrama de la cruz keynesiana"></canvas>
+          </div>
+          <div class="diagram-footer" id="footCross">
+            Intersección con la recta de <code>45° (DA = Y)</code> considerando los efectos inducidos de <code>i</code> y <code>e</code>.
+          </div>
+        </figure>
+      </section>
+
+      <!-- Controles inferiores del carrusel en móvil -->
+      <div class="mobile-carousel-nav" id="mobileCarouselNav" aria-label="Controles de paso entre diagramas">
+        <button type="button" class="btn-tool" id="btnPrevSlide" aria-label="Diagrama anterior">← Anterior</button>
+        <span class="slide-counter" id="mobileSlideCounter">Diagrama 1 de 4</span>
+        <button type="button" class="btn-tool" id="btnNextSlide" aria-label="Diagrama siguiente">Siguiente →</button>
+      </div>
+
+      <!-- FRANJA DE RESULTADOS: E0 / E1 / E2, VARIACIONES, MULTIPLICADORES Y TRANSMISIÓN -->
+      <section class="results-strip" aria-label="Franja de resultados cuantitativos y mecanismo de transmisión">
+        <!-- Fila superior de síntesis de equilibrio y multiplicadores -->
+        <div class="results-kpi-row">
+          <div class="kpi-summary-block surface-card">
+            <div class="card-section-head">
+              <div>
+                <span class="block-kicker">SÍNTESIS DEL EQUILIBRIO</span>
+                <h2 class="section-heading">Trayectoria E₀ → E₁ → E₂ y variaciones</h2>
+              </div>
+              <span class="comparison-status-pill" id="compareStatusBadge" hidden>Comparando Escenario B actual vs. Escenario A fijado</span>
+            </div>
+
+            <!-- Tarjetas rápidas de las 4 variables nucleares (Y, i, e, M/P) -->
+            <div class="core-metrics-grid" id="coreMetricsGrid" aria-label="Variables principales del equilibrio"></div>
+
+            <!-- Tabla completa de resultados E0, E1, E2, Delta (y comparación A/B cuando está activa) -->
+            <div class="table-scroll-wrap">
+              <table class="lab-table" id="resultsTable">
+                <thead>
+                  <tr id="resultsTableHeadRow">
+                    <th scope="col">Variable macroeconómica</th>
+                    <th scope="col">Inicial (E₀)</th>
+                    <th scope="col">Impacto (E₁)</th>
+                    <th scope="col">Final (E₂)</th>
+                    <th scope="col">Variación (E₂ − E₀)</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Multiplicadores y Transmisión paso a paso -->
+          <div class="transmission-column">
+            <article class="surface-card multipliers-card" aria-labelledby="headingMultipliers">
+              <div class="card-section-head">
+                <div>
+                  <span class="block-kicker">SENSIBILIDAD DEL RÉGIMEN ACTUAL</span>
+                  <h2 id="headingMultipliers" class="section-heading">Multiplicadores efectivos</h2>
+                </div>
+              </div>
+              <div class="multipliers-grid" id="multipliersGrid"></div>
+            </article>
+
+            <article class="surface-card narrative-card" aria-labelledby="headingTransmission">
+              <div class="card-section-head">
+                <div>
+                  <span class="block-kicker">CAUSALIDAD ECONÓMICA</span>
+                  <h2 id="headingTransmission" class="section-heading">Transmisión paso a paso</h2>
+                </div>
+                <button type="button" class="btn-link-why" id="btnOpenWhyFromSteps">Ver intuición teórica completa →</button>
+              </div>
+              <ol class="transmission-steps" id="transmissionSteps"></ol>
+            </article>
+          </div>
+        </div>
+
+        <!-- Fila pedagógica plegable: Clasificación endógena/exógena y Matriz de eficacia Mundell-Fleming -->
+        <details class="pedagogical-drawer surface-card">
+          <summary class="pedagogical-summary">
+            <div>
+              <span class="block-kicker">MARCO CONCEPTUAL Y TRILEMA DE MUNDELL</span>
+              <strong>¿Qué controla la autoridad económica en este régimen y cuándo es eficaz cada política?</strong>
+            </div>
+            <span class="summary-toggle-hint">Desplegar matriz y clasificación ▾</span>
+          </summary>
+          <div class="pedagogical-grid">
+            <div class="var-classification-box">
+              <h3 class="sub-heading">Clasificación de variables bajo el régimen seleccionado</h3>
+              <div class="var-classes-grid" id="varClassesGrid"></div>
+            </div>
+            <div class="policy-matrix-box">
+              <h3 class="sub-heading">Matriz clásica de eficacia (Mundell–Fleming con κ → ∞)</h3>
+              <div class="table-scroll-wrap">
+                <table class="lab-table policy-matrix-table" id="policyMatrixTable">
+                  <thead>
+                    <tr>
+                      <th scope="col">Perturbación</th>
+                      <th scope="col" data-col-regime="flex">Tipo de cambio flexible</th>
+                      <th scope="col" data-col-regime="fixed">Tipo de cambio fijo</th>
+                      <th scope="col" data-col-regime="closed">Economía cerrada</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">Expansión fiscal (↑G, ↓T)</th>
+                      <td data-col-regime="flex"><strong>Ineficaz con κ→∞:</strong> la apreciación cambiaria (↓e) contrae NX y desplaza completamente al impulso fiscal.</td>
+                      <td data-col-regime="fixed"><strong>Máxima eficacia:</strong> la entrada de capitales obliga al banco central a comprar reservas y expandir M/P.</td>
+                      <td data-col-regime="closed"><strong>Eficacia intermedia:</strong> eleva Y pero sufre desplazamiento parcial (crowding out) por el alza de i.</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Expansión monetaria (↑M/P)</th>
+                      <td data-col-regime="flex"><strong>Máxima eficacia:</strong> la salida incipiente de capitales deprecia la moneda (↑e) e impulsa NX e Y.</td>
+                      <td data-col-regime="fixed"><strong>Ineficaz (endógena):</strong> la pérdida de reservas para defender ē revierte la expansión monetaria.</td>
+                      <td data-col-regime="closed"><strong>Eficaz:</strong> reduce la tasa de interés i y estimula la inversión privada I(i).</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Alza de tasa externa (↑i* o ↑ρ)</th>
+                      <td data-col-regime="flex"><strong>Expansiva vía e:</strong> la salida de capitales deprecia la moneda y eleva las exportaciones netas.</td>
+                      <td data-col-regime="fixed"><strong>Contractiva:</strong> el banco central vende reservas y contrae M/P para sostener la paridad ē.</td>
+                      <td data-col-regime="closed"><strong>No aplica:</strong> no existen flujos financieros ni comerciales con el exterior.</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Devaluación oficial (↑ē)</th>
+                      <td data-col-regime="flex"><strong>No es instrumento:</strong> el tipo de cambio e se determina endógenamente en el mercado de divisas.</td>
+                      <td data-col-regime="fixed"><strong>Expansiva:</strong> mejora NX, genera superávit externo y expande M/P vía acumulación de reservas.</td>
+                      <td data-col-regime="closed"><strong>No aplica:</strong> economía sin sector externo.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL / CAJÓN DE EXPLICACIÓN "¿POR QUÉ?" -->
+  <div class="why-backdrop" id="whyBackdrop" hidden></div>
+  <aside class="why-drawer" id="whyDrawer" role="dialog" aria-modal="true" aria-labelledby="whyDrawerTitle" hidden>
+    <div class="why-drawer-header">
+      <div>
+        <span class="block-kicker" id="whyDrawerKicker">INTUICIÓN ECONÓMICA · PASO A PASO</span>
+        <h2 id="whyDrawerTitle" class="why-drawer-title">¿Por qué se desplazan las curvas en este escenario?</h2>
+      </div>
+      <button type="button" class="btn-icon" id="btnCloseWhy" aria-label="Cerrar explicación">✕</button>
+    </div>
+
+    <div class="why-tabs" role="tablist" aria-label="Secciones de la explicación">
+      <button type="button" role="tab" class="why-tab is-active" data-why-tab="all" aria-selected="true">Visión general</button>
+      <button type="button" role="tab" class="why-tab" data-why-tab="islm" aria-selected="false">1 · IS–LM–BP</button>
+      <button type="button" role="tab" class="why-tab" data-why-tab="mf" aria-selected="false">2 · Mundell–Fleming</button>
+      <button type="button" role="tab" class="why-tab" data-why-tab="money" aria-selected="false">3 · Dinero</button>
+      <button type="button" role="tab" class="why-tab" data-why-tab="cross" aria-selected="false">4 · Cruz Keynesiana</button>
+    </div>
+
+    <div class="why-drawer-body" id="whyDrawerBody">
+      <!-- Rellenado dinámicamente según el estado actual del modelo -->
+    </div>
+  </aside>
+
+  <!-- Toast de notificación accesible -->
+  <div class="lab-toast" id="labToast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Motor matemático real sin duplicar ecuaciones -->
+  <script src="../../js/islm-model.js"></script>
+  <script src="lab.js"></script>
+</body>
+</html>
