@@ -32,6 +32,8 @@ Fecha: 2026-10-18. Base: `origin/main` 7631444. Coordinador: Claude Code.
 | F12 | Tipos de cambio de Open ER API: agregador no oficial; correcto que se etiquete como indicativo. | Baja | Bajo | — | Mantener etiqueta |
 | F13 | `package.json`/README/`index.html` aún usan el posicionamiento «inteligencia/observatorio para decidir». | Baja | Medio | Bajo | Fase UI |
 | F14 | ~~El workflow `validate.yml` solo ejecuta smoke~~ **Corrección del coordinador**: esa lectura correspondía a 0df3892; en 7631444 `validate.yml` ya ejecutaba smoke, unitarias y e2e. Codex 1 lo simplificó a `npm test`. El deploy (`vercel-deploy.yml`) solo ejecuta smoke antes de publicar. | Baja | — | — | — |
+| F16 | **Integridad de datos**: el respaldo local contiene 11 valores de cuenta corriente de LCN (2014–2024) que no pueden provenir de WDI: la API devuelve `null` para LCN en los 36 años 1990–2025. El resto del respaldo, transcrito a mano y sin fecha, difiere de WDI actual en magnitudes compatibles con revisiones (≤ 2,5 pp; PIB per cápita ≤ 7,7 %). | Alta | Alto | Bajo | Codex 4 (regenerar por script) |
+| F17 | Cobertura WDI de los países candidatos (2014–2025): completa salvo Argentina IPC (7/12, 2014–2017 nulos), Bolivia y Japón en comercio exterior (hasta 2024). | Info | — | — | Codex 4 |
 | F15 | A 360 px la insignia de estado («Respaldo local — no act…») queda recortada y la topbar translúcida deja ver el texto del hero detrás (captura de Codex 1). | Baja | Bajo | Bajo | Fase laboratorio/UI |
 
 ## Plan por fases y asignación (Orca)
