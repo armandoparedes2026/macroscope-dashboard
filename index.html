@@ -1,17 +1,18 @@
 <!doctype html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101e36">
   <meta name="description" content="Laboratorio interactivo de economía aplicada: estadísticas oficiales, comparaciones internacionales y un simulador IS–LM–BP / Mundell–Fleming con equilibrio inicial anclado en datos WDI y supuestos explícitos.">
   <title>MacroScope — Laboratorio Interactivo de Economía Aplicada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script>
     // Aplica el tema guardado antes del primer pintado para evitar el parpadeo oscuro → claro.
-    try { if (localStorage.getItem('macroscope_theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}
+    let initialTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    try { const saved = localStorage.getItem('macroscope_theme'); if (['light','dark'].includes(saved)) initialTheme = saved; } catch (e) {}
+    document.documentElement.dataset.theme = initialTheme;
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/tokens.css">
@@ -58,7 +59,7 @@
 <div class="app-shell">
  <aside class="sidebar" aria-label="Navegación principal">
   <div class="brand">
-    <span class="brand-logo" role="img" aria-label="MacroScope"><svg fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.5 9 11l4 4 7-9"/><path d="M14.5 6H20v5.5"/><path d="M3 21h18"/></svg></span>
+    <span class="brand-logo" role="img" aria-label="MacroScope"><svg fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.5 9 11l4 4 7-9"/><path d="M14.5 6H20v5.5"/><path d="M3 21h18"/></svg></span>
   </div>
   <nav class="side-nav" aria-label="Secciones del dashboard">
    <button class="tab-btn is-active" type="button" data-tab="overview" aria-current="page" title="Panorama económico"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-grid"/></svg><span class="nav-text">Panorama económico</span></button>

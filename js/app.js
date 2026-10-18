@@ -70,7 +70,7 @@
       document.getElementById('themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
       document.getElementById('carouselPrev')?.addEventListener('click',()=>{moveCarousel(-1);restartCarouselAuto();});
       document.getElementById('carouselNext')?.addEventListener('click',()=>{moveCarousel(1);restartCarouselAuto();});
-      let mode='dark';try{mode=localStorage.getItem('macroscope_theme')||'dark';}catch(e){}
+      const mode=document.documentElement.dataset.theme;
       document.documentElement.dataset.theme = mode === 'light' ? 'light' : 'dark';
       document.getElementById('themeIcon').setAttribute('href', mode === 'light' ? '#i-moon' : '#i-sun');
       document.querySelectorAll('.reveal').forEach((el,i)=>el.style.setProperty('--reveal-delay', `${Math.min(i*70,420)}ms`));

@@ -3,12 +3,13 @@
    Chart.js loads with `defer`, so the decision is taken on DOMContentLoaded (deferred scripts run before it).
    This listener is registered before the app's own DOMContentLoaded handler, so it always runs first. */
 (function(){
+ const M=globalThis.MacroScope;
  class ChartFallback {
   constructor(canvas,config){
    this.canvas=canvas;this.config=config;this.ctx=canvas.getContext('2d');this.destroyed=false;
    this.bars=[];this.points=[];
    this.tooltip=document.createElement('div');
-   this.tooltip.style.cssText='position:absolute;z-index:8;max-width:215px;pointer-events:none;padding:10px 12px;color:#fff;background:#152940;border:1px solid #324963;box-shadow:0 8px 20px rgba(10,20,40,.22);border-radius:9px;font:11px/1.6 DM Sans,Arial,sans-serif;display:none;white-space:pre-line;';
+   this.tooltip.style.cssText='position:absolute;z-index:8;max-width:215px;pointer-events:none;padding:10px 12px;color:var(--surface);background:var(--primary);border:1px solid var(--primary);box-shadow:0 8px 20px var(--tint-54);border-radius:9px;font:11px/1.6 DM Sans,Arial,sans-serif;display:none;white-space:pre-line;';
    this.canvas.parentElement.appendChild(this.tooltip);
    this.mouseHandler=e=>this.onMove(e);
    this.leaveHandler=()=>this.tooltip.style.display='none';
@@ -20,7 +21,7 @@
   color(index,dataset,pointIndex=0){
    const v=dataset.borderColor||dataset.backgroundColor;
    if(Array.isArray(v))return v[pointIndex%v.length];
-   return v || ['#438ce6','#20aaa8','#e7a454'][index%3];
+   return v || M.color('--series-'+(index%6+1));
   }
   fmt(n){if(!Number.isFinite(n))return 'N/D';if(Math.abs(n)>=1e6)return `${(n/1e6).toFixed(1)} M`;if(Math.abs(n)>=1000)return `${(n/1000).toFixed(n%1000===0?0:1)} mil`;return Number(n).toLocaleString('es-PE',{maximumFractionDigits:1});}
   render(){
@@ -34,8 +35,8 @@
    ctx.clearRect(0,0,w,h);
    const labels=cfg.data.labels||[],ds=cfg.data.datasets||[];
    const dark=document.documentElement.dataset.theme==='dark';
-   const text=dark?'#a9bcd6':'#8593a7',axisText=dark?'#d4e0ee':'#42566e';
-   const grid=dark?'rgba(148,178,209,.12)':'rgba(128,148,172,.13)';
+   const text=dark?M.color('--primary'):M.color('--primary'),axisText=dark?M.color('--primary'):M.color('--primary');
+   const grid=dark?M.color('--tint-2'):M.color('--tint-88');
    const horizontal=cfg.options?.indexAxis==='y';
    const bars=ds.filter(d=>(d.type||cfg.type)==='bar'),lines=ds.filter(d=>(d.type||cfg.type)==='line');
    const showLegend=ds.length>1 && cfg.options?.plugins?.legend?.display!==false;
@@ -103,7 +104,7 @@
       const color=this.color(ix,d);this.points.push(...points.filter(Boolean));
       if(d.fill){
        const gradient=ctx.createLinearGradient(0,plot.y,0,plot.y+plot.h);
-       gradient.addColorStop(0,'rgba(67,140,230,.13)');gradient.addColorStop(1,'rgba(67,140,230,0)');
+       gradient.addColorStop(0,M.color('--tint-78'));gradient.addColorStop(1,M.color('--tint-89'));
        ctx.beginPath();let start=null;
        points.forEach((p,i)=>{if(!p)return;if(!start){ctx.moveTo(p.x,scaleY(0));ctx.lineTo(p.x,p.y);start=p;}else ctx.lineTo(p.x,p.y);});
        if(start){const last=points.filter(Boolean).at(-1);ctx.lineTo(last.x,scaleY(0));ctx.closePath();ctx.fillStyle=gradient;ctx.fill();}
@@ -111,7 +112,7 @@
       ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=d.borderWidth||2.4;ctx.lineCap='round';ctx.lineJoin='round';
       if(d.borderDash)ctx.setLineDash(d.borderDash);
       let prev=false;points.forEach(p=>{if(!p){prev=false;return;}if(prev)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);prev=true;});ctx.stroke();ctx.setLineDash([]);
-      points.forEach(p=>{if(!p)return;ctx.beginPath();ctx.arc(p.x,p.y,3.15,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=dark?'#132239':'#fff';ctx.stroke();});
+      points.forEach(p=>{if(!p)return;ctx.beginPath();ctx.arc(p.x,p.y,3.15,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=dark?M.color('--primary'):M.color('--surface');ctx.stroke();});
     });
    }
   }
@@ -158,7 +159,7 @@
   const roundTo = (...args) => M.roundTo(...args);
     function chartTheme() {
       const vars = getComputedStyle(document.documentElement);
-      return {tick:vars.getPropertyValue('--chart-tick').trim()||'#8a98ae',grid:vars.getPropertyValue('--grid').trim()||'rgba(116,131,153,.12)',ink:vars.getPropertyValue('--ink').trim()||'#1a2940',paper:vars.getPropertyValue('--paper').trim()||'#ffffff'};
+      return {tick:vars.getPropertyValue('--chart-tick').trim()||M.color('--primary'),grid:vars.getPropertyValue('--grid').trim()||M.color('--tint-59'),ink:vars.getPropertyValue('--ink').trim()||M.color('--primary'),paper:vars.getPropertyValue('--paper').trim()||M.color('--surface')};
     }
     function renderCharts() {
       M.renderComparison?.();
@@ -176,18 +177,18 @@
       const ticks={color:palette.tick,font:{family:'DM Sans',size:10},maxRotation:0};
       const grid={color:palette.grid};
       const legend={labels:{color:palette.ink,usePointStyle:true,pointStyle:'circle',boxWidth:7,boxHeight:7,padding:18,font:{family:'DM Sans',size:11,weight:'600'}}};
-      const tooltip={backgroundColor:'#142943',titleColor:'#fff',bodyColor:'#dce6f4',padding:12,cornerRadius:9,displayColors:true,callbacks:{label(ctx){return `${ctx.dataset.label}: ${formatValue(ctx.parsed.y??ctx.parsed.x,state.activeIndicator)}`;}}};
+      const tooltip={backgroundColor:M.color('--primary'),titleColor:M.color('--surface'),bodyColor:M.color('--text-muted'),padding:12,cornerRadius:9,displayColors:true,callbacks:{label(ctx){return `${ctx.dataset.label}: ${formatValue(ctx.parsed.y??ctx.parsed.x,state.activeIndicator)}`;}}};
       const core={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend,tooltip}};
       const primary=years.map(y=>runtimeDB[state.country]?.[state.activeIndicator]?.[y]??null);
       const bench=years.map(y=>runtimeDB[state.benchmark]?.[state.activeIndicator]?.[y]??null);
       if(trendChartInstance)trendChartInstance.destroy();
-      trendChartInstance=new Chart(document.getElementById('trendChart'),{type:'line',data:{labels:years,datasets:[{label:c.name,data:primary,borderColor:'#438ce6',backgroundColor:'rgba(67,140,230,.09)',fill:true,tension:.28,borderWidth:2.5,pointRadius:3.3,pointHoverRadius:6,pointBackgroundColor:'#438ce6',pointBorderWidth:2,pointBorderColor:palette.paper},...(state.country===state.benchmark?[]:[{label:b.name,data:bench,borderColor:'#20aaa8',borderDash:[6,5],tension:.28,borderWidth:2,pointRadius:2.6,pointHoverRadius:5,pointBackgroundColor:'#20aaa8'}])]},options:{...core,scales:{x:{ticks,grid:{display:false},border:{display:false}},y:{ticks,grid,border:{display:false}}}}});
+      trendChartInstance=new Chart(document.getElementById('trendChart'),{type:'line',data:{labels:years,datasets:[{label:c.name,data:primary,borderColor:M.color('--primary'),backgroundColor:M.color('--tint-79'),fill:true,tension:.28,borderWidth:2.5,pointRadius:3.3,pointHoverRadius:6,pointBackgroundColor:M.color('--primary'),pointBorderWidth:2,pointBorderColor:palette.paper},...(state.country===state.benchmark?[]:[{label:b.name,data:bench,borderColor:M.color('--success'),borderDash:[6,5],tension:.28,borderWidth:2,pointRadius:2.6,pointHoverRadius:5,pointBackgroundColor:M.color('--success')}])]},options:{...core,scales:{x:{ticks,grid:{display:false},border:{display:false}},y:{ticks,grid,border:{display:false}}}}});
       if(regionalChartInstance)regionalChartInstance.destroy();
-      regionalChartInstance=new Chart(document.getElementById('regionalChart'),{type:'bar',data:{labels:countries.map(k=>COUNTRIES[k].name),datasets:[{label:`${meta.title} (${meta.unit})`,data:countries.map(k=>commonYear?runtimeDB[k]?.[state.activeIndicator]?.[commonYear]:null),backgroundColor:countries.map(k=>k===state.country?'#438ce6':k===state.benchmark?'#20aaa8':'#cdd8e7'),borderRadius:5,barPercentage:.65}]},options:{...core,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...tooltip,callbacks:{label(ctx){return formatValue(ctx.parsed.x,state.activeIndicator);}}}},scales:{x:{ticks,grid,border:{display:false}},y:{ticks:{...ticks,color:palette.ink},grid:{display:false},border:{display:false}}}}});
+      regionalChartInstance=new Chart(document.getElementById('regionalChart'),{type:'bar',data:{labels:countries.map(k=>COUNTRIES[k].name),datasets:[{label:`${meta.title} (${meta.unit})`,data:countries.map(k=>commonYear?runtimeDB[k]?.[state.activeIndicator]?.[commonYear]:null),backgroundColor:countries.map(k=>k===state.country?M.color('--primary'):k===state.benchmark?M.color('--success'):M.color('--primary')),borderRadius:5,barPercentage:.65}]},options:{...core,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...tooltip,callbacks:{label(ctx){return formatValue(ctx.parsed.x,state.activeIndicator);}}}},scales:{x:{ticks,grid,border:{display:false}},y:{ticks:{...ticks,color:palette.ink},grid:{display:false},border:{display:false}}}}});
       const gdp=years.map(y=>runtimeDB[state.country]?.['NY.GDP.MKTP.KD.ZG']?.[y]??null);
       const inf=years.map(y=>runtimeDB[state.country]?.['FP.CPI.TOTL.ZG']?.[y]??null);
       if(macroMixChartInstance)macroMixChartInstance.destroy();
-      macroMixChartInstance=new Chart(document.getElementById('macroMixChart'),{type:'bar',data:{labels:years,datasets:[{type:'bar',label:'Crecimiento PBI (%)',data:gdp,backgroundColor:gdp.map(v=>v===null?'#9baac1':v>=0?'rgba(38,170,160,.72)':'rgba(225,95,112,.73)'),borderRadius:4,barPercentage:.7},{type:'line',label:'Inflación IPC (%)',data:inf,borderColor:'#e7a454',backgroundColor:'#e7a454',borderWidth:2.5,pointRadius:2.7,pointHoverRadius:5,tension:.25}]},options:{...core,plugins:{...core.plugins,tooltip:{...tooltip,callbacks:{label(ctx){return `${ctx.dataset.label}: ${ctx.parsed.y===null?'N/D':Number(ctx.parsed.y).toFixed(1)+'%'}`;}}}},scales:{x:{ticks,grid:{display:false},border:{display:false}},y:{ticks,grid,border:{display:false}}}}});
+      macroMixChartInstance=new Chart(document.getElementById('macroMixChart'),{type:'bar',data:{labels:years,datasets:[{type:'bar',label:'Crecimiento PBI (%)',data:gdp,backgroundColor:gdp.map(v=>v===null?M.color('--primary'):v>=0?M.color('--tint-90'):M.color('--tint-91')),borderRadius:4,barPercentage:.7},{type:'line',label:'Inflación IPC (%)',data:inf,borderColor:M.color('--warning'),backgroundColor:M.color('--warning'),borderWidth:2.5,pointRadius:2.7,pointHoverRadius:5,tension:.25}]},options:{...core,plugins:{...core.plugins,tooltip:{...tooltip,callbacks:{label(ctx){return `${ctx.dataset.label}: ${ctx.parsed.y===null?'N/D':Number(ctx.parsed.y).toFixed(1)+'%'}`;}}}},scales:{x:{ticks,grid:{display:false},border:{display:false}},y:{ticks,grid,border:{display:false}}}}});
     }
 
     function clipLine(line, xr, yr) {
@@ -229,7 +230,7 @@
       const w = rect.width, h = rect.height;
       ctx.clearRect(0, 0, w, h);
       const css = getComputedStyle(document.documentElement);
-      const color = name => css.getPropertyValue(name).trim() || '#888';
+      const color = name => css.getPropertyValue(name).trim() || M.color('--text-muted');
       const font = (size, weight = 500) => `${weight} ${size}px 'DM Sans', system-ui, sans-serif`;
       if (spec.message) {
         ctx.fillStyle = color('--muted'); ctx.font = font(12, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';

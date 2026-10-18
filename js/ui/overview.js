@@ -40,14 +40,14 @@
     document.getElementById('compareMissing').textContent=(years.length?'':'Periodo inválido: el inicio debe ser anterior o igual al fin. ')+(missing.length?missing.map(item=>`${COUNTRIES[item.country].name}: sin dato en ${item.years.join(', ')}`).join(' · '):'Sin observaciones ausentes en el periodo.')+(comparison.common?` · Años comunes: ${shared.length}/${years.length}. La tabla conserva todos los años solicitados.`:'');
     const units={raw:meta.unit,base:`Índice ${comparison.base} = 100`,cumulative:'Crecimiento acumulado (%)',convergence:'PPA constante relativa a EE. UU. (EE. UU. = 100%)'};
     document.getElementById('compareSubtitle').textContent=`${meta.title} · ${units[comparison.mode]} · ${comparison.start}–${comparison.end}`;
-    const colors=['#438ce6','#20aaa8','#e7a454','#d680bd'];
+    const colors=Array.from({length:6},(_,i)=>M.color('--series-'+(i+1)));
     document.getElementById('compareLegend').innerHTML=comparison.countries.map((c,i)=>`<span><i style="background:${colors[i]}"></i>${COUNTRIES[c].flag} ${COUNTRIES[c].name}</span>`).join('');
     const number=value=>Number.isFinite(value)?value.toLocaleString('es-PE',{maximumFractionDigits:comparison.mode==='raw'?meta.decimals:2}):'sin dato';
     document.getElementById('compareTableHead').innerHTML=`<tr><th scope="col">Año</th>${comparison.countries.map(c=>`<th scope="col">${COUNTRIES[c].name}</th>`).join('')}</tr>`;
     document.getElementById('compareTableBody').innerHTML=years.map(y=>`<tr><th scope="row">${y}</th>${comparison.countries.map((c,i)=>`<td>${number(transformed[i][y])}</td>`).join('')}</tr>`).join('');
     const added=comparison.countries.filter(c=>!['PER','CHL','COL','MEX','BRA','USA','LCN'].includes(c));
     document.getElementById('compareInstitution').textContent=added.length ? `${added.map(c=>COUNTRIES[c].name).join(', ')}: Sin meta de referencia. En el simulador, tasa real neutral de 1,5% e inflación de referencia de 3% son supuestos genéricos ilustrativos (tasa nominal inicial de 4,5%). ${added.filter(c=>['ECU','DEU','ESP'].includes(c)).map(c=>M.ISLM_COUNTRY[c].note).join(' ')}` : '';
-    M.drawComparisonChart(chartYears,comparison.countries.map((c,i)=>({label:COUNTRIES[c].name,data:chartYears.map(y=>transformed[i][y]),borderColor:colors[i],spanGaps:false,fill:false,pointRadius:2,borderWidth:2})),units[comparison.mode]);
+    M.drawComparisonChart(chartYears,comparison.countries.map((c,i)=>({label:COUNTRIES[c].name,data:chartYears.map(y=>transformed[i][y]),borderColor:colors[i],spanGaps:false,fill:false,pointRadius:2,borderWidth:2,borderDash:[[],[8,4],[2,3],[8,3,2,3]][i%4],pointStyle:['circle','rect','rectRot','triangle'][i%4]})),units[comparison.mode]);
   }
   window.addEventListener('DOMContentLoaded',()=>{
     for(const [id,includeAggregate]of [['countrySelect',false],['benchmarkSelect',true]])document.getElementById(id).innerHTML=countryOptions(includeAggregate);

@@ -1,6 +1,7 @@
 (function () {
   'use strict';
   const M = globalThis.MacroScope ||= {};
+  M.color = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const { COUNTRIES, FALLBACK_DB, FALLBACK_FX } = M;
     // Deep clone fallback into runtime DB
     const runtimeDB = JSON.parse(JSON.stringify(FALLBACK_DB));
