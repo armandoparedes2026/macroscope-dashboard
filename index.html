@@ -997,7 +997,8 @@
       node.innerHTML='';
       Object.entries(INDICATORS).forEach(([code,meta])=>{
         const latest=getLatestYearAndValue(state.country,code);
-        const benchmark=getLatestYearAndValue(state.benchmark,code);        const prevDelta=Number.isFinite(latest.prevValue)?latest.value-latest.prevValue:null;
+        const benchmark=getLatestYearAndValue(state.benchmark,code);
+        const prevDelta=Number.isFinite(latest.prevValue)?latest.value-latest.prevValue:null;
         const equalYear=latest.year===benchmark.year;
         const pill= prevDelta===null ? {text:'Sin referencia',type:'neutral'} : Math.abs(prevDelta)<0.05 ? {text:'Sin cambio',type:'neutral'} : {text:prevDelta>0?'En aumento':'En descenso',type:prevDelta>0?'neutral':'neutral'};
         const card=document.createElement('button');
