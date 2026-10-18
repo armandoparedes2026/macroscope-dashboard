@@ -48,6 +48,17 @@
     form.addEventListener('reset',()=>{setTimeout(update,0);});
     document.getElementById('sourceResults').addEventListener('click',event=>{const btn=event.target.closest('[data-cite-source]');if(btn)copyText(catalog.citeSource(catalog.SOURCES.find(s=>s.id===btn.dataset.citeSource),new Date()));});
   }
-  function setupStudentViews() { setupSourceDirectory(); window.addEventListener('hashchange',route); route(); }
-  Object.assign(M,{setupStudentViews,route,renderSourceDirectory,copyText,escapeHTML});
+  function renderGlossary() {
+    const query=document.getElementById('glossarySearch').value.trim().toLocaleLowerCase('es');
+    const terms=Object.entries(M.LAB_CONTENT.GLOSSARY).filter(([key,value])=>[key,value.short,value.long].join(' ').toLocaleLowerCase('es').includes(query));
+    document.getElementById('helpGlossary').innerHTML=terms.map(([key,value])=>`<details id="help-term-${escapeHTML(key)}"><summary>${escapeHTML(key==='rho'?'ρ · Prima de riesgo':key==='multiplier'?'Multiplicador':key==='trilemma'?'Trilema':key)}</summary><p>${escapeHTML(value.short)}</p><p>${escapeHTML(value.long)}</p></details>`).join('');
+    document.getElementById('glossaryCount').textContent=`${terms.length} términos encontrados`;
+  }
+  function showGlossaryTerm(key) {
+    if(!key||!M.LAB_CONTENT.GLOSSARY[key])return;
+    document.getElementById('glossarySearch').value='';renderGlossary();
+    const term=document.getElementById('help-term-'+key);term.open=true;term.querySelector('summary').focus({preventScroll:true});term.scrollIntoView({block:'start',behavior:'instant'});
+  }
+  function setupStudentViews() { setupSourceDirectory(); renderGlossary(); document.getElementById('glossarySearch').addEventListener('input',renderGlossary); window.addEventListener('hashchange',route); route(); }
+  Object.assign(M,{setupStudentViews,route,renderSourceDirectory,copyText,escapeHTML,showGlossaryTerm});
 })();

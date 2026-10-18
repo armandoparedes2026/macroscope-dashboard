@@ -195,7 +195,7 @@
       ['IS','LM','BP','NX','CA','rho','multiplier','trilemma'].filter(key=>glossary[key]).forEach(key => {
         const btn = document.createElement('button'); btn.type='button'; btn.className='islm-glossary-button'; btn.textContent=key==='rho'?'ρ':key==='multiplier'?'Multiplicador':key==='trilemma'?'Trilema':key;
         btn.setAttribute('aria-label',`Definición de ${btn.textContent}`);
-        btn.addEventListener('click',()=>{ document.getElementById('islmHelpBody').innerHTML=`<h4>${escapeHTML(btn.textContent)}</h4><p>${escapeHTML(glossary[key].short)}</p><p>${escapeHTML(glossary[key].long)}</p>`;dialog.showModal(); });
+        btn.addEventListener('click',()=>{ location.hash='ayuda?term='+encodeURIComponent(key); });
         document.getElementById('islmLayers').append(btn);
       });
       document.getElementById('islmReferences').innerHTML = Object.values(content().REFERENCES).map(r=>`<li>${escapeHTML(r)}</li>`).join('');
