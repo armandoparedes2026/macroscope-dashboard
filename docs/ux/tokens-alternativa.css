@@ -1,0 +1,171 @@
+/**
+ * MacroScope — Sistema de Tokens Visuales Alternativo (Variante B)
+ * "Archivo Esmeralda & Dorado Trigo"
+ *
+ * Familia cromática: Verde, Dorado, Crema, Azul, Naranja, Amarillo.
+ * Modos Claro y Oscuro de primera clase (no invertidos), verificados con WCAG 2.1 AA:
+ * - Texto (--text, --text-muted): >= 4.5:1 sobre --bg, --surface y --surface-2.
+ * - Componentes UI (--border, --focus) y Series (--series-1..6): >= 3.0:1 sobre --bg y --surface.
+ * - Tokens semánticos (--primary, --accent, --success, --warning, --danger): >= 4.5:1 sobre --bg y --surface.
+ */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Superficies en crema avena y arena */
+  --bg: #F9F6EC;
+  --surface: #FFFFFF;
+  --surface-2: #EDE7D8;
+
+  /* Tipografía en verde pino tinta y pizarra */
+  --text: #132824;
+  --text-muted: #465E58;
+
+  /* Bordes y divisores */
+  --border: #747A6E;
+  --border-subtle: #D5D2C4;
+
+  /* Semántica e interacción */
+  --primary: #125E46;
+  --primary-soft: rgba(18, 94, 70, 0.10);
+  --accent: #1B4D8E;
+  --accent-soft: rgba(27, 77, 142, 0.10);
+  --success: #1B6B3A;
+  --success-soft: rgba(27, 107, 58, 0.10);
+  --warning: #8C5B00;
+  --warning-soft: rgba(140, 91, 0, 0.12);
+  --danger: #B53518;
+  --danger-soft: rgba(181, 53, 24, 0.10);
+  --focus: #8C5500;
+
+  /* Paleta de 6 series para gráficos (distinguible en deuteranopía y protanopía) */
+  --series-1: #0A382A; /* Verde pino profundo — Sólido · círculo ● */
+  --series-2: #1F62C2; /* Azul real vivo — Guion largo · cuadrado ■ */
+  --series-3: #9E2C00; /* Naranja cobre intenso — Punteado denso · rombo ◆ */
+  --series-4: #B08000; /* Dorado trigo — Guion-punto · triángulo ▲ */
+  --series-5: #007B8A; /* Verde azulado andino — Sólido grueso · anillo ○ */
+  --series-6: #3A1D08; /* Tierra tostada — Guion corto · cruz ✕ */
+
+  /* Tipografía y ritmo espacial */
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 48px;
+  --shadow: 0 10px 28px rgba(19, 40, 36, 0.07), 0 2px 6px rgba(19, 40, 36, 0.04);
+
+  /* Alias de compatibilidad con css/tokens.css actual */
+  --bg-2: var(--surface-2);
+  --paper: var(--surface);
+  --paper-2: var(--surface);
+  --paper-3: var(--surface-2);
+  --paper-sub: var(--bg);
+  --ink: var(--text);
+  --ink-deep: var(--text);
+  --ink-soft: var(--text-muted);
+  --muted: var(--text-muted);
+  --subtle: var(--text-muted);
+  --line: var(--border-subtle);
+  --line-strong: var(--border);
+  --blue: var(--accent);
+  --blue-2: var(--primary);
+  --blue-soft: var(--primary-soft);
+  --teal: var(--primary);
+  --teal-soft: var(--primary-soft);
+  --amber: var(--warning);
+  --rose: var(--danger);
+  --violet: var(--series-2);
+  --grid: rgba(19, 40, 36, 0.10);
+  --chart-tick: var(--text-muted);
+  --sidebar: #102420;
+  --side-muted: #B6C9C3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #0D1917;
+    --surface: #142623;
+    --surface-2: #1D332F;
+
+    --text: #F6F1E5;
+    --text-muted: #C0C6BA;
+
+    --border: #768D86;
+    --border-subtle: #27423C;
+
+    --primary: #4CD6A5;
+    --primary-soft: rgba(76, 214, 165, 0.14);
+    --accent: #73AEFF;
+    --accent-soft: rgba(115, 174, 255, 0.14);
+    --success: #65DF88;
+    --success-soft: rgba(101, 223, 136, 0.14);
+    --warning: #F5C63C;
+    --warning-soft: rgba(245, 198, 60, 0.14);
+    --danger: #FF8266;
+    --danger-soft: rgba(255, 130, 102, 0.14);
+    --focus: #FFD047;
+
+    --series-1: #4CD6A5;
+    --series-2: #73AEFF;
+    --series-3: #FFD047;
+    --series-4: #FF8538;
+    --series-5: #F3E9D2;
+    --series-6: #3E82C4;
+
+    --shadow: 0 18px 42px rgba(4, 12, 10, 0.44), 0 3px 10px rgba(4, 12, 10, 0.28);
+    --grid: rgba(246, 241, 229, 0.11);
+    --sidebar: #091311;
+    --side-muted: #A6B8B2;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0D1917;
+  --surface: #142623;
+  --surface-2: #1D332F;
+
+  --text: #F6F1E5;
+  --text-muted: #C0C6BA;
+
+  --border: #768D86;
+  --border-subtle: #27423C;
+
+  --primary: #4CD6A5;
+  --primary-soft: rgba(76, 214, 165, 0.14);
+  --accent: #73AEFF;
+  --accent-soft: rgba(115, 174, 255, 0.14);
+  --success: #65DF88;
+  --success-soft: rgba(101, 223, 136, 0.14);
+  --warning: #F5C63C;
+  --warning-soft: rgba(245, 198, 60, 0.14);
+  --danger: #FF8266;
+  --danger-soft: rgba(255, 130, 102, 0.14);
+  --focus: #FFD047;
+
+  --series-1: #4CD6A5;
+  --series-2: #73AEFF;
+  --series-3: #FFD047;
+  --series-4: #FF8538;
+  --series-5: #F3E9D2;
+  --series-6: #3E82C4;
+
+  --shadow: 0 18px 42px rgba(4, 12, 10, 0.44), 0 3px 10px rgba(4, 12, 10, 0.28);
+  --grid: rgba(246, 241, 229, 0.11);
+  --sidebar: #091311;
+  --side-muted: #A6B8B2;
+}
