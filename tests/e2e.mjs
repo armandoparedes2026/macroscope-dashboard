@@ -130,9 +130,12 @@ await check('tema claro persistente y sin desborde horizontal en móvil', async 
   assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), 'light');
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), 0);
-  const navTop = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.mobile-nav')).top));
-  const topbarHeight = await page.evaluate(() => document.querySelector('.topbar').offsetHeight);
-  assert.equal(navTop, topbarHeight, 'la navegación móvil debe quedar justo debajo de la barra superior');
+  // ResizeObserver updates --topbar-h asynchronously after the viewport change, so wait for it to settle.
+  await page.waitForFunction(
+    () => parseFloat(getComputedStyle(document.querySelector('.mobile-nav')).top) === document.querySelector('.topbar').offsetHeight,
+    null,
+    { timeout: 3000 },
+  ).catch(() => assert.fail('la navegación móvil debe quedar justo debajo de la barra superior'));
 });
 
 await check('carrusel: sin avance automático con prefers-reduced-motion', async (page) => {
