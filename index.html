@@ -120,8 +120,16 @@
      </div>
      <section aria-labelledby="readingsTitle"><div class="section-top"><div><h2 class="section-title" id="readingsTitle">Lecturas clave del ciclo</h2><p class="section-sub">Relaciona actividad, precios y sector externo.</p></div></div><div class="insight-grid" id="insightGrid"></div></section>
      <div>
-      <div class="section-top"><div><h2 class="section-title">Indicadores esenciales</h2><p class="section-sub">Selecciona una tarjeta para explorar su evolución y compararla con otras economías.</p></div><span id="activeIndicatorBadge" class="text-chip">Crecimiento del PBI</span></div>
+      <div class="section-top"><div><h2 class="section-title">Indicadores esenciales</h2><p class="section-sub">Selecciona una tarjeta: el gráfico de evolución y el comparador de economías muestran ese mismo indicador.</p></div><span id="activeIndicatorBadge" class="text-chip">Crecimiento del PBI</span></div>
       <div class="kpi-grid" id="kpiGrid" aria-label="Tarjetas de indicadores"></div>
+     </div>
+     <div class="charts-grid">
+      <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="trendChartTitle">Evolución histórica</h3><p id="trendChartSubtitle">Comparación temporal de indicadores</p></div><select id="indicatorSelectChart" class="field-select" aria-label="Indicador para el gráfico principal"><option value="NY.GDP.MKTP.KD.ZG">Crecimiento del PBI</option><option value="FP.CPI.TOTL.ZG">Inflación IPC</option><option value="SL.UEM.TOTL.ZS">Desempleo</option><option value="NY.GDP.PCAP.CD">PBI per cápita</option><option value="NE.EXP.GNFS.ZS">Exportaciones</option><option value="BN.CAB.XOKA.GD.ZS">Cuenta corriente</option><option value="NE.RSB.GNFS.ZS">Balanza de bienes y servicios</option><option value="NE.IMP.GNFS.ZS">Importaciones</option></select></div><div class="chart-wrap tall"><canvas id="trendChart" role="img" aria-label="Evolución histórica del indicador seleccionado comparada con la economía de referencia"></canvas></div></article>
+      <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="regionalChartTitle">Comparación entre economías</h3><p id="regionalChartSubtitle">Mismo año para todos los países</p></div></div><div class="chart-wrap tall"><canvas id="regionalChart" role="img" aria-label="Ranking de economías por el indicador activo"></canvas></div></article>
+     </div>
+     <div class="charts-grid half">
+      <article class="surface chart-card reveal"><div class="card-top"><div><h3>Crecimiento e inflación</h3><p>Dos variables esenciales para interpretar el ciclo económico.</p></div></div><div class="chart-wrap"><canvas id="macroMixChart" role="img" aria-label="Comparación entre crecimiento anual e inflación"></canvas></div></article>
+      <article class="surface decisions-card reveal"><div class="card-top" style="margin-bottom:0"><div><h3>Preguntas para interpretar los datos</h3><p>Implicancias posibles según el entorno macroeconómico.</p></div><span class="status-pill neutral">ANÁLISIS</span></div><div id="decisionCardsContainer" class="decisions-list"></div><div class="advisory"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-info"/></svg><span>Interpretaciones orientativas basadas en reglas simples. No constituyen asesoría financiera ni sustituyen el análisis sectorial o empresarial.</span></div></article>
      </div>
      <article class="surface chart-card comparison-panel" id="comparisonPanel" aria-labelledby="compareTitle">
       <div class="card-top"><div><h2 id="compareTitle">Comparador de economías</h2><p id="compareSubtitle"></p></div><span class="text-chip">Hasta 4 economías</span></div>
@@ -140,14 +148,6 @@
       <p class="data-note" id="compareInstitution"></p>
       <div class="compare-limitations"><strong>Limitaciones de la comparación</strong><p>US$ corrientes incluyen precios y tipos de cambio; PPA constante compara poder adquisitivo a precios de 2021. Los niveles y las tasas (%) se muestran por separado. WDI puede revisar cifras. Los agregados regionales como LCN no representan una economía nacional y su cuenta corriente no está disponible. Las metodologías nacionales de desempleo e IPC pueden diferir; el desempleo WDI es modelado OIT y el IPC es promedio anual. Los huecos se conservan: nunca se interpolan ni se convierten a cero.</p><p>Índice base = valor / base × 100, solo para niveles. Acumulado = (Π(1 + g/100) − 1) × 100 desde el primer año seleccionado: un hueco invalida la cadena posterior. Convergencia = PBI por habitante PPA constante / EE. UU. del mismo año × 100.</p><a href="docs/fuentes-wdi.md">Fuentes, cobertura y métodos WDI</a></div>
      </article>
-     <div class="charts-grid">
-      <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="trendChartTitle">Evolución histórica</h3><p id="trendChartSubtitle">Comparación temporal de indicadores</p></div><select id="indicatorSelectChart" class="field-select" aria-label="Indicador para el gráfico principal"><option value="NY.GDP.MKTP.KD.ZG">Crecimiento del PBI</option><option value="FP.CPI.TOTL.ZG">Inflación IPC</option><option value="SL.UEM.TOTL.ZS">Desempleo</option><option value="NY.GDP.PCAP.CD">PBI per cápita</option><option value="NE.EXP.GNFS.ZS">Exportaciones</option><option value="BN.CAB.XOKA.GD.ZS">Cuenta corriente</option><option value="NE.RSB.GNFS.ZS">Balanza de bienes y servicios</option><option value="NE.IMP.GNFS.ZS">Importaciones</option></select></div><div class="chart-wrap tall"><canvas id="trendChart" role="img" aria-label="Evolución histórica del indicador seleccionado comparada con la economía de referencia"></canvas></div></article>
-      <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="regionalChartTitle">Comparación entre economías</h3><p id="regionalChartSubtitle">Mismo año para todos los países</p></div></div><div class="chart-wrap tall"><canvas id="regionalChart" role="img" aria-label="Ranking de economías por el indicador activo"></canvas></div></article>
-     </div>
-     <div class="charts-grid half">
-      <article class="surface chart-card reveal"><div class="card-top"><div><h3>Crecimiento e inflación</h3><p>Dos variables esenciales para interpretar el ciclo económico.</p></div></div><div class="chart-wrap"><canvas id="macroMixChart" role="img" aria-label="Comparación entre crecimiento anual e inflación"></canvas></div></article>
-      <article class="surface decisions-card reveal"><div class="card-top" style="margin-bottom:0"><div><h3>Preguntas para interpretar los datos</h3><p>Implicancias posibles según el entorno macroeconómico.</p></div><span class="status-pill neutral">ANÁLISIS</span></div><div id="decisionCardsContainer" class="decisions-list"></div><div class="advisory"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-info"/></svg><span>Interpretaciones orientativas basadas en reglas simples. No constituyen asesoría financiera ni sustituyen el análisis sectorial o empresarial.</span></div></article>
-     </div>
    <section class="data-inspector" id="tab-data" aria-label="Matriz de datos e inspector API">
     <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD Y EXPLORACIÓN</div><h1>Datos claros. Fuentes visibles.</h1><p>Explora la serie anual, exporta observaciones y consulta los endpoints solicitados a las fuentes públicas.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Banco Mundial · WDI</div></div>
     <article class="surface soft-panel"><div class="card-top" style="flex-wrap:wrap"><div><h3>Histórico de indicadores</h3><p id="tableCountrySubtitle">Datos anuales de la economía seleccionada, por indicador y año.</p></div><div class="data-actions"><label class="search-box"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-search"/></svg><input id="tableSearchInput" type="search" placeholder="Filtrar por año" aria-label="Filtrar filas por año"></label><button class="control-action primary" id="exportCsvBtn" type="button"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-download"/></svg>Exportar CSV</button></div></div>
@@ -192,14 +192,14 @@
          <figure class="islm-panel"><figcaption><strong>4 · Mercado de bienes</strong><span>Demanda agregada (DA) vs. producto (Y)</span></figcaption><canvas id="islmPanelCross" role="img" aria-label="Cruz keynesiana"></canvas></figure>
         </div>
        </article>
+       <article class="surface soft-panel reveal" aria-label="Mecanismo de transmisión">
+        <div class="card-top"><div><h3>Mecanismo de transmisión</h3><p>Lectura paso a paso de la dinámica tras el cambio; los valores de cada paso están en el resultado del equilibrio.</p></div></div>
+        <ol class="islm-steps" id="islmNarrative"></ol>
+       </article>
        <article class="surface soft-panel reveal" aria-label="Resultados del modelo">
         <div class="card-top"><div><h3>Resultado del equilibrio</h3><p>Valores en índice (producto inicial = 100); tasas en %; e = 100 en el punto inicial (sube = depreciación).</p></div></div>
         <div class="islm-multipliers" id="islmMultipliers"></div><div id="islmEquations" hidden></div>
         <div class="data-table-wrap"><table class="data-table islm-table"><thead><tr><th>Variable</th><th>Inicial (E₀)</th><th>Impacto (E₁)</th><th>Final (E₂)</th><th>Cambio</th></tr></thead><tbody id="islmResults"></tbody></table></div>
-       </article>
-       <article class="surface soft-panel reveal" aria-label="Mecanismo de transmisión">
-        <div class="card-top"><div><h3>Mecanismo de transmisión</h3><p>Lectura paso a paso del escenario según la teoría.</p></div></div>
-        <ol class="islm-steps" id="islmNarrative"></ol>
        </article>
       </div>
      </div>

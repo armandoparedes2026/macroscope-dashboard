@@ -37,7 +37,7 @@
       choose('benchmarkSelect',state.benchmark,val=>{state.benchmark=val;renderAll();});
       syncBenchmarkOptions();
       choose('periodSelect',state.period,val=>{state.period=val;renderExecutiveBanner();renderKpiCards();renderCharts();});
-      choose('indicatorSelectChart',state.activeIndicator,val=>{state.activeIndicator=val;renderKpiCards();renderCharts();});
+      choose('indicatorSelectChart',state.activeIndicator,val=>globalThis.MacroScope.selectIndicator(val));
       document.getElementById('syncApiBtn').addEventListener('click',()=>{syncLiveWorldBankData(true);loadBcrp();});
       document.getElementById('copyBriefBtn').addEventListener('click',copyExecutiveBrief);
       document.getElementById('exportCsvBtn').addEventListener('click',exportCsv);

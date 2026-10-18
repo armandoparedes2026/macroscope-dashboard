@@ -67,15 +67,26 @@
         renderComparison();
       });
     }
+    comparison.indicator=state.activeIndicator;
     document.getElementById('compareIndicator').innerHTML=Object.entries(INDICATORS).map(([c,m])=>`<option value="${c}">${m.title} (${m.unit})</option>`).join('');
     for(const [id,key]of [['compareIndicator','indicator'],['compareStart','start'],['compareEnd','end'],['compareMode','mode'],['compareBase','base']]){
       const select=document.getElementById(id);
       if(['start','end','base'].includes(key))select.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
-      select.value=comparison[key];select.addEventListener('change',()=>{comparison[key]=select.value;renderComparison();});
+      select.value=comparison[key];
+      // The comparator's indicator is the page-wide active indicator, not a separate setting.
+      select.addEventListener('change',()=>{if(key==='indicator'){selectIndicator(select.value);return;}comparison[key]=select.value;renderComparison();});
     }
     document.getElementById('compareCommon').addEventListener('change',e=>{comparison.common=e.target.checked;renderComparison();});
   });
-  Object.assign(M,{comparison,renderComparison});
+  /** One active indicator drives the KPI cards, the trend chart and the comparator. */
+  function selectIndicator(code){
+    if(!INDICATORS[code])return;
+    state.activeIndicator=code;
+    comparison.indicator=code;
+    for(const id of ['indicatorSelectChart','compareIndicator']){const el=document.getElementById(id);if(el)el.value=code;}
+    renderKpiCards();renderCharts();renderComparison();
+  }
+  Object.assign(M,{comparison,renderComparison,selectIndicator});
     let toastTimer;
     function showToast(msg, isSuccess = true) {
       const el = document.getElementById('toastContainer');
@@ -302,7 +313,7 @@
         card.setAttribute('aria-pressed',String(state.activeIndicator===code));
         card.setAttribute('aria-label',`Explorar ${meta.title}: ${formatValue(latest.value,code)} en ${latest.year}`);
         card.innerHTML=`<span class="kpi-top"><span class="kpi-col"><span class="kpi-title">${meta.title}</span><span class="kpi-number">${formatValue(latest.value,code)}</span><span class="kpi-year">Último dato: ${latest.year} · ${meta.unit} · Extracción: ${M.localDate((cellSource(state.country,code,latest.year)==='wdi'?wdiFetchedAt[code]:FALLBACK_EXTRACTED_AT[code]))}${cellSource(state.country,code,latest.year)==='fallback'&&latest.year!=='N/D'?' · Respaldo local — no actualizado':''}</span></span><span class="status-pill neutral">${pill}</span></span><span class="kpi-bottom"><span class="kpi-col"><span class="kpi-delta ${deltaCls}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</span><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></span>${sparkSvg(code)}</span>`;
-        card.addEventListener('click',()=>{state.activeIndicator=code;document.getElementById('indicatorSelectChart').value=code;renderKpiCards();renderCharts();});
+        card.addEventListener('click',()=>selectIndicator(code));
         const wrapper=document.createElement('article');wrapper.className='kpi-entry';wrapper.appendChild(card);
         if(code==='FP.CPI.TOTL.ZG'){const note=document.createElement('p');note.className='data-note';note.textContent='WDI: variación del IPC promedio anual. BCRP interanual: mes frente al mismo mes del año anterior; no equivalentes.';wrapper.append(note);}
         const source=document.createElement('p');source.className='data-note';source.textContent='Fuente: Banco Mundial · WDI · '+code;wrapper.append(source);
