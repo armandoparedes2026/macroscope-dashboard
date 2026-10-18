@@ -40,14 +40,14 @@
     document.getElementById('compareMissing').textContent=(years.length?'':'Periodo inválido: el inicio debe ser anterior o igual al fin. ')+(missing.length?missing.map(item=>`${COUNTRIES[item.country].name}: sin dato en ${item.years.join(', ')}`).join(' · '):'Sin observaciones ausentes en el periodo.')+(comparison.common?` · Años comunes: ${shared.length}/${years.length}. La tabla conserva todos los años solicitados.`:'');
     const units={raw:meta.unit,base:`Índice ${comparison.base} = 100`,cumulative:'Crecimiento acumulado (%)',convergence:'PPA constante relativa a EE. UU. (EE. UU. = 100%)'};
     document.getElementById('compareSubtitle').textContent=`${meta.title} · ${units[comparison.mode]} · ${comparison.start}–${comparison.end}`;
-    const colors=['#438ce6','#20aaa8','#e7a454','#d680bd'];
+    const colors=Array.from({length:6},(_,i)=>M.color('--series-'+(i+1)));
     document.getElementById('compareLegend').innerHTML=comparison.countries.map((c,i)=>`<span><i style="background:${colors[i]}"></i>${COUNTRIES[c].flag} ${COUNTRIES[c].name}</span>`).join('');
     const number=value=>Number.isFinite(value)?value.toLocaleString('es-PE',{maximumFractionDigits:comparison.mode==='raw'?meta.decimals:2}):'sin dato';
     document.getElementById('compareTableHead').innerHTML=`<tr><th scope="col">Año</th>${comparison.countries.map(c=>`<th scope="col">${COUNTRIES[c].name}</th>`).join('')}</tr>`;
     document.getElementById('compareTableBody').innerHTML=years.map(y=>`<tr><th scope="row">${y}</th>${comparison.countries.map((c,i)=>`<td>${number(transformed[i][y])}</td>`).join('')}</tr>`).join('');
     const added=comparison.countries.filter(c=>!['PER','CHL','COL','MEX','BRA','USA','LCN'].includes(c));
     document.getElementById('compareInstitution').textContent=added.length ? `${added.map(c=>COUNTRIES[c].name).join(', ')}: Sin meta de referencia. En el simulador, tasa real neutral de 1,5% e inflación de referencia de 3% son supuestos genéricos ilustrativos (tasa nominal inicial de 4,5%). ${added.filter(c=>['ECU','DEU','ESP'].includes(c)).map(c=>M.ISLM_COUNTRY[c].note).join(' ')}` : '';
-    M.drawComparisonChart(chartYears,comparison.countries.map((c,i)=>({label:COUNTRIES[c].name,data:chartYears.map(y=>transformed[i][y]),borderColor:colors[i],spanGaps:false,fill:false,pointRadius:2,borderWidth:2})),units[comparison.mode]);
+    M.drawComparisonChart(chartYears,comparison.countries.map((c,i)=>({label:COUNTRIES[c].name,data:chartYears.map(y=>transformed[i][y]),borderColor:colors[i],spanGaps:false,fill:false,pointRadius:2,borderWidth:2,borderDash:[[],[8,4],[2,3],[8,3,2,3]][i%4],pointStyle:['circle','rect','rectRot','triangle'][i%4]})),units[comparison.mode]);
   }
   window.addEventListener('DOMContentLoaded',()=>{
     for(const [id,includeAggregate]of [['countrySelect',false],['benchmarkSelect',true]])document.getElementById(id).innerHTML=countryOptions(includeAggregate);
@@ -148,9 +148,9 @@
       const gdpGap = Number.isFinite(gdp.value) && Number.isFinite(gdpB.value) && gdp.year===gdpB.year ? gdp.value-gdpB.value : null;
       return [
         {
-          overline:'Momentum macro',
+          overline:'Actividad y demanda',
           title:`${country.name} ${Number.isFinite(gdp.value)&&gdp.value>=0?'avanza':'corrige'} con un PBI de ${formatValue(gdp.value,'NY.GDP.MKTP.KD.ZG')}`,
-          text:`La actividad económica del último corte (${gdp.year}) ${gdpGap===null?'no puede compararse directamente con el benchmark por diferencias de corte.':(gdpGap>=0?`supera a ${benchmark.name} en ${formatDelta(gdpGap,'NY.GDP.MKTP.KD.ZG')}.`:`se ubica por debajo de ${benchmark.name} en ${formatDelta(gdpGap,'NY.GDP.MKTP.KD.ZG')}.`)} Esta lectura sirve para contextualizar demanda, inversión y ritmo de expansión empresarial.`,
+          text:`La actividad económica del último corte (${gdp.year}) ${gdpGap===null?'no puede compararse directamente con el benchmark por diferencias de corte.':(gdpGap>=0?`supera a ${benchmark.name} en ${formatDelta(gdpGap,'NY.GDP.MKTP.KD.ZG')}.`:`se ubica por debajo de ${benchmark.name} en ${formatDelta(gdpGap,'NY.GDP.MKTP.KD.ZG')}.`)} Esta lectura sirve para contextualizar demanda, inversión y ciclo económico.`,
           chips:[`${country.flag} ${country.name}`, `${benchmark.flag} Benchmark: ${benchmark.name}`, `Dato anual · ${gdp.year}`],
           signals:[
             ['Crecimiento', formatValue(gdp.value,'NY.GDP.MKTP.KD.ZG'), `Comparación ${gdpGap===null?'no homogénea':'con benchmark homogénea'}`],
@@ -161,7 +161,7 @@
         {
           overline:'Estabilidad interna',
           title:`Presión de precios en ${formatValue(inf.value,'FP.CPI.TOTL.ZG')} y desempleo en ${formatValue(uem.value,'SL.UEM.TOTL.ZS')}`,
-          text:`El binomio inflación–empleo condiciona precios, costos y consumo. Una inflación más alta puede tensionar márgenes; un desempleo elevado puede anticipar una demanda más débil o heterogénea por segmentos.`,
+          text:`El binomio inflación–empleo condiciona precios, costos y consumo. La inflación WDI es el cambio del IPC promedio anual; no equivale a la variación interanual mensual del BCRP. Contrasta precios y empleo con los supuestos de oferta y demanda agregada.`,
           chips:[`IPC · ${inf.year}`, `Desempleo · ${uem.year}`, `${determineTone('FP.CPI.TOTL.ZG',inf.value).label}`],
           signals:[
             ['Inflación', formatValue(inf.value,'FP.CPI.TOTL.ZG'), 'Sensibilidad sobre costos y precios'],
@@ -172,7 +172,7 @@
         {
           overline:'Frente externo',
           title:`Sector externo con exportaciones de ${formatValue(exp.value,'NE.EXP.GNFS.ZS')} y cuenta corriente de ${formatValue(cab.value,'BN.CAB.XOKA.GD.ZS')}`,
-          text:`Estas señales ayudan a leer exposición externa, tracción exportadora y balance agregado. Úsalas como contexto para decisiones de cobertura, abastecimiento importado y diversificación comercial; no como señal operativa única.`,
+          text:`Estas señales ayudan a leer exposición externa, tracción exportadora y balance agregado. Relaciona estas observaciones con la balanza de pagos y el modelo de economía abierta.`,
           chips:[`Exportaciones · ${exp.year}`, `Cuenta corriente · ${cab.year}`, `Monitoreo internacional`],
           signals:[
             ['Exportaciones', formatValue(exp.value,'NE.EXP.GNFS.ZS'), 'Participación sobre el PBI'],
@@ -182,100 +182,9 @@
         }
       ];
     }
-    const carouselPause=new Set();
-    const reducedMotionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
-    // Rebuilds slide content; only needed when the underlying data or selection changes.
-    function renderInsightCarousel(resetIndex=false){
-      const track=document.getElementById('insightTrack');
-      const dots=document.getElementById('carouselDots');
-      if(!track || !dots) return;
-      const slides=buildInsightSlides();
-      if(resetIndex) state.carouselIndex=0;
-      track.innerHTML=slides.map((slide,i)=>`<div class="insight-slide" role="group" aria-roledescription="slide" aria-label="${i+1} de ${slides.length}"><div class="insight-copy premium-ring"><div class="insight-overline">${slide.overline}</div><h3 class="insight-title">${slide.title}</h3><p class="insight-text">${slide.text}</p><div class="insight-meta">${slide.chips.map(c=>`<span class="meta-chip">${c}</span>`).join('')}</div></div><div class="insight-side"><div class="signal-board premium-ring"><div class="signal-header"><div><strong>Radar ejecutivo</strong><span>Lecturas resumidas del país seleccionado</span></div><span class="text-chip">Slide ${i+1}/${slides.length}</span></div><div class="signal-list">${slide.signals.map(([k,v,s])=>`<div class="signal-item"><div class="signal-key"><strong>${k}</strong><span>${s}</span></div><div class="signal-value">${v}</div></div>`).join('')}</div></div><div class="data-note" style="margin-top:0">La narrativa se actualiza automáticamente cuando cambias de país, benchmark o periodo.</div></div></div>`).join('');
-      dots.innerHTML=slides.map((_,i)=>`<button type="button" class="carousel-dot" data-index="${i}" aria-label="Ir a slide ${i+1}"></button>`).join('');
-      goToSlide(state.carouselIndex);
+    function renderInsightCards(){
+      document.getElementById('insightGrid').innerHTML=buildInsightSlides().map(slide=>`<article class="surface insight-card"><div class="eyebrow">${slide.overline}</div><h3>${slide.title}</h3><p>${slide.text}</p><div class="insight-meta">${slide.chips.map(chip=>`<span class="meta-chip">${chip}</span>`).join('')}</div></article>`).join('');
     }
-    // Moves between already-rendered slides without touching their markup.
-    function goToSlide(index){
-      const track=document.getElementById('insightTrack');
-      const slides=track?[...track.children]:[];
-      if(!slides.length) return;
-      state.carouselIndex=((index%slides.length)+slides.length)%slides.length;
-      track.style.transform=`translateX(-${state.carouselIndex*100}%)`;
-      slides.forEach((el,i)=>el.setAttribute('aria-hidden',String(i!==state.carouselIndex)));
-      document.querySelectorAll('#carouselDots .carousel-dot').forEach((btn,i)=>{
-        btn.classList.toggle('is-active',i===state.carouselIndex);
-        if(i===state.carouselIndex)btn.setAttribute('aria-current','true');else btn.removeAttribute('aria-current');
-      });
-    }
-    function moveCarousel(step=1){goToSlide(state.carouselIndex+step);}
-    // Autoplay only while the carousel is visible, not hovered/focused and motion is allowed (WCAG 2.2.2).
-    function restartCarouselAuto(){
-      clearInterval(state.carouselTimer);
-      state.carouselTimer=null;
-      if(reducedMotionQuery.matches || carouselPause.size || document.hidden || state.activeTab!=='overview') return;
-      state.carouselTimer=setInterval(()=>moveCarousel(1),6500);
-    }
-    function setupCarousel(){
-      const box=document.getElementById('insightCarousel');
-      if(!box) return;
-      let startX=0;
-      box.addEventListener('touchstart',e=>{startX=e.changedTouches[0].clientX;},{passive:true});
-      box.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-startX; if(Math.abs(dx)>40){moveCarousel(dx>0?-1:1); restartCarouselAuto();}},{passive:true});
-      document.getElementById('carouselDots')?.addEventListener('click',e=>{
-        const btn=e.target.closest('.carousel-dot');
-        if(btn){goToSlide(Number(btn.dataset.index));restartCarouselAuto();}
-      });
-      const pause=reason=>{carouselPause.add(reason);restartCarouselAuto();};
-      const resume=reason=>{carouselPause.delete(reason);restartCarouselAuto();};
-      box.addEventListener('mouseenter',()=>pause('hover'));
-      box.addEventListener('mouseleave',()=>resume('hover'));
-      box.addEventListener('focusin',()=>pause('focus'));
-      box.addEventListener('focusout',e=>{if(!box.contains(e.relatedTarget))resume('focus');});
-      document.addEventListener('visibilitychange',restartCarouselAuto);
-      reducedMotionQuery.addEventListener?.('change',restartCarouselAuto);
-    }
-
-    function updateScrollProgress(){
-      const el=document.documentElement;
-      const scrollable=Math.max(1, el.scrollHeight - el.clientHeight);
-      const pct=Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100));
-      const bar=document.getElementById('scrollProgressBar');
-      if(bar) bar.style.width=`${pct}%`;
-    }
-    function setupHeroScrollCue(){
-      const cue=document.getElementById('heroScrollCue');
-      const target=document.getElementById('overviewFilters');
-      if(!cue || !target) return;
-      target.tabIndex = -1;
-      cue.addEventListener('click',()=>{
-        const stickyHeight = [...document.querySelectorAll('.topbar,.mobile-nav')]
-          .filter(el=>getComputedStyle(el).position==='sticky' && el.getBoundingClientRect().height>0)
-          .reduce((sum,el)=>sum+el.getBoundingClientRect().height,0);
-        target.focus({preventScroll:true});
-        window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-stickyHeight-12,
-          behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-      });
-    }
-    function setupParallaxCards(){
-      document.querySelectorAll('.page-heading,.executive').forEach(el=>{
-        el.addEventListener('pointermove',e=>{
-          if(window.innerWidth < 900) return;
-          const r=el.getBoundingClientRect();
-          const px=((e.clientX-r.left)/r.width - .5) * 2;
-          const py=((e.clientY-r.top)/r.height - .5) * 2;
-          el.style.setProperty('--mx', `${px * 2.2}deg`);
-          el.style.setProperty('--my', `${py * 1.8}deg`);
-        });
-        el.addEventListener('pointerleave',()=>{el.style.setProperty('--mx','0deg');el.style.setProperty('--my','0deg');});
-      });
-    }
-    function setupRevealAnimations(){
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.querySelectorAll('.reveal').forEach(el=>el.classList.add('is-visible'));return;}
-      const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target);}})},{threshold:.16});
-      document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-    }
-
     // ============================================================================
     // 3. LIVE WORLD BANK API & FX API FETCHER
     // ============================================================================
@@ -392,15 +301,19 @@
         card.className='kpi-card'+(state.activeIndicator===code?' active-kpi':'');
         card.setAttribute('aria-pressed',String(state.activeIndicator===code));
         card.setAttribute('aria-label',`Explorar ${meta.title}: ${formatValue(latest.value,code)} en ${latest.year}`);
-        card.innerHTML=`<span class="kpi-top"><span class="kpi-col"><span class="kpi-title">${meta.title}</span><span class="kpi-number">${formatValue(latest.value,code)}</span><span class="kpi-year">Último dato: ${latest.year} · ${meta.unit} · Extracción: ${wdiFetchedAt[code]||FALLBACK_EXTRACTED_AT[code]||'no registrada'}${cellSource(state.country,code,latest.year)==='fallback'&&latest.year!=='N/D'?' · Respaldo local — no actualizado':''}</span></span><span class="status-pill neutral">${pill}</span></span><span class="kpi-bottom"><span class="kpi-col"><span class="kpi-delta ${deltaCls}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</span><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></span>${sparkSvg(code)}</span>`;
+        card.innerHTML=`<span class="kpi-top"><span class="kpi-col"><span class="kpi-title">${meta.title}</span><span class="kpi-number">${formatValue(latest.value,code)}</span><span class="kpi-year">Último dato: ${latest.year} · ${meta.unit} · Extracción: ${M.localDate((cellSource(state.country,code,latest.year)==='wdi'?wdiFetchedAt[code]:FALLBACK_EXTRACTED_AT[code]))}${cellSource(state.country,code,latest.year)==='fallback'&&latest.year!=='N/D'?' · Respaldo local — no actualizado':''}</span></span><span class="status-pill neutral">${pill}</span></span><span class="kpi-bottom"><span class="kpi-col"><span class="kpi-delta ${deltaCls}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</span><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></span>${sparkSvg(code)}</span>`;
         card.addEventListener('click',()=>{state.activeIndicator=code;document.getElementById('indicatorSelectChart').value=code;renderKpiCards();renderCharts();});
-        node.appendChild(card);
+        const wrapper=document.createElement('article');wrapper.className='kpi-entry';wrapper.appendChild(card);
+        if(code==='FP.CPI.TOTL.ZG'){const note=document.createElement('p');note.className='data-note';note.textContent='WDI: variación del IPC promedio anual. BCRP interanual: mes frente al mismo mes del año anterior; no equivalentes.';wrapper.append(note);}
+        const source=document.createElement('p');source.className='data-note';source.textContent='Fuente: Banco Mundial · WDI · '+code;wrapper.append(source);
+        wrapper.append(M.citationButton({provider:'wdi',code,country:COUNTRIES[state.country].name,extracted:(cellSource(state.country,code,latest.year)==='wdi'?wdiFetchedAt[code]:FALLBACK_EXTRACTED_AT[code])}));
+        node.appendChild(wrapper);
       });
     }
 
     function renderDecisionMatrix() {
       const node=document.getElementById('decisionCardsContainer');
-      const indicators=[['NY.GDP.MKTP.KD.ZG','Actividad y capacidad operativa','La evolución del crecimiento puede alterar la demanda y los planes de inversión. Contrasta el dato con tus ventas y el desempeño sectorial.'],['FP.CPI.TOTL.ZG','Precios y costos','Una variación del IPC puede influir en costos y poder adquisitivo. Evalúa contratos, proveedores y elasticidades antes de cambiar precios.'],['BN.CAB.XOKA.GD.ZS','Exposición externa','El saldo en cuenta corriente ayuda a contextualizar el sector externo, pero no predice por sí solo el tipo de cambio ni determina una cobertura específica.']];
+      const indicators=[['NY.GDP.MKTP.KD.ZG','Actividad y capacidad operativa','La evolución del crecimiento puede alterar la demanda y los planes de inversión. Relaciona el dato con demanda agregada e inversión.'],['FP.CPI.TOTL.ZG','Precios y costos','Una variación del IPC puede influir en costos y poder adquisitivo. Distingue cambios de precios de cambios de cantidades y revisa el periodo del IPC.'],['BN.CAB.XOKA.GD.ZS','Exposición externa','El saldo en cuenta corriente ayuda a contextualizar el sector externo, pero no predice por sí solo el tipo de cambio ni determina una cobertura específica.']];
       node.innerHTML=indicators.map(([code,title,advice],i)=>{
         const x=getLatestYearAndValue(state.country,code);
         return `<div class="decision-item"><div class="decision-item-top"><strong>${String(i+1).padStart(2,'0')} / ${title}</strong><span class="status-pill neutral">${formatValue(x.value,code)} · ${x.year}</span></div><p>${advice}</p></div>`;
@@ -468,7 +381,7 @@
       }
     }
 
-    function fallbackCopy(text) {
+    function fallbackCopy(text, message='Resumen copiado al portapapeles') {
       const ta = document.createElement('textarea');
       ta.value = text;
       ta.style.position = 'fixed';
@@ -476,8 +389,8 @@
       document.body.appendChild(ta);
       ta.select();
       try {
-        document.execCommand('copy');
-        showToast('Resumen ejecutivo copiado al portapapeles');
+        const copied=document.execCommand('copy');
+        showToast(copied?message:'No se pudo copiar automáticamente',copied);
       } catch (e) {
         showToast('No se pudo copiar automáticamente', false);
       }
@@ -496,5 +409,5 @@
     }
 
 
-  Object.assign(M, { buildInsightSlides, copyExecutiveBrief, exportCsv, fallbackCopy, getFilteredYears, getLatestYearAndValue, goToSlide, moveCarousel, renderDataTableAndInspector, renderDecisionMatrix, renderExecutiveBanner, renderFxGrid, renderHeroPanels, renderInsightCarousel, renderKpiCards, restartCarouselAuto, setTheme, setupCarousel, setupHeroScrollCue, setupParallaxCards, setupRevealAnimations, showToast, sparkSvg, syncBenchmarkOptions, syncLiveWorldBankData, updateRangeStyles, updateScrollProgress });
+  Object.assign(M, { buildInsightSlides, copyExecutiveBrief, exportCsv, fallbackCopy, getFilteredYears, getLatestYearAndValue, renderDataTableAndInspector, renderDecisionMatrix, renderExecutiveBanner, renderFxGrid, renderHeroPanels, renderInsightCards, renderKpiCards, setTheme, showToast, sparkSvg, syncBenchmarkOptions, syncLiveWorldBankData, updateRangeStyles });
 })();

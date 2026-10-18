@@ -1,0 +1,91 @@
+{
+  "360": {
+    "filterTop": 459,
+    "bcrpText": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria: 4.25 % · Observación: Oct.2026 · PD04722MM · Fuente: BCRP · Extracción: 2026-10-18T19:14:26.917Z\n\nÍndice de precios Lima Metrop",
+    "slideOpacity": "0.78",
+    "innerMask": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 8%, rgb(0, 0, 0) 92%, rgba(0, 0, 0, 0) 100%)",
+    "titleSubGap": 6,
+    "apiBadgeRect": {
+      "w": 278,
+      "h": 38
+    },
+    "sidebarTextsHidden": true
+  },
+  "390": {
+    "filterTop": 436,
+    "bcrpText": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria: 4.25 % · Observación: Oct.2026 · PD04722MM · Fuente: BCRP · Extracción: 2026-10-18T19:14:26.917Z\n\nÍndice de precios Lima Metrop",
+    "slideOpacity": "0.78",
+    "innerMask": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 8%, rgb(0, 0, 0) 92%, rgba(0, 0, 0, 0) 100%)",
+    "titleSubGap": 6,
+    "apiBadgeRect": {
+      "w": 308,
+      "h": 38
+    },
+    "sidebarTextsHidden": true
+  },
+  "768": {
+    "filterTop": 373,
+    "bcrpText": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria: 4.25 % · Observación: Oct.2026 · PD04722MM · Fuente: BCRP · Extracción: 2026-10-18T19:14:26.917Z\n\nÍndice de precios Lima Metrop",
+    "slideOpacity": "0.78",
+    "innerMask": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 8%, rgb(0, 0, 0) 92%, rgba(0, 0, 0, 0) 100%)",
+    "titleSubGap": 6,
+    "apiBadgeRect": {
+      "w": 199,
+      "h": 40
+    },
+    "sidebarTextsHidden": true
+  },
+  "1024": {
+    "filterTop": 333,
+    "bcrpText": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria: 4.25 % · Observación: Oct.2026 · PD04722MM · Fuente: BCRP · Extracción: 2026-10-18T19:14:26.917Z\n\nÍndice de precios Lima Metrop",
+    "slideOpacity": "0.78",
+    "innerMask": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 8%, rgb(0, 0, 0) 92%, rgba(0, 0, 0, 0) 100%)",
+    "titleSubGap": 6,
+    "apiBadgeRect": {
+      "w": 199,
+      "h": 40
+    },
+    "sidebarTextsHidden": true
+  },
+  "1280": {
+    "filterTop": 338,
+    "bcrpText": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria: 4.25 % · Observación: Oct.2026 · PD04722MM · Fuente: BCRP · Extracción: 2026-10-18T19:14:26.917Z\n\nÍndice de precios Lima Metrop",
+    "slideOpacity": "0.78",
+    "innerMask": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 8%, rgb(0, 0, 0) 92%, rgba(0, 0, 0, 0) 100%)",
+    "titleSubGap": 6,
+    "apiBadgeRect": {
+      "w": 199,
+      "h": 40
+    },
+    "sidebarTextsHidden": true
+  },
+  "1440": {
+    "filterTop": 345,
+    "bcrpText": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria: 4.25 % · Observación: Oct.2026 · PD04722MM · Fuente: BCRP · Extracción: 2026-10-18T19:14:26.917Z\n\nÍndice de precios Lima Metrop",
+    "slideOpacity": "0.78",
+    "innerMask": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 8%, rgb(0, 0, 0) 92%, rgba(0, 0, 0, 0) 100%)",
+    "titleSubGap": 6,
+    "apiBadgeRect": {
+      "w": 199,
+      "h": 40
+    },
+    "sidebarTextsHidden": true,
+    "labMetrics": {
+      "canvasTopAt1440x900": 961,
+      "guidedOpenByDefault": false,
+      "glossaryTop": 3336
+    }
+  },
+  "1920": {
+    "filterTop": 345,
+    "bcrpText": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria: 4.25 % · Observación: Oct.2026 · PD04722MM · Fuente: BCRP · Extracción: 2026-10-18T19:14:26.917Z\n\nÍndice de precios Lima Metrop",
+    "slideOpacity": "0.78",
+    "innerMask": "linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 8%, rgb(0, 0, 0) 92%, rgba(0, 0, 0, 0) 100%)",
+    "titleSubGap": 6,
+    "apiBadgeRect": {
+      "w": 199,
+      "h": 40
+    },
+    "sidebarTextsHidden": true
+  }
+}

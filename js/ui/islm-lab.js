@@ -93,7 +93,7 @@
       learning.executed = false;
       const s = learning.scenario;
       document.getElementById('islmProblem').textContent = `${s.title} ${s.problem}`;
-      document.getElementById('islmPredictions').innerHTML = s.predict.map(key => `<label>${key}<select class="field-select" data-predict="${key}" aria-label="Predicción ${key}"><option value="">Predice…</option><option value="1">↑ Sube</option><option value="-1">↓ Baja</option><option value="0">Sin cambio</option></select></label>`).join('');
+      document.getElementById('islmPredictions').innerHTML = s.predict.map(key => `<label>${({Y:"Y · Producto",i:"i · Tasa de interés",e:"e · Tipo de cambio",NX:"NX · Exportaciones netas"})[key]||key}<select class="field-select" data-predict="${key}" aria-label="Predicción ${key}"><option value="">Predice…</option><option value="1">↑ Sube</option><option value="-1">↓ Baja</option><option value="0">Sin cambio</option></select></label>`).join('');
       document.getElementById('islmGrade').textContent = 'Predice cada variable antes de ejecutar.';
       document.getElementById('islmTheory').textContent = '';
       document.getElementById('islmRegimeCompare').innerHTML = '';
@@ -195,7 +195,7 @@
       ['IS','LM','BP','NX','CA','rho','multiplier','trilemma'].filter(key=>glossary[key]).forEach(key => {
         const btn = document.createElement('button'); btn.type='button'; btn.className='islm-glossary-button'; btn.textContent=key==='rho'?'ρ':key==='multiplier'?'Multiplicador':key==='trilemma'?'Trilema':key;
         btn.setAttribute('aria-label',`Definición de ${btn.textContent}`);
-        btn.addEventListener('click',()=>{ document.getElementById('islmHelpBody').innerHTML=`<h4>${escapeHTML(btn.textContent)}</h4><p>${escapeHTML(glossary[key].short)}</p><p>${escapeHTML(glossary[key].long)}</p>`;dialog.showModal(); });
+        btn.addEventListener('click',()=>{ location.hash='ayuda?term='+encodeURIComponent(key); });
         document.getElementById('islmLayers').append(btn);
       });
       document.getElementById('islmReferences').innerHTML = Object.values(content().REFERENCES).map(r=>`<li>${escapeHTML(r)}</li>`).join('');

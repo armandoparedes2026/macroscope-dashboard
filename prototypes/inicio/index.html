@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MacroScope — Cuaderno y Laboratorio de Economía Aplicada</title>
+  <meta name="description" content="Portada orientada a estudiantes de pregrado de economía: simula políticas en el modelo IS–LM–BP, compara series oficiales y consulta el directorio de fuentes con formatos de citación.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="inicio.css">
+  <script>
+    try {
+      const saved = localStorage.getItem('macroscope_proto_theme');
+      if (saved === 'dark' || saved === 'light') {
+        document.documentElement.dataset.theme = saved;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#contenido-principal">Ir al contenido principal</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#contenido-principal" aria-label="MacroScope — Inicio">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span class="brand-copy">
+          <span class="brand-name">MacroScope</span>
+          <span class="brand-sub">Economía Aplicada · Pregrado</span>
+        </span>
+      </a>
+
+      <nav class="header-nav" aria-label="Navegación de secciones">
+        <a class="nav-link" href="#caminos">Tres caminos</a>
+        <a class="nav-link" href="#directorio-fuentes">Fuentes</a>
+        <a class="nav-link" href="#ayuda">Ayuda y glosario</a>
+        <a class="nav-link nav-link-prelim" href="#docentes">Docentes <span class="badge-prelim">Preliminar</span></a>
+      </nav>
+
+      <button type="button" class="theme-toggle" id="themeToggleBtn" aria-label="Alternar entre tema claro y oscuro" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"></path>
+        </svg>
+        <span id="themeToggleLabel">Modo oscuro</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="contenido-principal">
+    <!-- 1. HERO BREVE: qué es y para quién (estudiantes) -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-rule" aria-hidden="true"></span> PORTADA PARA ESTUDIANTES DE ECONOMÍA</p>
+          <h1 id="hero-title">Conecta la teoría del curso con <em>datos oficiales</em> y modelos abiertos.</h1>
+          <p class="hero-lead">
+            MacroScope es un cuaderno interactivo para estudiantes de pregrado. Pon a prueba tus hipótesis en el laboratorio IS–LM–BP antes de ver el desplazamiento de las curvas, compara trayectorias macroeconómicas reales y verifica de qué institución proviene cada serie para citarla con rigor en tus trabajos.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#camino-aprender">Ir al laboratorio IS–LM–BP</a>
+            <a class="btn btn-secondary" href="#camino-explorar">Explorar series y comparador</a>
+            <a class="btn btn-secondary" href="#ayuda">Cómo usar y citar</a>
+          </div>
+          <ul class="hero-pills" aria-label="Principios metodológicos">
+            <li>Separación explícita entre simulación teórica y dato observado</li>
+            <li>Trazabilidad institucional (Banco Mundial WDI y BCRP)</li>
+            <li>Sin interpolación de años ausentes</li>
+          </ul>
+        </div>
+
+        <aside class="hero-compass" aria-label="Ruta rápida en menos de diez segundos">
+          <div class="compass-header">
+            <strong>¿Qué necesitas resolver hoy?</strong>
+            <span class="compass-tag">3 rutas directas</span>
+          </div>
+          <ol class="compass-steps">
+            <li>
+              <span class="step-num">01</span>
+              <div>
+                <b>Practicar para un control o examen de Macroeconomía</b>
+                <span>Elige un escenario guiado en «Aprender», registra tu predicción de producto, tasa y tipo de cambio, y contrasta el mecanismo paso a paso.</span>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">02</span>
+              <div>
+                <b>Sustentar un trabajo empírico o informe de coyuntura</b>
+                <span>Compara hasta cuatro economías en «Explorar datos», distingue variaciones anuales de niveles y descarga la tabla con columna de procedencia.</span>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">03</span>
+              <div>
+                <b>Encontrar la fuente primaria y el formato de citación</b>
+                <span>Revisa «Buscar fuentes» por curso, tema o país para conocer la cobertura temporal, la definición metodológica y la cita lista para copiar.</span>
+              </div>
+            </li>
+          </ol>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 2. TRES CAMINOS: Aprender, Explorar datos, Buscar fuentes -->
+    <section id="caminos" class="paths-section" aria-labelledby="paths-title">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-rule" aria-hidden="true"></span> ARQUITECTURA DE NAVEGACIÓN</p>
+            <h2 id="paths-title">Tres caminos según tu <em>objetivo de estudio.</em></h2>
+          </div>
+          <p>Cada espacio declara si trabajas con un modelo teórico de corto plazo o con estadísticas oficiales publicadas.</p>
+        </div>
+
+        <div class="paths-grid">
+          <!-- Camino 1: Aprender -->
+          <article id="camino-aprender" class="path-card path-learn">
+            <div>
+              <div class="path-top">
+                <span class="path-index">01 · APRENDER</span>
+                <span class="path-epistemic">Simulación teórica</span>
+              </div>
+              <h3>Laboratorio y escenarios guiados</h3>
+              <p>
+                Experimenta con el modelo IS–LM–BP y Mundell–Fleming en economía cerrada, tipo de cambio flexible o fijo, y distintos grados de movilidad de capital.
+              </p>
+              <ul class="path-list">
+                <li><strong>Predicción activa:</strong> anticipa qué ocurre con el producto, la tasa de interés y el tipo de cambio antes de ejecutar el shock.</li>
+                <li><strong>Cuatro mercados simultáneos:</strong> sigue el equilibrio inicial, el impacto interno y el ajuste externo con explicación causal.</li>
+                <li><strong>Comparación A/B de regímenes:</strong> guarda un escenario base y contrasta por qué una política es eficaz en un régimen e ineficaz en otro.</li>
+              </ul>
+            </div>
+            <a class="path-cta" href="#camino-aprender">
+              <span>Abrir laboratorio y escenarios</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </article>
+
+          <!-- Camino 2: Explorar datos -->
+          <article id="camino-explorar" class="path-card path-explore">
+            <div>
+              <div class="path-top">
+                <span class="path-index">02 · EXPLORAR DATOS</span>
+                <span class="path-epistemic">Estadística oficial</span>
+              </div>
+              <h3>Panorama macro y comparador</h3>
+              <p>
+                Analiza la evolución anual y mensual de indicadores fundamentales sin mezclar unidades ni ocultar vacíos de información en las series históricas.
+              </p>
+              <ul class="path-list">
+                <li><strong>Panorama nacional y regional:</strong> crecimiento del PBI, inflación, desempleo, apertura comercial, cuenta corriente y balanza de bienes.</li>
+                <li><strong>Comparador multimodo:</strong> valores observados, índice de año base para niveles, crecimiento acumulado encadenado y convergencia PPA.</li>
+                <li><strong>Perú en profundidad:</strong> seguimiento de series mensuales del BCRP con nombres legibles, unidades claras y fecha de actualización.</li>
+              </ul>
+            </div>
+            <a class="path-cta" href="#camino-explorar">
+              <span>Explorar panorama y comparador</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </article>
+
+          <!-- Camino 3: Buscar fuentes -->
+          <article id="camino-fuentes" class="path-card path-sources">
+            <div>
+              <div class="path-top">
+                <span class="path-index">03 · BUSCAR FUENTES</span>
+                <span class="path-epistemic">Trazabilidad y cita</span>
+              </div>
+              <h3>Directorio por curso, tema y país</h3>
+              <p>
+                Ubica rápidamente qué código oficial corresponde a cada variable de clase, qué diferencias metodológicas existen entre proveedores y cómo citarlos.
+              </p>
+              <ul class="path-list">
+                <li><strong>Por curso de la carrera:</strong> Macroeconomía I y II, Economía Monetaria, Comercio Internacional, Política Económica y Cuentas Nacionales.</li>
+                <li><strong>Por tema y frecuencia:</strong> actividad real, precios e inflación, sector externo, empleo modelado vs. encuestas nacionales y tipos de cambio.</li>
+                <li><strong>Ficha de citación académica:</strong> código de serie, institución autora, alcance geográfico, advertencias de uso y formato APA / institucional.</li>
+              </ul>
+            </div>
+            <a class="path-cta" href="#directorio-fuentes">
+              <span>Consultar directorio de fuentes</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </article>
+        </div>
+
+        <!-- Vista previa estructurada del directorio de fuentes (sin cifras inventadas) -->
+        <div id="directorio-fuentes" class="sources-preview" aria-labelledby="dir-preview-title">
+          <div class="sources-preview-head">
+            <h3 id="dir-preview-title">Estructura del directorio de fuentes para trabajos universitarios</h3>
+            <span>Organización por asignatura, variable e institución proveedora</span>
+          </div>
+          <div class="directory-grid">
+            <div class="dir-card">
+              <small>Por curso · Ciclo básico e intermedio</small>
+              <strong>Macroeconomía Abierta y Política Monetaria</strong>
+              <p>Vincula las identidades de cuentas nacionales, paridad descubierta de tasas y balanza de pagos con sus series correspondientes en WDI y BCRP.</p>
+            </div>
+            <div class="dir-card">
+              <small>Por tema · Precisión metodológica</small>
+              <strong>Inflación promedio anual vs. variación interanual</strong>
+              <p>Explica cuándo emplear la serie anual armonizada del Banco Mundial para comparaciones entre países y cuándo usar la serie mensual del banco central.</p>
+            </div>
+            <div class="dir-card">
+              <small>Por país · Cobertura e instituciones</small>
+              <strong>América Latina y economías de referencia</strong>
+              <p>Detalla los códigos ISO, el tratamiento de agregados regionales y la distinción entre consulta en vivo al API y respaldo local verificado.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. FRANJA "AYUDA": cómo usar, glosario, preguntas frecuentes, cómo citar -->
+    <section id="ayuda" class="help-strip" aria-labelledby="help-title">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-rule" aria-hidden="true"></span> CENTRO DE APOYO AL ESTUDIANTE</p>
+            <h2 id="help-title">Ayuda visible en todo el <em>recorrido.</em></h2>
+          </div>
+          <p>Recursos directos para resolver dudas conceptuales, metodológicas y de citación sin salir de tu flujo de estudio.</p>
+        </div>
+
+        <div class="help-grid">
+          <article class="help-card">
+            <div>
+              <div class="help-card-head">
+                <span class="help-symbol">GUÍA · 01</span>
+              </div>
+              <h3>Cómo usar MacroScope</h3>
+              <p>Pasos para alternar entre observación empírica y simulación teórica, leer desplazamientos del equilibrio inicial al final y exportar tablas limpias.</p>
+            </div>
+            <a class="help-link" href="#ayuda">Leer guía de uso →</a>
+          </article>
+
+          <article class="help-card">
+            <div>
+              <div class="help-card-head">
+                <span class="help-symbol">CONCEPTOS · 02</span>
+              </div>
+              <h3>Glosario económico</h3>
+              <p>Definiciones breves y rigurosas de curvas IS, LM y BP, condición de Marshall–Lerner, prima de riesgo, trilema de Mundell y multiplicadores.</p>
+            </div>
+            <a class="help-link" href="#ayuda">Abrir glosario de términos →</a>
+          </article>
+
+          <article class="help-card">
+            <div>
+              <div class="help-card-head">
+                <span class="help-symbol">DUDAS · 03</span>
+              </div>
+              <h3>Preguntas frecuentes</h3>
+              <p>Por qué un año sin registro no se interpola, qué significa el asterisco de respaldo local y por qué el desempleo OIT difiere de encuestas urbanas.</p>
+            </div>
+            <a class="help-link" href="#ayuda">Ver preguntas frecuentes →</a>
+          </article>
+
+          <article class="help-card">
+            <div>
+              <div class="help-card-head">
+                <span class="help-symbol">CITAS · 04</span>
+              </div>
+              <h3>Cómo citar datos y fuentes</h3>
+              <p>Plantillas listas para copiar que incluyen institución proveedora, código exacto del indicador, unidad de medida y fecha de extracción de la consulta.</p>
+            </div>
+            <a class="help-link" href="#ayuda">Copiar formato de citación →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. DOCENTES (MENCIÓN DISCRETA "PRELIMINAR") + MUESTRA DEL SISTEMA VISUAL -->
+    <section id="docentes" class="bottom-band" aria-labelledby="docentes-title">
+      <div class="container bottom-grid">
+        <aside class="teachers-notice" aria-labelledby="docentes-title">
+          <div class="teachers-top">
+            <span class="badge-prelim">Preliminar</span>
+            <h2 id="docentes-title">Espacio para docentes y jefes de práctica</h2>
+          </div>
+          <p>
+            Esta versión prioriza la experiencia de aprendizaje autónomo del estudiante de pregrado. En una etapa posterior se habilitarán guías de clase descargables, secuencias de ejercicios comentadas y enlaces con configuración predefinida para compartir en el aula.
+          </p>
+        </aside>
+
+        <aside class="palette-card" aria-label="Muestra de series accesibles para gráficos">
+          <div>
+            <h3>Series gráficas con distinción para daltonismo</h3>
+            <p>Familia cromática azul, verde, dorado, naranja, crema y bronce verificada en modo claro y oscuro.</p>
+          </div>
+          <div class="series-swatches">
+            <span class="swatch-chip"><i class="swatch-dot" style="background:var(--series-1)"></i>S1 · Azul</span>
+            <span class="swatch-chip"><i class="swatch-dot" style="background:var(--series-2)"></i>S2 · Naranja</span>
+            <span class="swatch-chip"><i class="swatch-dot" style="background:var(--series-3)"></i>S3 · Verde</span>
+            <span class="swatch-chip"><i class="swatch-dot" style="background:var(--series-4)"></i>S4 · Dorado</span>
+            <span class="swatch-chip"><i class="swatch-dot" style="background:var(--series-5)"></i>S5 · Cobalto</span>
+            <span class="swatch-chip"><i class="swatch-dot" style="background:var(--series-6)"></i>S6 · Bronce</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>MacroScope · Prototipo estático de portada centrado en el estudiante</span>
+      <span>Fuentes documentadas: World Bank Open Data (WDI) · Banco Central de Reserva del Perú (BCRP)</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const btn = document.getElementById('themeToggleBtn');
+      const label = document.getElementById('themeToggleLabel');
+      function syncButton() {
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        btn.setAttribute('aria-pressed', String(isDark));
+        label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
+      }
+      btn.addEventListener('click', function () {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('macroscope_proto_theme', next); } catch (e) {}
+        syncButton();
+      });
+      syncButton();
+    })();
+  </script>
+</body>
+</html>

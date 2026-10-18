@@ -1,6 +1,7 @@
 (function () {
   'use strict';
   const M = globalThis.MacroScope ||= {};
+  M.color = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const { COUNTRIES, FALLBACK_DB, FALLBACK_FX } = M;
     // Deep clone fallback into runtime DB
     const runtimeDB = JSON.parse(JSON.stringify(FALLBACK_DB));
@@ -20,7 +21,7 @@
       tableFilter: '',
       lastEndpoints: [],
       sampleRawJson: null,
-      liveMacroSuccess: 0, liveFxSuccess: false, fxUpdated: null, syncToken: 0, carouselIndex: 0, carouselTimer: null
+      liveMacroSuccess: 0, liveFxSuccess: false, fxUpdated: null, syncToken: 0
     };
 
     // Load saved preferences safely

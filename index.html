@@ -1,17 +1,18 @@
 <!doctype html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101e36">
   <meta name="description" content="Laboratorio interactivo de economía aplicada: estadísticas oficiales, comparaciones internacionales y un simulador IS–LM–BP / Mundell–Fleming con equilibrio inicial anclado en datos WDI y supuestos explícitos.">
   <title>MacroScope — Laboratorio Interactivo de Economía Aplicada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script>
     // Aplica el tema guardado antes del primer pintado para evitar el parpadeo oscuro → claro.
-    try { if (localStorage.getItem('macroscope_theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}
+    let initialTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    try { const saved = localStorage.getItem('macroscope_theme'); if (['light','dark'].includes(saved)) initialTheme = saved; } catch (e) {}
+    document.documentElement.dataset.theme = initialTheme;
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/tokens.css">
@@ -19,11 +20,13 @@
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/islm.css">
+<link rel="stylesheet" href="css/students.css">
 <script defer src="js/islm-model.js"></script>
 <script defer src="js/lab-content.js"></script>
 <script defer src="js/config/countries.js"></script>
 <script defer src="js/config/indicators.js"></script>
 <script defer src="js/data/fallback-wdi.js"></script>
+<script defer src="js/data/sources-catalog.js"></script>
 <script defer src="js/config/state.js"></script>
 <script defer src="js/services/wdi.js"></script>
 <script defer src="js/services/compare.js"></script>
@@ -33,10 +36,10 @@
 <script defer src="js/ui/charts.js"></script>
 <script defer src="js/ui/overview.js"></script>
 <script defer src="js/ui/islm-lab.js"></script>
+<script defer src="js/ui/student-views.js"></script>
 <script defer src="js/app.js"></script>
 </head>
 <body>
-<div class="scroll-progress"><span id="scrollProgressBar"></span></div>
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></symbol>
  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M7.5 14.5l4-4 3 2.5L20 6"/></symbol>
@@ -55,39 +58,49 @@
  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22c-6-3-8-7-8-12V5l8-3 8 3v5c0 5-2 9-8 12Z"/><path d="m9 12 2 2 4-4"/></symbol>
 </svg>
 <div class="app-shell">
- <aside class="sidebar" aria-label="Navegación principal">
-  <div class="brand">
-    <span class="brand-logo" role="img" aria-label="MacroScope"><svg fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.5 9 11l4 4 7-9"/><path d="M14.5 6H20v5.5"/><path d="M3 21h18"/></svg></span>
-  </div>
-  <nav class="side-nav" aria-label="Secciones del dashboard">
-   <button class="tab-btn is-active" type="button" data-tab="overview" aria-current="page" title="Panorama económico"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-grid"/></svg><span class="nav-text">Panorama económico</span></button>
-   <button class="tab-btn" type="button" data-tab="simulator" title="Modelo IS–LM y divisas"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-wallet"/></svg><span class="nav-text">Modelo IS–LM y divisas</span></button>
-   <button class="tab-btn" type="button" data-tab="data" title="Datos e inspector API"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-database"/></svg><span class="nav-text">Datos e inspector API</span></button>
-  </nav>
- </aside>
  <div class="workspace">
   <header class="topbar">
-    <div class="top-left"><div class="crumb">LABORATORIO DE ECONOMÍA APLICADA <span class="crumb-line"></span> TEORÍA, MODELOS Y DATOS</div><div class="top-title" id="topTitle">Panorama macroeconómico</div></div>
+    <a class="brand-name" href="#inicio">MacroScope</a>
+    <details class="nav-menu"><summary>Menú</summary><nav class="primary-nav" aria-label="Navegación principal"><a href="#inicio" data-route="inicio">Inicio</a><a href="#laboratorio" data-route="laboratorio">Aprender</a><a href="#panorama" data-route="panorama">Explorar datos</a><a href="#fuentes" data-route="fuentes">Buscar fuentes</a><a href="#ayuda" data-route="ayuda">Ayuda</a></nav></details>
     <div class="top-right">
       <div class="api-indicator" id="apiStatusBadge" title="Estado de la última conexión"><span class="status-dot" id="apiStatusDot"></span><span id="apiStatusText">Consultando fuentes...</span></div>
       <button class="icon-button" id="themeBtn" type="button" title="Cambiar entre modo claro y oscuro" aria-label="Cambiar tema"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use id="themeIcon" href="#i-moon"/></svg></button>
     </div>
   </header>
-  <nav class="mobile-nav" aria-label="Navegación móvil">
-   <button type="button" class="tab-btn is-active" data-tab="overview" aria-current="page"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-grid"/></svg>Panorama</button>
-   <button type="button" class="tab-btn" data-tab="simulator"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-wallet"/></svg>IS–LM</button>
-   <button type="button" class="tab-btn" data-tab="data"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Datos y API</button>
-  </nav>
   <main class="content">
-   <section class="view" id="tab-overview" aria-label="Panorama económico">
-     <div class="page-heading"><div><div class="eyebrow">LABORATORIO INTERACTIVO DE ECONOMÍA APLICADA</div><h1>Teoría, modelos y datos para entender la economía.</h1><p>Una lectura clara de la economía, sus tendencias y su posición frente a los mercados de referencia.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-calendar"/></svg><span id="headingPeriod">Serie anual · 2014–2024</span></div><button class="hero-scroll-cue" id="heroScrollCue" type="button" aria-label="Desplazarse hacia el contenido principal"><span class="cue-dot"></span><span>Explorar análisis</span></button></div>
+   <section class="view home-view" id="inicio" data-view="inicio" tabindex="-1" aria-labelledby="homeTitle">
+     <header class="home-intro"><div class="eyebrow">ECONOMÍA · TEORÍA Y EVIDENCIA</div><h1 id="homeTitle">Entiende la economía.<br><em>Conecta modelos y datos.</em></h1><p>MacroScope es un laboratorio para estudiantes de economía: experimenta con modelos, compara indicadores oficiales y encuentra fuentes para tus trabajos.</p></header>
+     <div class="path-grid" aria-label="Elige tu camino">
+       <a class="path-card" href="#laboratorio"><span class="eyebrow">01 · APRENDER</span><h2>Aprender</h2><p>Predice un resultado y experimenta con el modelo IS–LM–BP.</p><span class="path-action">Abrir laboratorio →</span></a>
+       <a class="path-card" href="#panorama"><span class="eyebrow">02 · EXPLORAR DATOS</span><h2>Explorar datos</h2><p>Compara economías y consulta indicadores con su procedencia.</p><span class="path-action">Explorar panorama →</span></a>
+       <a class="path-card" href="#fuentes"><span class="eyebrow">03 · BUSCAR FUENTES</span><h2>Buscar fuentes</h2><p>Encuentra bases oficiales para tu curso y copia sus citas.</p><span class="path-action">Buscar una fuente →</span></a>
+     </div>
+     <aside class="help-band"><div><h2>Una guía para empezar</h2><p>Cómo usar la plataforma, glosario, preguntas frecuentes y citación.</p></div><a class="control-action" href="#ayuda">Abrir ayuda</a></aside>
+     <aside class="teacher-note"><strong>Docentes — Preliminar</strong><p>Esta versión prioriza el aprendizaje autónomo de estudiantes de pregrado.</p></aside>
+   </section>
+   <section class="view" id="fuentes" data-view="fuentes" hidden tabindex="-1"><header class="view-heading"><div class="eyebrow">DIRECTORIO ACADÉMICO</div><h1>Buscar fuentes</h1><p>Elige una base para tu curso y comprueba su metodología antes de usarla.</p><a class="control-action" href="#ayuda">Cómo citar una fuente</a></header>
+     <form id="sourceFilters" class="source-filters" role="search"><label>Curso<select id="sourceCourse" class="field-select"></select></label><label>Alcance<select id="sourceScope" class="field-select"></select></label><label>Acceso<select id="sourceAccess" class="field-select"></select></label><label>Buscar<input id="sourceQuery" type="search" placeholder="Tema, fuente u organismo"></label><button type="reset" class="control-action">Limpiar filtros</button></form>
+     <p id="sourceCount" role="status" aria-live="polite"></p><div class="source-grid" id="sourceResults"></div><p id="sourceChecked" class="data-note"></p></section>
+   <section class="view" id="ayuda" data-view="ayuda" hidden tabindex="-1"><header class="view-heading"><div class="eyebrow">GUÍA DE APRENDIZAJE</div><h1>Ayuda</h1><p>Empieza por un camino y consulta los términos que necesites.</p><a class="control-action primary" href="#laboratorio">Empezar a aprender</a></header>
+     <section aria-labelledby="howTitle"><h2 id="howTitle">Cómo usar MacroScope</h2><div class="path-grid help-paths"><article class="surface help-card"><h3>Aprender</h3><ol><li>Elige un escenario y lee sus supuestos.</li><li>Predice el cambio de las variables.</li><li>Ejecuta y contrasta tu respuesta con el modelo.</li></ol></article><article class="surface help-card"><h3>Explorar datos</h3><ol><li>Elige el país y el indicador.</li><li>Compara años, unidades y economías.</li><li>Consulta la procedencia y copia la cita.</li></ol></article><article class="surface help-card"><h3>Buscar fuentes</h3><ol><li>Filtra por curso, alcance o acceso.</li><li>Lee la descripción y los avisos.</li><li>Abre la fuente y revisa su metodología.</li></ol></article></div></section>
+     <section aria-labelledby="glossaryTitle"><h2 id="glossaryTitle">Glosario económico</h2><label for="glossarySearch">Buscar un término o una definición</label><input id="glossarySearch" class="glossary-search" type="search" placeholder="Por ejemplo: IS, inflación, trilema"><p id="glossaryCount" role="status" aria-live="polite"></p><div id="helpGlossary" class="help-glossary"></div></section>
+     <section class="help-faq" aria-labelledby="faqTitle"><h2 id="faqTitle">Preguntas frecuentes</h2>
+       <details><summary>¿De dónde vienen los datos?</summary><p>El panorama utiliza World Development Indicators del Banco Mundial. El panel Perú en profundidad consulta BCRPData. Cada indicador muestra su fuente, código, periodo y extracción disponible.</p></details>
+       <details><summary>¿Por qué un dato dice «respaldo local»?</summary><p>Si la consulta no devuelve una observación, se usa la copia incluida con la plataforma. Su fecha de extracción se muestra junto al dato: no representa una actualización en línea.</p></details>
+       <details><summary>¿Qué significa «ilustrativo» en el simulador?</summary><p>El modelo explica relaciones teóricas bajo supuestos. Sus parámetros y resultados no son estimaciones causales ni pronósticos; una simulación teórica se distingue de una estadística observada.</p></details>
+       <details><summary>¿Cómo cito un dato?</summary><p>Usa «Cómo citar» junto al indicador para copiar institución, base, código, país y fecha de consulta. En el directorio, «Copiar cita» identifica la fuente; añade a tu trabajo el indicador y el periodo que utilizaste.</p></details>
+       <details><summary>¿Por qué dos países muestran años distintos?</summary><p>La publicación y cobertura varían entre series y países. Compara el mismo año cuando sea posible. El comparador conserva las ausencias como «sin dato» y permite seleccionar solo años comunes.</p></details>
+     </section>
+     <section class="surface help-card" aria-labelledby="citationTitle"><h2 id="citationTitle">Cómo citar</h2><p>Banco Mundial. (s. f.). World Development Indicators [Base de datos]. Indicador: FP.CPI.TOTL.ZG. País: Perú. Recuperado el [fecha de extracción], de https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG</p><p>Banco Central de Reserva del Perú. (s. f.). BCRPData [Base de datos]. Serie: [código]. Recuperado el [fecha de extracción], de https://estadisticas.bcrp.gob.pe/estadisticas/series/</p><p>La inflación WDI mide el cambio del IPC promedio anual. La inflación BCRP interanual compara un mes con el mismo mes del año anterior. No son medidas equivalentes.</p></section></section>
+   <section class="view" id="tab-overview" data-view="panorama" hidden tabindex="-1" aria-label="Panorama económico">
+     <div class="page-heading"><div><div class="eyebrow">LABORATORIO INTERACTIVO DE ECONOMÍA APLICADA</div><h1>Explorar datos económicos.</h1><p>Selecciona un país y compara indicadores oficiales con su fuente y periodo.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-calendar"/></svg><span id="headingPeriod">Serie anual · 2014–2024</span></div></div>
      <div class="filter-bar" id="overviewFilters" aria-label="Filtros globales">
       <div class="filter-group main-country"><label class="control-label" for="countrySelect">ECONOMÍA PRINCIPAL</label><select class="field-select" id="countrySelect"><option value="PER">🇵🇪 Perú</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="USA">🇺🇸 Estados Unidos</option></select></div>
       <div class="filter-group"><label class="control-label" for="benchmarkSelect">COMPARAR CON</label><select class="field-select" id="benchmarkSelect"><option value="LCN">🌎 América Latina y el Caribe</option><option value="USA">🇺🇸 Estados Unidos</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="PER">🇵🇪 Perú</option></select></div>
       <div class="filter-group"><label class="control-label" for="periodSelect">PERIODO DE ANÁLISIS</label><select class="field-select" id="periodSelect"><option value="5">Últimos 5 años disponibles</option><option value="10" selected>Últimos 10 años disponibles</option><option value="all">Toda la serie (2014 en adelante)</option></select></div>
       <button type="button" id="syncApiBtn" class="control-action primary"><svg id="syncIcon" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg><span>Actualizar datos</span></button>
      </div>
-     <article class="surface" style="padding:20px;margin-bottom:20px" aria-labelledby="bcrpTitle">
+     <article class="surface" style="padding:var(--space-5);margin-bottom:var(--space-5)" aria-labelledby="bcrpTitle">
        <h2 id="bcrpTitle">Perú en profundidad (BCRP)</h2>
        <p>Series mensuales oficiales · Banco Central de Reserva del Perú</p>
        <div id="bcrpResults" aria-live="polite">Consultando BCRP…</div>
@@ -98,17 +111,14 @@
        <div class="executive-actions"><button type="button" class="ghost-light" id="copyBriefBtn"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg>Copiar resumen</button></div>
       </div>
       <div class="hero-side">
-        <div class="surface premium-ring" style="padding:18px 18px 16px">
-          <div class="section-top" style="margin-bottom:8px"><div><h2 class="section-title" style="font-size:15px">Estado del tablero</h2><p class="section-sub">Lecturas compactas del entorno macro.</p></div><span class="text-chip" id="heroStatusChip">Observación activa</span></div>
+        <div class="surface premium-ring" style="padding:var(--space-px-18) var(--space-px-18) var(--space-4)">
+          <div class="section-top" style="margin-bottom:var(--space-2)"><div><h2 class="section-title" style="font-size:15px">Estado del tablero</h2><p class="section-sub">Lecturas compactas del entorno macro.</p></div><span class="text-chip" id="heroStatusChip">Observación activa</span></div>
           <div class="selector-summary" id="heroSummaryMini"></div>
         </div>
         <div class="pulse-strip" id="pulseStrip"></div>
       </div>
      </div>
-     <article class="surface insight-carousel premium-ring reveal" id="insightCarousel">
-      <div class="insight-head"><div><h2 class="section-title">Señales destacadas</h2><p class="section-sub">Movimientos recientes más relevantes de los indicadores, para interpretarlos con teoría y datos.</p></div><div class="carousel-controls"><button class="carousel-btn" id="carouselPrev" type="button" aria-label="Insight anterior"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chevron-left"/></svg></button><div class="carousel-dots" id="carouselDots"></div><button class="carousel-btn" id="carouselNext" type="button" aria-label="Insight siguiente"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chevron"/></svg></button></div></div>
-      <div class="insight-carousel-inner"><div class="insight-track" id="insightTrack"></div></div>
-     </article>
+     <section aria-labelledby="readingsTitle"><div class="section-top"><div><h2 class="section-title" id="readingsTitle">Lecturas clave del ciclo</h2><p class="section-sub">Relaciona actividad, precios y sector externo.</p></div></div><div class="insight-grid" id="insightGrid"></div></section>
      <div>
       <div class="section-top"><div><h2 class="section-title">Indicadores esenciales</h2><p class="section-sub">Selecciona una tarjeta para explorar su evolución y compararla con otras economías.</p></div><span id="activeIndicatorBadge" class="text-chip">Crecimiento del PBI</span></div>
       <div class="kpi-grid" id="kpiGrid" aria-label="Tarjetas de indicadores"></div>
@@ -136,19 +146,27 @@
      </div>
      <div class="charts-grid half">
       <article class="surface chart-card reveal"><div class="card-top"><div><h3>Crecimiento e inflación</h3><p>Dos variables esenciales para interpretar el ciclo económico.</p></div></div><div class="chart-wrap"><canvas id="macroMixChart" role="img" aria-label="Comparación entre crecimiento anual e inflación"></canvas></div></article>
-      <article class="surface decisions-card reveal"><div class="card-top" style="margin-bottom:0"><div><h3>Lecturas para la gestión</h3><p>Implicancias posibles según el entorno macroeconómico.</p></div><span class="status-pill neutral">ANÁLISIS</span></div><div id="decisionCardsContainer" class="decisions-list"></div><div class="advisory"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-info"/></svg><span>Interpretaciones orientativas basadas en reglas simples. No constituyen asesoría financiera ni sustituyen el análisis sectorial o empresarial.</span></div></article>
+      <article class="surface decisions-card reveal"><div class="card-top" style="margin-bottom:0"><div><h3>Preguntas para interpretar los datos</h3><p>Implicancias posibles según el entorno macroeconómico.</p></div><span class="status-pill neutral">ANÁLISIS</span></div><div id="decisionCardsContainer" class="decisions-list"></div><div class="advisory"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-info"/></svg><span>Interpretaciones orientativas basadas en reglas simples. No constituyen asesoría financiera ni sustituyen el análisis sectorial o empresarial.</span></div></article>
      </div>
+   <section class="data-inspector" id="tab-data" aria-label="Matriz de datos e inspector API">
+    <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD Y EXPLORACIÓN</div><h1>Datos claros. Fuentes visibles.</h1><p>Explora la serie anual, exporta observaciones y consulta los endpoints solicitados a las fuentes públicas.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Banco Mundial · WDI</div></div>
+    <article class="surface soft-panel"><div class="card-top" style="flex-wrap:wrap"><div><h3>Histórico de indicadores</h3><p id="tableCountrySubtitle">Datos anuales de la economía seleccionada, por indicador y año.</p></div><div class="data-actions"><label class="search-box"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-search"/></svg><input id="tableSearchInput" type="search" placeholder="Filtrar por año" aria-label="Filtrar filas por año"></label><button class="control-action primary" id="exportCsvBtn" type="button"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-download"/></svg>Exportar CSV</button></div></div>
+      <div class="data-table-wrap"><table class="data-table"><thead><tr><th>Año</th><th>Crecimiento PBI<br>(% anual)</th><th>Inflación IPC<br>(% anual)</th><th>Desempleo<br>(%)</th><th>PBI per cápita<br>(US$ corrientes)</th><th>Exportaciones<br>(% del PBI)</th><th>Cuenta corriente<br>(% del PBI)</th><th>NX bienes y servicios<br>(% del PBI)</th><th>Importaciones<br>(% del PBI)</th></tr></thead><tbody id="macroTableBody"></tbody></table></div>
+      <div class="data-note" id="tableProvenanceNote">N/D indica un registro no disponible. Las celdas en cursiva con <span style="color:var(--amber)">*</span> proceden del respaldo local incorporado (no confirmadas por la API en esta sesión); el resto fue devuelto por el API del Banco Mundial. El proveedor puede revisar las cifras posteriormente.</div>
+      <div class="data-note"><strong>Notas metodológicas.</strong> Inflación (FP.CPI.TOTL.ZG): variación del IPC <em>promedio anual</em>; no equivale a la variación diciembre–diciembre que usan los bancos centrales (p. ej., el BCRP) para evaluar su meta. Desempleo (SL.UEM.TOTL.ZS): estimación <em>modelada de la OIT</em> a nivel nacional; no es comparable con la tasa de Lima Metropolitana publicada por el INEI.</div>
+    </article>
+    <article class="surface soft-panel"><div class="card-top"><div><h3>Inspector de consultas y respuestas</h3><p>EndPoints REST consultados y muestra de la respuesta JSON recibida.</p></div><span class="inspector-status" id="inspectorLatencyBadge">API REST v2</span></div><div class="inspector-grid"><div class="code-block"><div class="code-label">Solicitudes recientes</div><ul id="endpointList"></ul></div><div class="code-block"><div class="code-label">Ejemplo de respuesta</div><pre id="rawJsonPreview">Sincronizando...</pre></div></div><p class="data-note">Proveedor principal: <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" class="source-link">World Bank Open Data</a>. Fuente de divisas: <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer" class="source-link">ExchangeRate-API</a>. Estos datos no constituyen una cotización oficial del banco central.</p></article>
    </section>
-   <section class="view" id="tab-simulator" hidden aria-label="Modelo IS-LM-BP y Mundell-Fleming">
-     <div class="page-heading"><div><div class="eyebrow">MACROECONOMÍA ABIERTA · CORTO PLAZO</div><h1>IS–LM–BP y Mundell–Fleming.</h1><p>Elige el tipo de economía, mueve instrumentos de política o shocks externos y observa cómo se desplazan las curvas en cuatro mercados enlazados: qué controla la economía, qué le viene dado y cómo se transmite cada decisión.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chart"/></svg>Modelo didáctico · supuestos explícitos</div></div>
-     <div class="islm-banner">Simulación teórica — no es evidencia empírica</div>
+   </section>
+   <section class="view" id="tab-simulator" data-view="laboratorio" tabindex="-1" hidden aria-label="Modelo IS-LM-BP y Mundell-Fleming">
+     <div class="page-heading"><div><div class="eyebrow">MACROECONOMÍA ABIERTA · CORTO PLAZO</div><h1>IS–LM–BP y Mundell–Fleming.</h1><p>Predice, modifica un instrumento y contrasta el equilibrio en cuatro mercados.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chart"/></svg>Modelo didáctico · supuestos explícitos</div></div>
      <div class="islm-learning surface soft-panel">
       <div class="islm-toolbar"><label>Nivel <select id="islmLevel" class="field-select"><option value="intro">Introductorio</option><option value="intermediate" selected>Intermedio</option><option value="advanced">Avanzado</option></select></label><button id="islmWhy" class="control-action" type="button">¿Por qué?</button></div>
       <p id="islmLevelText"></p><details id="islmGuided"><summary>Aprender con un escenario guiado</summary><label for="islmScenario">Problema</label><select id="islmScenario" class="field-select"></select><p id="islmProblem"></p><div id="islmPredictions" class="islm-predictions"></div><button id="islmRun" class="control-action primary" type="button">Ejecutar y contrastar</button><div id="islmGrade" role="status" aria-live="polite"></div><div id="islmTheory"></div><div id="islmRegimeCompare" class="islm-regime-compare"></div></details>
      </div>
      <div class="sim-layout islm-layout">
       <details open class="surface sim-block islm-controls reveal" aria-label="Configuración del modelo"><summary>Parámetros · configurar y experimentar</summary>
-       <div class="card-top"><div><h3>A · Configuración</h3></div><button type="button" id="islmResetBtn" class="control-action" style="height:32px;padding:0 10px;font-size:10px">Restablecer</button></div>
+       <div class="card-top"><div><h3>A · Configuración</h3></div><button type="button" id="islmResetBtn" class="control-action" style="height:32px;padding:0 var(--space-px-10);font-size:10px">Restablecer</button></div>
        <label class="islm-select"><span class="control-label">País · contexto observado</span><select id="islmCountry" class="field-select"></select></label>
        <div class="islm-selects">
         <label class="islm-select"><span class="control-label">Régimen</span><select class="field-select" id="islmRegime"><option value="closed">Cerrada · IS–LM</option><option value="flex" selected>Flexible · economía abierta</option><option value="fixed">Fijo · economía abierta</option></select></label>
@@ -156,7 +174,7 @@
         <label class="islm-select"><span class="control-label">Instrumento monetario</span><select class="field-select" id="islmInstrument"><option value="money">Oferta monetaria (M)</option><option value="rate">Tasa de política (i)</option></select></label>
        </div>
        <p class="islm-note" id="islmTrilemma" role="status"></p>
-       <div class="sim-section-heading" style="margin-top:18px">B · Experimentación</div><p class="data-note">Aplica un cambio rápido o ajusta los controles.</p>
+       <div class="sim-section-heading" style="margin-top:var(--space-px-18)">B · Experimentación</div><p class="data-note">Aplica un cambio rápido o ajusta los controles.</p>
        <div class="islm-presets" id="islmPresets"></div>
        <div id="islmPolicyInputs"></div>
        <details class="islm-details"><summary>Shocks externos y confianza</summary><div id="islmExternalInputs"></div></details>
@@ -195,15 +213,7 @@
      <article class="surface soft-panel reveal"><div class="card-top"><div><h3>Tipos de cambio de referencia</h3><p>Un dólar estadounidense (USD) expresado en monedas seleccionadas.</p></div><span id="fxStatusBadge" class="text-chip">Fuente referencial · respaldo local</span></div><div id="fxGrid" class="fx-grid"></div><div class="data-note">Las cotizaciones pueden ser indicativas y no equivalen a tasas de compra/venta bancarias. Verifica fecha y condiciones antes de operar.</div></article>
      <div class="sim-disclaimer"><svg fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-info"/></svg><span id="islmDisclaimer">Modelo didáctico de corto plazo con precios fijos (P = 1) y expectativas estáticas: la prima ρ incluye riesgo país y depreciación esperada. El equilibrio inicial se ancla en datos observados del WDI (importaciones, balanza de bienes y servicios y cuenta corriente) y en supuestos explícitos (meta de inflación más una tasa real neutral ilustrativa, tasa internacional de referencia, elasticidad-ingreso de las importaciones igual a 1 y parámetros de comportamiento didácticos); no es una estimación econométrica ni un modelo de pronóstico ni describe con exactitud la política de ningún banco central.</span></div>
    </section>
-   <section class="view" id="tab-data" hidden aria-label="Matriz de datos e inspector API">
-    <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD Y EXPLORACIÓN</div><h1>Datos claros. Fuentes visibles.</h1><p>Explora la serie anual, exporta observaciones y consulta los endpoints solicitados a las fuentes públicas.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Banco Mundial · WDI</div></div>
-    <article class="surface soft-panel"><div class="card-top" style="flex-wrap:wrap"><div><h3>Histórico de indicadores</h3><p id="tableCountrySubtitle">Datos anuales de la economía seleccionada, por indicador y año.</p></div><div class="data-actions"><label class="search-box"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-search"/></svg><input id="tableSearchInput" type="search" placeholder="Filtrar por año" aria-label="Filtrar filas por año"></label><button class="control-action primary" id="exportCsvBtn" type="button"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-download"/></svg>Exportar CSV</button></div></div>
-      <div class="data-table-wrap"><table class="data-table"><thead><tr><th>Año</th><th>Crecimiento PBI<br>(% anual)</th><th>Inflación IPC<br>(% anual)</th><th>Desempleo<br>(%)</th><th>PBI per cápita<br>(US$ corrientes)</th><th>Exportaciones<br>(% del PBI)</th><th>Cuenta corriente<br>(% del PBI)</th><th>NX bienes y servicios<br>(% del PBI)</th><th>Importaciones<br>(% del PBI)</th></tr></thead><tbody id="macroTableBody"></tbody></table></div>
-      <div class="data-note" id="tableProvenanceNote">N/D indica un registro no disponible. Las celdas en cursiva con <span style="color:var(--amber)">*</span> proceden del respaldo local incorporado (no confirmadas por la API en esta sesión); el resto fue devuelto por el API del Banco Mundial. El proveedor puede revisar las cifras posteriormente.</div>
-      <div class="data-note"><strong>Notas metodológicas.</strong> Inflación (FP.CPI.TOTL.ZG): variación del IPC <em>promedio anual</em>; no equivale a la variación diciembre–diciembre que usan los bancos centrales (p. ej., el BCRP) para evaluar su meta. Desempleo (SL.UEM.TOTL.ZS): estimación <em>modelada de la OIT</em> a nivel nacional; no es comparable con la tasa de Lima Metropolitana publicada por el INEI.</div>
-    </article>
-    <article class="surface soft-panel"><div class="card-top"><div><h3>Inspector de consultas y respuestas</h3><p>EndPoints REST consultados y muestra de la respuesta JSON recibida.</p></div><span class="inspector-status" id="inspectorLatencyBadge">API REST v2</span></div><div class="inspector-grid"><div class="code-block"><div class="code-label">Solicitudes recientes</div><ul id="endpointList"></ul></div><div class="code-block"><div class="code-label">Ejemplo de respuesta</div><pre id="rawJsonPreview">Sincronizando...</pre></div></div><p class="data-note">Proveedor principal: <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" class="source-link">World Bank Open Data</a>. Fuente de divisas: <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer" class="source-link">ExchangeRate-API</a>. Estos datos no constituyen una cotización oficial del banco central.</p></article>
-   </section>
+
   </main>
   <footer class="footer"><span>© 2026 MacroScope · Laboratorio Interactivo de Economía Aplicada</span><span>Datos macroeconómicos anuales · <span id="lastUpdatedLabel">Consulta pendiente</span></span></footer>
  </div>
