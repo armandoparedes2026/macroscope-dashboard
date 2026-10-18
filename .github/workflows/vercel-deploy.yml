@@ -46,10 +46,10 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull production configuration
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN" --scope=cs-corp
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build static deployment
-        run: vercel build --prod --token="$VERCEL_TOKEN" --scope=cs-corp
+        run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Publish to Vercel
-        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" --scope=cs-corp
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
