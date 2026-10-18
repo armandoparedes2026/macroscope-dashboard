@@ -9,7 +9,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    // Aplica el tema guardado antes del primer pintado para evitar el parpadeo oscuro → claro.
+    try { if (localStorage.getItem('macroscope_theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
   <style>
 
     :root {
@@ -82,7 +86,7 @@
     .app-shell{min-height:100vh;display:grid;grid-template-columns:108px minmax(0,1fr)}
     .sidebar{background:linear-gradient(180deg,rgba(6,14,26,.92),rgba(8,19,33,.96));border-right:1px solid var(--line);backdrop-filter:blur(20px);color:#e9f2ff;min-height:100vh;padding:22px 16px;display:flex;flex-direction:column;align-items:center;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:15}
     .brand{display:flex;align-items:center;justify-content:center;padding:6px 0 28px}.brand-logo{width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,#5fa5ff 0%,#4f74ff 42%,#4ce1c9 100%);display:grid;place-items:center;box-shadow:0 18px 44px rgba(79,116,255,.38)} .brand-logo svg{width:28px;height:28px}
-    .brand>div,.nav-label,.nav-text,.nav-arrow,.sidebar-bottom{display:none}
+    .nav-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
     .side-nav{display:grid;gap:14px;width:100%}
     .tab-btn{position:relative;border:1px solid transparent;background:transparent;color:#a0b7d6;width:100%;display:flex;align-items:center;justify-content:center;min-height:58px;padding:0;border-radius:18px;transition:transform .18s ease, background .18s ease, border-color .18s ease,color .18s ease}
     .tab-btn svg{width:22px;height:22px;flex:none}
@@ -131,8 +135,11 @@
     .data-note{margin-top:12px;color:var(--muted);font-size:11px;line-height:1.7}.source-link{color:var(--blue)}
     .inspector-status{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(115,168,255,.08);border:1px solid rgba(115,168,255,.18);font-size:11px;font-weight:800;color:#a8c0eb}.inspector-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.code-block{border:1px solid var(--line);border-radius:18px;background:rgba(6,12,22,.54);padding:16px}.code-label{font-size:11px;font-weight:800;color:var(--subtle);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase}.code-block pre,.code-block ul{margin:0;color:#9fc0ea;font:12px/1.7 'IBM Plex Mono',ui-monospace,monospace;max-height:240px;overflow:auto;white-space:pre-wrap}.code-block ul{padding-left:18px}
     .footer{margin:24px 28px 0;padding:18px 6px 0;color:var(--subtle);font-size:11px;display:flex;justify-content:space-between;gap:14px;border-top:1px solid var(--line)}
-    .toast{position:fixed;right:22px;bottom:22px;z-index:30;display:flex;align-items:center;gap:10px;background:rgba(12,21,37,.92);border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;border-radius:16px;color:#eaf2ff;backdrop-filter:blur(14px)}.toast[hidden]{display:none}.toast-dot{width:9px;height:9px;border-radius:50%;background:#49d8bb;box-shadow:0 0 0 4px rgba(73,216,187,.12)}
-    
+    .toast{position:fixed;right:22px;bottom:22px;z-index:30;display:flex;align-items:center;gap:10px;background:rgba(12,21,37,.92);border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;border-radius:16px;color:#eaf2ff;backdrop-filter:blur(14px)}.toast[hidden]{display:none}.toast-dot{width:9px;height:9px;border-radius:50%;background:#49d8bb;box-shadow:0 0 0 4px rgba(73,216,187,.12)}.toast-dot.warning{background:#d6a144;box-shadow:0 0 0 4px rgba(214,161,68,.14)}
+    .data-table td.table-empty{text-align:center;color:var(--muted);padding:28px 16px}.data-table td.value-pos{color:var(--teal)}.data-table td.value-neg{color:var(--rose)}.data-table td.value-blue{color:var(--blue)}
+    .data-table td.cell-fallback{font-style:italic;opacity:.78}.data-table td.cell-fallback::after{content:'*';margin-left:2px;color:var(--amber);font-style:normal}
+    .kpi-col,.kpi-number,.kpi-year,.kpi-delta{display:block}
+
     ::-webkit-scrollbar{width:10px;height:10px}
     ::-webkit-scrollbar-track{background:rgba(255,255,255,.02)}
     ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(115,168,255,.55),rgba(87,218,203,.4));border-radius:999px;border:2px solid transparent;background-clip:padding-box}
@@ -160,7 +167,7 @@
     .insight-carousel{padding:0;overflow:hidden}
     .insight-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 24px 0}
     .insight-carousel-inner{position:relative;overflow:hidden;padding:18px 24px 22px}
-    .insight-track{display:flex;transition:transform .7s cubic-bezier(.2,.8,.2,1);will-change:transform}
+    .insight-track{display:flex;will-change:transform}
     .insight-slide{min-width:100%;display:grid;grid-template-columns:1.12fr .88fr;gap:18px;align-items:stretch}
     .insight-copy{padding:24px;border-radius:24px;background:linear-gradient(135deg,rgba(15,30,53,.92),rgba(17,50,73,.88));border:1px solid rgba(115,168,255,.14);position:relative;overflow:hidden}
     [data-theme="light"] .insight-copy{background:linear-gradient(135deg,#f9fbff,#eef5ff)}
@@ -186,9 +193,6 @@
     .field-select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 22px) calc(50% - 3px),calc(100% - 16px) calc(50% - 3px);background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:42px}
     .chart-card .card-top{margin-bottom:18px}.chart-card .card-top p{max-width:420px}
     .chart-wrap:before{content:'';position:absolute;inset:0;border-radius:18px;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 38%)}
-    .reveal{opacity:0;transform:translateY(18px);transition:opacity .75s ease,transform .75s cubic-bezier(.2,.8,.2,1)}
-    .reveal.is-visible{opacity:1;transform:none}
-    .tab-btn, .control-action, .icon-button, .kpi-card, .pulse-card, .surface, .page-heading, .executive {will-change:transform}
 
     
     .scroll-progress{position:fixed;top:0;left:0;right:0;height:4px;z-index:60;background:linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.01))}
@@ -233,7 +237,7 @@
 
     @media(max-width:1400px){.executive-grid,.insight-slide{grid-template-columns:1fr}.pulse-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fx-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.charts-grid{grid-template-columns:1fr}.charts-grid.half{grid-template-columns:1fr 1fr}}
     @media(max-width:1120px){.app-shell{grid-template-columns:88px minmax(0,1fr)}.topbar{margin:0 12px;padding-left:20px;padding-right:20px}.content{padding:24px 16px 0}.footer{margin-left:16px;margin-right:16px}.page-heading{padding:28px 26px 48px}.filter-bar{padding:16px;flex-wrap:wrap}.filter-group{flex:1 1 calc(50% - 14px)}.sim-layout{grid-template-columns:1fr}.selector-summary,.pulse-strip{grid-template-columns:1fr 1fr}.fx-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:760px){.app-shell{display:block}.sidebar{display:none}.topbar{margin:0;padding:16px 16px 14px}.top-title{font-size:20px}.crumb{display:none}.api-indicator{max-width:165px;overflow:hidden;text-overflow:ellipsis;padding:9px 11px;font-size:10px}.api-indicator span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mobile-nav{display:flex;position:sticky;top:74px;z-index:21;gap:8px;padding:10px 16px;background:rgba(7,14,25,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}.mobile-nav::-webkit-scrollbar{display:none}.mobile-nav .tab-btn{width:auto;flex:none;padding:11px 14px;min-height:auto;gap:7px;font-size:11px;color:var(--muted);border-color:var(--line);background:rgba(255,255,255,.02)}.mobile-nav .tab-btn svg{width:15px;height:15px}.mobile-nav .tab-btn.is-active{color:white;border-color:rgba(115,168,255,.4);background:rgba(115,168,255,.16)}.mobile-nav .tab-btn.is-active:before{display:none}.content{padding:18px 14px 0}.page-heading{display:block;border-radius:24px;padding:24px 20px 40px}.page-heading h1{font-size:29px}.page-heading p{font-size:13px}.page-badge{display:none}.hero-scroll-cue{left:20px;bottom:12px;padding:10px 12px}.filter-bar{margin-top:-26px;border-radius:18px;padding:12px;gap:10px}.filter-group{flex-basis:100%}.control-action,.field-select{height:46px;font-size:13px}.executive-grid{grid-template-columns:1fr}.executive{display:block;padding:20px;border-radius:20px}.executive-actions{margin-top:18px}.ghost-light{width:100%}.selector-summary,.pulse-strip{grid-template-columns:1fr}.summary-mini,.pulse-card{padding:15px}.insight-head{padding:18px 18px 0;display:block}.carousel-controls{margin-top:12px;justify-content:space-between}.insight-carousel-inner{padding:14px 18px 18px}.insight-slide{grid-template-columns:1fr}.insight-copy,.signal-board{padding:18px;border-radius:20px}.section-top{display:block}.text-chip{display:inline-flex;margin-top:10px}.kpi-grid{grid-template-columns:1fr;gap:12px}.kpi-card{padding:18px;min-height:170px}.kpi-top{display:block}.kpi-number{font-size:29px}.status-pill{position:absolute;top:16px;right:16px;font-size:8px;padding:5px 7px}.kpi-title{max-width:calc(100% - 72px)}.kpi-spark{display:none}.chart-card,.decisions-card,.soft-panel,.sim-block{padding:18px}.chart-wrap,.chart-wrap.tall{height:250px}.card-top{flex-wrap:wrap}.card-top .field-select{max-width:none;width:100%}.fx-grid,.charts-grid.half,.sim-results,.inspector-grid{grid-template-columns:1fr}.result-card{display:flex;justify-content:space-between;align-items:center;gap:12px}.result-number{font-size:20px}.result-delta{text-align:right}.data-actions{width:100%;flex-wrap:wrap}.data-actions .search-box{flex:1}.data-actions .search-box input{width:100%;min-width:85px}.footer{margin:22px 14px 0;flex-wrap:wrap}.toast{right:14px;bottom:14px;left:14px}}
+    @media(max-width:760px){.app-shell{display:block}.sidebar{display:none}.topbar{margin:0;padding:16px 16px 14px}.top-title{font-size:20px}.crumb{display:none}.api-indicator{max-width:165px;overflow:hidden;text-overflow:ellipsis;padding:9px 11px;font-size:10px}.api-indicator span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mobile-nav{display:flex;position:sticky;top:var(--topbar-h,74px);z-index:21;gap:8px;padding:10px 16px;background:rgba(7,14,25,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}.mobile-nav::-webkit-scrollbar{display:none}.mobile-nav .tab-btn{width:auto;flex:none;padding:11px 14px;min-height:auto;gap:7px;font-size:11px;color:var(--muted);border-color:var(--line);background:rgba(255,255,255,.02)}.mobile-nav .tab-btn svg{width:15px;height:15px}.mobile-nav .tab-btn.is-active{color:white;border-color:rgba(115,168,255,.4);background:rgba(115,168,255,.16)}.mobile-nav .tab-btn.is-active:before{display:none}.content{padding:18px 14px 0}.page-heading{display:block;border-radius:24px;padding:24px 20px 40px}.page-heading h1{font-size:29px}.page-heading p{font-size:13px}.page-badge{display:none}.hero-scroll-cue{left:20px;bottom:12px;padding:10px 12px}.filter-bar{margin-top:-26px;border-radius:18px;padding:12px;gap:10px}.filter-group{flex-basis:100%}.control-action,.field-select{height:46px;font-size:13px}.executive-grid{grid-template-columns:1fr}.executive{display:block;padding:20px;border-radius:20px}.executive-actions{margin-top:18px}.ghost-light{width:100%}.selector-summary,.pulse-strip{grid-template-columns:1fr}.summary-mini,.pulse-card{padding:15px}.insight-head{padding:18px 18px 0;display:block}.carousel-controls{margin-top:12px;justify-content:space-between}.insight-carousel-inner{padding:14px 18px 18px}.insight-slide{grid-template-columns:1fr}.insight-copy,.signal-board{padding:18px;border-radius:20px}.section-top{display:block}.text-chip{display:inline-flex;margin-top:10px}.kpi-grid{grid-template-columns:1fr;gap:12px}.kpi-card{padding:18px;min-height:170px}.kpi-top{display:block}.kpi-number{font-size:29px}.status-pill{position:absolute;top:16px;right:16px;font-size:8px;padding:5px 7px}.kpi-title{max-width:calc(100% - 72px)}.kpi-spark{display:none}.chart-card,.decisions-card,.soft-panel,.sim-block{padding:18px}.chart-wrap,.chart-wrap.tall{height:250px}.card-top{flex-wrap:wrap}.card-top .field-select{max-width:none;width:100%}.fx-grid,.charts-grid.half,.sim-results,.inspector-grid{grid-template-columns:1fr}.result-card{display:flex;justify-content:space-between;align-items:center;gap:12px}.result-number{font-size:20px}.result-delta{text-align:right}.data-actions{width:100%;flex-wrap:wrap}.data-actions .search-box{flex:1}.data-actions .search-box input{width:100%;min-width:85px}.footer{margin:22px 14px 0;flex-wrap:wrap}.toast{right:14px;bottom:14px;left:14px}}
     @media print{body{background:white;color:#111}body::before,.sidebar,.mobile-nav,.top-right,.filter-bar,.executive-actions,.data-actions,.footer,.toast{display:none!important}.app-shell{display:block}.topbar,.content{padding:10px 0;margin:0;background:#fff}.surface,.kpi-card,.page-heading,.executive{box-shadow:none;background:#fff;color:#111;border-color:#ddd;break-inside:avoid}.page-heading h1,.top-title,.section-title,.card-top h3,.kpi-number,.executive h2{color:#111}.page-heading p,.executive p,.section-sub,.data-note,.card-top p{color:#444}.chart-card{break-inside:avoid}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
@@ -261,19 +265,13 @@
 <div class="app-shell">
  <aside class="sidebar" aria-label="Navegación principal">
   <div class="brand">
-    <span class="brand-logo"><svg fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 17.5 9 11l4 4 7-9"/><path d="M14.5 6H20v5.5"/><path d="M3 21h18"/></svg></span>
-    <div><div class="brand-name">macro<span>scope.</span></div><div class="brand-caption">ECONOMIC INTELLIGENCE</div></div>
+    <span class="brand-logo" role="img" aria-label="MacroScope"><svg fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.5 9 11l4 4 7-9"/><path d="M14.5 6H20v5.5"/><path d="M3 21h18"/></svg></span>
   </div>
-  <div class="nav-label">Espacio de trabajo</div>
   <nav class="side-nav" aria-label="Secciones del dashboard">
-   <button class="tab-btn is-active" type="button" data-tab="overview" aria-current="page"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-grid"/></svg><span class="nav-text">Panorama ejecutivo</span><svg class="nav-arrow" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-chevron"/></svg></button>
-   <button class="tab-btn" type="button" data-tab="simulator"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-wallet"/></svg><span class="nav-text">Divisas y simulador</span><svg class="nav-arrow" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-chevron"/></svg></button>
-   <button class="tab-btn" type="button" data-tab="data"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg><span class="nav-text">Datos e inspector API</span><svg class="nav-arrow" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-chevron"/></svg></button>
+   <button class="tab-btn is-active" type="button" data-tab="overview" aria-current="page" title="Panorama ejecutivo"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-grid"/></svg><span class="nav-text">Panorama ejecutivo</span></button>
+   <button class="tab-btn" type="button" data-tab="simulator" title="Divisas y simulador"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-wallet"/></svg><span class="nav-text">Divisas y simulador</span></button>
+   <button class="tab-btn" type="button" data-tab="data" title="Datos e inspector API"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-database"/></svg><span class="nav-text">Datos e inspector API</span></button>
   </nav>
-  <div class="sidebar-bottom">
-   <div class="source-block"><div class="source-overline">Origen de los datos</div><div class="source-title"><svg fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-shield"/></svg>World Bank Open Data</div><div class="source-text">Indicadores macroeconómicos anuales del WDI. Cotizaciones cambiarias referenciales mediante Open ER API.</div></div>
-   <div class="side-footer"><span>MACROSCOPE</span><span>2026</span></div>
-  </div>
  </aside>
  <div class="workspace">
   <header class="topbar">
@@ -293,7 +291,7 @@
      <div class="page-heading"><div><div class="eyebrow">OBSERVATORIO MACROECONÓMICO</div><h1>Inteligencia para decidir mejor.</h1><p>Una lectura clara de la economía, sus tendencias y su posición frente a los mercados de referencia.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-calendar"/></svg><span id="headingPeriod">Serie anual · 2014–2024</span></div><button class="hero-scroll-cue" id="heroScrollCue" type="button" aria-label="Desplazarse hacia el contenido principal"><span class="cue-dot"></span><span>Explorar análisis</span></button></div>
      <div class="filter-bar" id="overviewFilters" aria-label="Filtros globales">
       <div class="filter-group main-country"><label class="control-label" for="countrySelect">ECONOMÍA PRINCIPAL</label><select class="field-select" id="countrySelect"><option value="PER">🇵🇪 Perú</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="USA">🇺🇸 Estados Unidos</option></select></div>
-      <div class="filter-group"><label class="control-label" for="benchmarkSelect">COMPARAR CON</label><select class="field-select" id="benchmarkSelect"><option value="LCN">🌎 América Latina y el Caribe</option><option value="USA">🇺🇸 Estados Unidos</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="PER">🇵🇪 Perú</option></select></div>
+      <div class="filter-group"><label class="control-label" for="benchmarkSelect">COMPARAR CON</label><select class="field-select" id="benchmarkSelect"><option value="LCN">🌎 América Latina y el Caribe</option><option value="USA">🇺🇸 Estados Unidos</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="PER">🇵🇪 Perú</option></select></div>
       <div class="filter-group"><label class="control-label" for="periodSelect">PERIODO DE ANÁLISIS</label><select class="field-select" id="periodSelect"><option value="5">Últimos 5 años disponibles</option><option value="10" selected>Últimos 10 años disponibles</option><option value="all">Toda la serie (2014 en adelante)</option></select></div>
       <button type="button" id="syncApiBtn" class="control-action primary"><svg id="syncIcon" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg><span>Actualizar datos</span></button>
      </div>
@@ -333,7 +331,7 @@
      <div class="sim-layout">
       <article class="surface sim-block reveal"><div class="card-top"><div><h3>Configura tu escenario</h3><p>Ajusta parámetros y observa los resultados al instante.</p></div><button type="button" id="resetSimBtn" class="control-action" style="height:32px;padding:0 10px;font-size:10px">Restablecer</button></div>
        <div class="sim-section-heading">01 · Estructura operativa</div>
-       <div class="sim-field"><div class="sim-label"><label for="simRevenueInput">Ingresos anuales (miles de US$)</label><output class="sim-value" id="simRevenueVal">10.000 K</output></div><input class="sim-range" id="simRevenueInput" aria-label="Ingresos anuales base" type="range" min="1000" max="100000" step="1000" value="10000"><div class="sim-hint">Base para la simulación</div></div>
+       <div class="sim-field"><div class="sim-label"><label for="simRevenueInput">Ingresos anuales (miles, <span id="simCurrencyLabel">PEN</span>)</label><output class="sim-value" id="simRevenueVal">10.000 K</output></div><input class="sim-range" id="simRevenueInput" aria-label="Ingresos anuales base" type="range" min="1000" max="100000" step="1000" value="10000"><div class="sim-hint">Base para la simulación</div></div>
        <div class="sim-field"><div class="sim-label"><label for="simMarginInput">Margen EBITDA base</label><output class="sim-value" id="simMarginVal">22,0%</output></div><input class="sim-range" id="simMarginInput" type="range" min="5" max="50" step="0.5" value="22"></div>
        <div class="sim-field"><div class="sim-label"><label for="simUsdCostInput">Costos expuestos al dólar</label><output class="sim-value" id="simUsdCostVal">35%</output></div><input class="sim-range" id="simUsdCostInput" type="range" min="0" max="100" step="5" value="35"></div>
        <div class="sim-section-heading" style="margin-top:19px">02 · Supuestos macroeconómicos</div>
@@ -344,7 +342,7 @@
       <article class="surface sim-block reveal"><div class="card-top"><div><h3>Resultado de la simulación</h3><p>Comparación entre el escenario base y la proyección hipotética.</p></div><span class="status-pill neutral">EXPERIMENTAL</span></div>
        <div class="sim-results"><div class="result-card"><div><div class="result-label">Ingresos proyectados</div><div class="result-number" id="simOutRev">—</div></div><div class="result-delta" id="simOutRevDelta">—</div></div><div class="result-card"><div><div class="result-label">EBITDA proyectado</div><div class="result-number" id="simOutEbitda">—</div></div><div class="result-delta" id="simOutEbitdaDelta">—</div></div><div class="result-card"><div><div class="result-label">Margen EBITDA</div><div class="result-number" id="simOutMargin">—</div></div><div class="result-delta" id="simOutMarginDelta">—</div></div></div>
        <div class="chart-wrap" style="height:315px;margin-top:22px"><canvas id="simChart" role="img" aria-label="Comparación de ingresos, costos y EBITDA por escenario"></canvas></div>
-       <div class="sim-disclaimer"><svg fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-info"/></svg><span>Modelo ilustrativo: sensibilidad de ingresos al PBI (1,15), traslado parcial de inflación a precios (65%) y ajuste de costos por inflación y divisas. Los parámetros son supuestos, no estimaciones econométricas ni pronósticos validados.</span></div>
+       <div class="sim-disclaimer"><svg fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-info"/></svg><span>Modelo ilustrativo expresado en <strong>moneda local</strong>: sensibilidad de ingresos al PBI (1,15), traslado parcial de inflación a precios (65%); los costos locales se ajustan por inflación y los costos dolarizados se reexpresan en moneda local según la variación cambiaria. Los parámetros son supuestos, no estimaciones econométricas ni pronósticos validados.</span></div>
       </article>
      </div>
    </section>
@@ -352,7 +350,8 @@
     <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD Y EXPLORACIÓN</div><h1>Datos claros. Fuentes visibles.</h1><p>Explora la serie anual, exporta observaciones y consulta los endpoints solicitados a las fuentes públicas.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Banco Mundial · WDI</div></div>
     <article class="surface soft-panel"><div class="card-top" style="flex-wrap:wrap"><div><h3>Histórico de indicadores</h3><p id="tableCountrySubtitle">Datos anuales de la economía seleccionada, por indicador y año.</p></div><div class="data-actions"><label class="search-box"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-search"/></svg><input id="tableSearchInput" type="search" placeholder="Filtrar por año" aria-label="Filtrar filas por año"></label><button class="control-action primary" id="exportCsvBtn" type="button"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-download"/></svg>Exportar CSV</button></div></div>
       <div class="data-table-wrap"><table class="data-table"><thead><tr><th>Año</th><th>Crecimiento PBI<br>(% anual)</th><th>Inflación IPC<br>(% anual)</th><th>Desempleo<br>(%)</th><th>PBI per cápita<br>(US$ corrientes)</th><th>Exportaciones<br>(% del PBI)</th><th>Cuenta corriente<br>(% del PBI)</th></tr></thead><tbody id="macroTableBody"></tbody></table></div>
-      <div class="data-note">N/D indica un registro no disponible. Algunas cifras proceden del respaldo incorporado cuando no se logra consultar la API; la información puede ser revisada posteriormente por el proveedor.</div>
+      <div class="data-note" id="tableProvenanceNote">N/D indica un registro no disponible. Las celdas en cursiva con <span style="color:var(--amber)">*</span> proceden del respaldo local incorporado (no confirmadas por la API en esta sesión); el resto fue devuelto por el API del Banco Mundial. El proveedor puede revisar las cifras posteriormente.</div>
+      <div class="data-note"><strong>Notas metodológicas.</strong> Inflación (FP.CPI.TOTL.ZG): variación del IPC <em>promedio anual</em>; no equivale a la variación diciembre–diciembre que usan los bancos centrales (p. ej., el BCRP) para evaluar su meta. Desempleo (SL.UEM.TOTL.ZS): estimación <em>modelada de la OIT</em> a nivel nacional; no es comparable con la tasa de Lima Metropolitana publicada por el INEI.</div>
     </article>
     <article class="surface soft-panel"><div class="card-top"><div><h3>Inspector de consultas y respuestas</h3><p>EndPoints REST consultados y muestra de la respuesta JSON recibida.</p></div><span class="inspector-status" id="inspectorLatencyBadge">API REST v2</span></div><div class="inspector-grid"><div class="code-block"><div class="code-label">Solicitudes recientes</div><ul id="endpointList"></ul></div><div class="code-block"><div class="code-label">Ejemplo de respuesta</div><pre id="rawJsonPreview">Sincronizando...</pre></div></div><p class="data-note">Proveedor principal: <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" class="source-link">World Bank Open Data</a>. Fuente de divisas: <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer" class="source-link">ExchangeRate-API</a>. Estos datos no constituyen una cotización oficial del banco central.</p></article>
    </section>
@@ -362,9 +361,10 @@
 </div>
 <div class="toast" id="toastContainer" role="status" aria-live="polite" hidden><span class="toast-dot" id="toastIcon"></span><span id="toastMessage">Actualizado</span></div>
 <script>
-/* Lightweight, self-contained chart renderer. Used when remote Chart.js is unavailable. */
+/* Lightweight, self-contained chart renderer. Used when remote Chart.js is unavailable.
+   Chart.js loads with `defer`, so the decision is taken on DOMContentLoaded (deferred scripts run before it).
+   This listener is registered before the app's own DOMContentLoaded handler, so it always runs first. */
 (function(){
- if(typeof window.Chart !== 'undefined') return;
  class ChartFallback {
   constructor(canvas,config){
    this.canvas=canvas;this.config=config;this.ctx=canvas.getContext('2d');this.destroyed=false;
@@ -490,9 +490,11 @@
    this.tooltip.style.left=`${Math.max(2,Math.min(canvasRect.width-tw-2,x+12))}px`;
    this.tooltip.style.top=`${Math.max(2,Math.min(canvasRect.height-th-2,y-th-8))}px`;
   }
+  get data(){return this.config.data;}
+  update(){this.render();}
   destroy(){this.destroyed=true;this.ro?.disconnect();this.canvas.removeEventListener('mousemove',this.mouseHandler);this.canvas.removeEventListener('mouseleave',this.leaveHandler);this.tooltip.remove();}
  }
- window.Chart=ChartFallback;
+ window.addEventListener('DOMContentLoaded',()=>{if(typeof window.Chart==='undefined')window.Chart=ChartFallback;});
 })();
 
 </script>
@@ -524,7 +526,7 @@
       'FP.CPI.TOTL.ZG': {
         code: 'FP.CPI.TOTL.ZG',
         title: 'Inflación (IPC)',
-        unit: '% anual',
+        unit: '% anual (promedio)',
         decimals: 1,
         prefix: '',
         suffix: '%',
@@ -534,7 +536,7 @@
       'SL.UEM.TOTL.ZS': {
         code: 'SL.UEM.TOTL.ZS',
         title: 'Tasa de Desempleo',
-        unit: '% fuerza laboral',
+        unit: '% fuerza laboral (OIT, modelado)',
         decimals: 1,
         prefix: '',
         suffix: '%',
@@ -575,7 +577,21 @@
 
     const YEARS = Array.from({length: new Date().getFullYear() - 2013}, (_, i) => String(2014 + i));
 
-    // Verified World Bank historical figures for instant availability & fallback resilience
+    // Inflation targets of each central bank (center ± tolerance, in %). Used to classify the latest CPI reading.
+    // Caveat: WDI reports the annual-average CPI change while targets are assessed on 12-month (Dec–Dec) inflation.
+    // USA: the Fed's 2% target is a point target on PCE inflation; ±1 pp is only a display band. LCN has no target.
+    const INFLATION_TARGETS = {
+      PER: { center: 2, tolerance: 1, bank: 'BCRP' },
+      CHL: { center: 3, tolerance: 1, bank: 'BCCh' },
+      COL: { center: 3, tolerance: 1, bank: 'BanRep' },
+      MEX: { center: 3, tolerance: 1, bank: 'Banxico' },
+      BRA: { center: 3, tolerance: 1.5, bank: 'BCB' },
+      USA: { center: 2, tolerance: 1, bank: 'Fed' }
+    };
+
+    // Local fallback transcribed from World Bank WDI so the dashboard renders offline.
+    // These figures have NOT been re-verified against the live API (some 2024 values may be preliminary
+    // estimates); every cell served from here is flagged as "fallback" in the UI and in the CSV export.
     const FALLBACK_DB = {
       PER: {
         'NY.GDP.MKTP.KD.ZG': { 2014: 2.4, 2015: 3.3, 2016: 4.0, 2017: 2.5, 2018: 4.0, 2019: 2.2, 2020: -10.9, 2021: 13.4, 2022: 2.8, 2023: -0.4, 2024: 3.3 },
@@ -647,6 +663,10 @@
     // Deep clone fallback into runtime DB
     const runtimeDB = JSON.parse(JSON.stringify(FALLBACK_DB));
     const runtimeFX = JSON.parse(JSON.stringify(FALLBACK_FX));
+    // Per-cell provenance: runtimeSource[country][indicator][year] === 'wdi' when the live API returned it.
+    // Anything absent here is served from FALLBACK_DB.
+    const runtimeSource = {};
+    const cellSource = (country, code, year) => runtimeSource[country]?.[code]?.[year] === 'wdi' ? 'wdi' : 'fallback';
 
     // App State
     const state = {
@@ -721,7 +741,7 @@
       document.documentElement.dataset.theme = mode;
       document.getElementById('themeIcon')?.setAttribute('href', mode==='dark' ? '#i-sun' : '#i-moon');
       try {localStorage.setItem('macroscope_theme',mode);} catch(e) {}
-      renderCharts(); updateSimulation();
+      renderCharts(); updateSimulation(true);
     }
     function chartTheme() {
       const vars = getComputedStyle(document.documentElement);
@@ -735,12 +755,21 @@
     }
 
 
-    function determineTone(indicatorCode, value) {
+    function determineTone(indicatorCode, value, countryCode = state.country) {
       const dir = INDICATORS[indicatorCode].goodDirection;
       if (!Number.isFinite(value)) return {label:'Sin dato', cls:'neutral'};
       if (indicatorCode === 'FP.CPI.TOTL.ZG') {
-        if (value <= 3.5) return {label:'Estable', cls:'positive'};
-        if (value <= 6) return {label:'Vigilancia', cls:'warning'};
+        const target = INFLATION_TARGETS[countryCode];
+        if (!target) {
+          // No inflation target (regional aggregate): generic thresholds.
+          if (value <= 3.5) return {label:'Estable', cls:'positive'};
+          if (value <= 6) return {label:'Vigilancia', cls:'warning'};
+          return {label:'Presión', cls:'negative'};
+        }
+        const low = target.center - target.tolerance, high = target.center + target.tolerance;
+        if (value < low) return {label:'Bajo meta', cls:'warning'};
+        if (value <= high) return {label:'En meta', cls:'positive'};
+        if (value <= high + 2) return {label:'Sobre meta', cls:'warning'};
         return {label:'Presión', cls:'negative'};
       }
       if (indicatorCode === 'SL.UEM.TOTL.ZS') {
@@ -753,8 +782,16 @@
         if (value >= -2.5) return {label:'Manejable', cls:'warning'};
         return {label:'Déficit', cls:'negative'};
       }
+      // Level indicators that are never negative: a sign-based rating carries no information.
+      if (indicatorCode === 'NY.GDP.PCAP.CD' || indicatorCode === 'NE.EXP.GNFS.ZS') return {label:'Nivel', cls:'neutral'};
       if (dir === 'high') return value >= 0 ? {label:'Favorable', cls:'positive'} : {label:'Débil', cls:'negative'};
       return value <= 0 ? {label:'Favorable', cls:'positive'} : {label:'Presión', cls:'warning'};
+    }
+    function inflationTargetText(countryCode){
+      const t=INFLATION_TARGETS[countryCode];
+      if(!t) return 'Sin meta de inflación de referencia';
+      const fmt=n=>n.toLocaleString('es-PE',{maximumFractionDigits:1});
+      return `Meta ${t.bank}: ${fmt(t.center)}% ± ${fmt(t.tolerance)} pp`;
     }
     function renderHeroPanels(){
       const gdp=getLatestYearAndValue(state.country,'NY.GDP.MKTP.KD.ZG');
@@ -764,7 +801,7 @@
       const benchmark=COUNTRIES[state.benchmark];
       const pulse=[
         {label:'Crecimiento anual', code:'NY.GDP.MKTP.KD.ZG', item:gdp, foot:`Comparado con ${benchmark.name}`},
-        {label:'Inflación anual', code:'FP.CPI.TOTL.ZG', item:inf, foot:'Ritmo de precios al consumidor'},
+        {label:'Inflación anual', code:'FP.CPI.TOTL.ZG', item:inf, foot:inflationTargetText(state.country)},
         {label:'Cuenta corriente', code:'BN.CAB.XOKA.GD.ZS', item:cab, foot:'Balance del frente externo'}
       ];
       const pulseStrip=document.getElementById('pulseStrip');
@@ -826,33 +863,58 @@
         }
       ];
     }
+    const carouselPause=new Set();
+    const reducedMotionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
+    // Rebuilds slide content; only needed when the underlying data or selection changes.
     function renderInsightCarousel(resetIndex=false){
       const track=document.getElementById('insightTrack');
       const dots=document.getElementById('carouselDots');
       if(!track || !dots) return;
       const slides=buildInsightSlides();
       if(resetIndex) state.carouselIndex=0;
-      if(state.carouselIndex>=slides.length) state.carouselIndex=0;
-      track.innerHTML=slides.map((slide,i)=>`<div class="insight-slide"><div class="insight-copy premium-ring"><div class="insight-overline">${slide.overline}</div><h3 class="insight-title">${slide.title}</h3><p class="insight-text">${slide.text}</p><div class="insight-meta">${slide.chips.map(c=>`<span class="meta-chip">${c}</span>`).join('')}</div></div><div class="insight-side"><div class="signal-board premium-ring"><div class="signal-header"><div><strong>Radar ejecutivo</strong><span>Lecturas resumidas del país seleccionado</span></div><span class="text-chip">Slide ${i+1}/${slides.length}</span></div><div class="signal-list">${slide.signals.map(([k,v,s])=>`<div class="signal-item"><div class="signal-key"><strong>${k}</strong><span>${s}</span></div><div class="signal-value">${v}</div></div>`).join('')}</div></div><div class="data-note" style="margin-top:0">La narrativa se actualiza automáticamente cuando cambias de país, benchmark o periodo.</div></div></div>`).join('');
-      dots.innerHTML=slides.map((_,i)=>`<button type="button" class="carousel-dot ${i===state.carouselIndex?'is-active':''}" data-index="${i}" aria-label="Ir a slide ${i+1}"></button>`).join('');
+      track.innerHTML=slides.map((slide,i)=>`<div class="insight-slide" role="group" aria-roledescription="slide" aria-label="${i+1} de ${slides.length}"><div class="insight-copy premium-ring"><div class="insight-overline">${slide.overline}</div><h3 class="insight-title">${slide.title}</h3><p class="insight-text">${slide.text}</p><div class="insight-meta">${slide.chips.map(c=>`<span class="meta-chip">${c}</span>`).join('')}</div></div><div class="insight-side"><div class="signal-board premium-ring"><div class="signal-header"><div><strong>Radar ejecutivo</strong><span>Lecturas resumidas del país seleccionado</span></div><span class="text-chip">Slide ${i+1}/${slides.length}</span></div><div class="signal-list">${slide.signals.map(([k,v,s])=>`<div class="signal-item"><div class="signal-key"><strong>${k}</strong><span>${s}</span></div><div class="signal-value">${v}</div></div>`).join('')}</div></div><div class="data-note" style="margin-top:0">La narrativa se actualiza automáticamente cuando cambias de país, benchmark o periodo.</div></div></div>`).join('');
+      dots.innerHTML=slides.map((_,i)=>`<button type="button" class="carousel-dot" data-index="${i}" aria-label="Ir a slide ${i+1}"></button>`).join('');
+      goToSlide(state.carouselIndex);
+    }
+    // Moves between already-rendered slides without touching their markup.
+    function goToSlide(index){
+      const track=document.getElementById('insightTrack');
+      const slides=track?[...track.children]:[];
+      if(!slides.length) return;
+      state.carouselIndex=((index%slides.length)+slides.length)%slides.length;
       track.style.transform=`translateX(-${state.carouselIndex*100}%)`;
-      dots.querySelectorAll('.carousel-dot').forEach(btn=>btn.addEventListener('click',()=>{state.carouselIndex=Number(btn.dataset.index);renderInsightCarousel();restartCarouselAuto();}));
+      slides.forEach((el,i)=>el.setAttribute('aria-hidden',String(i!==state.carouselIndex)));
+      document.querySelectorAll('#carouselDots .carousel-dot').forEach((btn,i)=>{
+        btn.classList.toggle('is-active',i===state.carouselIndex);
+        if(i===state.carouselIndex)btn.setAttribute('aria-current','true');else btn.removeAttribute('aria-current');
+      });
     }
-    function moveCarousel(step=1){
-      const count=buildInsightSlides().length;
-      state.carouselIndex=(state.carouselIndex+step+count)%count;
-      renderInsightCarousel();
-    }
+    function moveCarousel(step=1){goToSlide(state.carouselIndex+step);}
+    // Autoplay only while the carousel is visible, not hovered/focused and motion is allowed (WCAG 2.2.2).
     function restartCarouselAuto(){
       clearInterval(state.carouselTimer);
+      state.carouselTimer=null;
+      if(reducedMotionQuery.matches || carouselPause.size || document.hidden || state.activeTab!=='overview') return;
       state.carouselTimer=setInterval(()=>moveCarousel(1),6500);
     }
-    function setupCarouselGestures(){
+    function setupCarousel(){
       const box=document.getElementById('insightCarousel');
       if(!box) return;
       let startX=0;
       box.addEventListener('touchstart',e=>{startX=e.changedTouches[0].clientX;},{passive:true});
       box.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-startX; if(Math.abs(dx)>40){moveCarousel(dx>0?-1:1); restartCarouselAuto();}},{passive:true});
+      document.getElementById('carouselDots')?.addEventListener('click',e=>{
+        const btn=e.target.closest('.carousel-dot');
+        if(btn){goToSlide(Number(btn.dataset.index));restartCarouselAuto();}
+      });
+      const pause=reason=>{carouselPause.add(reason);restartCarouselAuto();};
+      const resume=reason=>{carouselPause.delete(reason);restartCarouselAuto();};
+      box.addEventListener('mouseenter',()=>pause('hover'));
+      box.addEventListener('mouseleave',()=>resume('hover'));
+      box.addEventListener('focusin',()=>pause('focus'));
+      box.addEventListener('focusout',e=>{if(!box.contains(e.relatedTarget))resume('focus');});
+      document.addEventListener('visibilitychange',restartCarouselAuto);
+      reducedMotionQuery.addEventListener?.('change',restartCarouselAuto);
     }
 
     function updateScrollProgress(){
@@ -926,6 +988,7 @@
                   runtimeDB[code] ||= {};
                   runtimeDB[code][ind] ||= {};
                   runtimeDB[code][ind][yr]=Number(entry.value);
+                  ((runtimeSource[code] ||= {})[ind] ||= {})[yr]='wdi';
                 }
               });
             }).catch(()=>null);
@@ -1000,13 +1063,15 @@
         const benchmark=getLatestYearAndValue(state.benchmark,code);
         const prevDelta=Number.isFinite(latest.prevValue)?latest.value-latest.prevValue:null;
         const equalYear=latest.year===benchmark.year;
-        const pill= prevDelta===null ? {text:'Sin referencia',type:'neutral'} : Math.abs(prevDelta)<0.05 ? {text:'Sin cambio',type:'neutral'} : {text:prevDelta>0?'En aumento':'En descenso',type:prevDelta>0?'neutral':'neutral'};
+        const pill= prevDelta===null ? 'Sin referencia' : Math.abs(prevDelta)<0.05 ? 'Sin cambio' : prevDelta>0 ? 'En aumento' : 'En descenso';
+        // Color the change by whether it is good for this indicator (e.g. rising inflation or unemployment is negative).
+        const deltaCls= prevDelta===null || Math.abs(prevDelta)<0.05 ? 'neutral' : (prevDelta>0)===(meta.goodDirection==='high') ? 'positive' : 'negative';
         const card=document.createElement('button');
         card.type='button';
         card.className='kpi-card'+(state.activeIndicator===code?' active-kpi':'');
         card.setAttribute('aria-pressed',String(state.activeIndicator===code));
         card.setAttribute('aria-label',`Explorar ${meta.title}: ${formatValue(latest.value,code)} en ${latest.year}`);
-        card.innerHTML=`<div class="kpi-top"><div><span class="kpi-title">${meta.title}</span><div class="kpi-number">${formatValue(latest.value,code)}</div><div class="kpi-year">Último dato: ${latest.year} · ${meta.unit}</div></div><span class="status-pill ${pill.type}">${pill.text}</span></div><div class="kpi-bottom"><div><div class="kpi-delta ${prevDelta===null?'neutral':prevDelta>=0?'positive':'negative'}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</div><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></div>${sparkSvg(code)}</div>`;
+        card.innerHTML=`<span class="kpi-top"><span class="kpi-col"><span class="kpi-title">${meta.title}</span><span class="kpi-number">${formatValue(latest.value,code)}</span><span class="kpi-year">Último dato: ${latest.year} · ${meta.unit}${cellSource(state.country,code,latest.year)==='fallback'&&latest.year!=='N/D'?' · respaldo local':''}</span></span><span class="status-pill neutral">${pill}</span></span><span class="kpi-bottom"><span class="kpi-col"><span class="kpi-delta ${deltaCls}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</span><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></span>${sparkSvg(code)}</span>`;
         card.addEventListener('click',()=>{state.activeIndicator=code;document.getElementById('indicatorSelectChart').value=code;renderKpiCards();renderCharts();});
         node.appendChild(card);
       });
@@ -1058,7 +1123,8 @@
       container.innerHTML=Object.values(runtimeFX).map(item=>`<div class="fx-card"><div class="fx-caption"><span class="fx-code">USD / ${item.code}</span><span class="fx-flag" aria-hidden="true">${item.flag}</span></div><div class="fx-rate">${item.rate.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="fx-currency">${item.name}</div></div>`).join('');
     }
 
-    function updateSimulation() {
+    let simMoney=n=>String(n);
+    function updateSimulation(rebuildChart=false) {
       const get=(id,fallback)=>Number(document.getElementById(id)?.value ?? fallback);
       const baseRev=get('simRevenueInput',10000), margin=get('simMarginInput',22), dollarShare=get('simUsdCostInput',35)/100;
       const gdp=get('simGdpShock',3), inflation=get('simInfShock',2.8), fx=get('simFxShock',2);
@@ -1070,13 +1136,17 @@
       document.getElementById('simInfShockVal').textContent=`${pct(inflation)}%`;
       document.getElementById('simFxShockVal').textContent=`${fx>0?'+':''}${pct(fx)}%`;
       updateRangeStyles();
+      // All amounts are in local currency (LCU). Local costs follow inflation; USD-denominated costs are
+      // re-expressed in LCU, so a depreciation (fx > 0) raises them proportionally.
+      const currency=COUNTRIES[state.country].currency;
+      document.getElementById('simCurrencyLabel').textContent=currency;
       const baseEBITDA=baseRev*margin/100, baseCosts=baseRev-baseEBITDA;
       const revenue=baseRev*(1+(gdp*1.15+inflation*.65)/100);
-      const costs=baseCosts*(1+(inflation/100)*(1-dollarShare)+(fx/100)*dollarShare);
+      const costs=baseCosts*((1-dollarShare)*(1+inflation/100)+dollarShare*(1+fx/100));
       const ebitda=revenue-costs;
       const newMargin=ebitda/revenue*100;
       const revDelta=(revenue/baseRev-1)*100,ebDelta=(ebitda/baseEBITDA-1)*100,marginBps=Math.round((newMargin-margin)*100);
-      const money=n=> {const abs=Math.abs(n);const amount=abs>=1000 ? `${(abs/1000).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})} MM` : `${Math.round(abs).toLocaleString('es-PE')} mil`;return `${n<0?'−':''}US$ ${amount}`;};
+      const money=n=> {const abs=Math.abs(n);const amount=abs>=1000 ? `${(abs/1000).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})} MM` : `${Math.round(abs).toLocaleString('es-PE')} mil`;return `${n<0?'−':''}${currency} ${amount}`;};
       document.getElementById('simOutRev').textContent=money(revenue);
       document.getElementById('simOutEbitda').textContent=money(ebitda);
       document.getElementById('simOutMargin').textContent=`${pct(newMargin)}%`;
@@ -1084,9 +1154,18 @@
         const el=document.getElementById(id);el.textContent=`${n>0?'+':''}${unit.startsWith('%')?pct(n):n} ${unit}`;el.className=`result-delta ${n>=0?'positive':'negative'}`;
       });
       if(typeof Chart==='undefined')return;
+      simMoney=money;
+      const base=[baseRev,baseCosts,baseEBITDA], simulated=[revenue,costs,ebitda];
+      // Slider drags fire many input events: update the existing chart instead of rebuilding it.
+      if(simChartInstance && !rebuildChart){
+        simChartInstance.data.datasets[0].data=base;
+        simChartInstance.data.datasets[1].data=simulated;
+        simChartInstance.update('none');
+        return;
+      }
       const theme=chartTheme();
       if(simChartInstance)simChartInstance.destroy();
-      simChartInstance=new Chart(document.getElementById('simChart'),{type:'bar',data:{labels:['Ingresos','Costos operativos','EBITDA'],datasets:[{label:'Escenario base',data:[baseRev,baseCosts,baseEBITDA],backgroundColor:'#a7bad0',borderRadius:5,barPercentage:.76},{label:'Escenario simulado',data:[revenue,costs,ebitda],backgroundColor:['#438ce6','#e7a454','#20aaa8'],borderRadius:5,barPercentage:.76}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:theme.ink,usePointStyle:true,pointStyle:'circle',padding:17,font:{family:'DM Sans',size:11}}},tooltip:{backgroundColor:'#142943',padding:12,cornerRadius:9,callbacks:{label(c){return `${c.dataset.label}: ${money(c.parsed.y)}`;}}}},scales:{x:{ticks:{color:theme.ink,font:{family:'DM Sans',size:10}},grid:{display:false},border:{display:false}},y:{ticks:{color:theme.tick,font:{family:'DM Sans',size:10}},grid:{color:theme.grid},border:{display:false}}}}});
+      simChartInstance=new Chart(document.getElementById('simChart'),{type:'bar',data:{labels:['Ingresos','Costos operativos','EBITDA'],datasets:[{label:'Escenario base',data:base,backgroundColor:'#a7bad0',borderRadius:5,barPercentage:.76},{label:'Escenario simulado',data:simulated,backgroundColor:['#438ce6','#e7a454','#20aaa8'],borderRadius:5,barPercentage:.76}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:theme.ink,usePointStyle:true,pointStyle:'circle',padding:17,font:{family:'DM Sans',size:11}}},tooltip:{backgroundColor:'#142943',padding:12,cornerRadius:9,callbacks:{label(c){return `${c.dataset.label}: ${simMoney(c.parsed.y)}`;}}}},scales:{x:{ticks:{color:theme.ink,font:{family:'DM Sans',size:10}},grid:{display:false},border:{display:false}},y:{ticks:{color:theme.tick,font:{family:'DM Sans',size:10}},grid:{color:theme.grid},border:{display:false}}}}});
     }
 
     // ============================================================================
@@ -1100,7 +1179,11 @@
         tbody.innerHTML=rows.map(y=>{
           const codes=Object.keys(INDICATORS);
           const vals=codes.map(code=>runtimeDB[state.country]?.[code]?.[y]);
-          return `<tr><td>${y}</td>${vals.map((val,i)=>`<td class="${i===0||i===5?(Number.isFinite(val)?val>=0?'value-pos':'value-neg':''):i===3?'value-blue':''}">${formatValue(val,codes[i])}</td>`).join('')}</tr>`;
+          return `<tr><td>${y}</td>${vals.map((val,i)=>{
+            const tone=i===0||i===5?(Number.isFinite(val)?val>=0?'value-pos':'value-neg':''):i===3?'value-blue':'';
+            const fallback=Number.isFinite(val)&&cellSource(state.country,codes[i],y)==='fallback';
+            return `<td class="${tone}${fallback?' cell-fallback':''}"${fallback?' title="Respaldo local: no confirmado por la API en esta sesión"':''}>${formatValue(val,codes[i])}</td>`;
+          }).join('')}</tr>`;
         }).join('');
       }
       document.getElementById('endpointList').innerHTML=state.lastEndpoints.length ? state.lastEndpoints.map(url=>`<li>${url.replaceAll('&','&amp;').replaceAll('<','&lt;')}</li>`).join('') : '<li>No se ha realizado ninguna consulta todavía.</li>';
@@ -1108,8 +1191,10 @@
     }
     function exportCsv() {
       const codes=Object.keys(INDICATORS);
-      const headers=['Anio','Pais',...codes.map(k=>k)];
-      const lines=[headers.join(','),...YEARS.filter(y=>codes.some(code=>Number.isFinite(runtimeDB[state.country]?.[code]?.[y]))).reverse().map(y=>[y,`"${COUNTRIES[state.country].name}"`,...codes.map(code=>runtimeDB[state.country]?.[code]?.[y]??'')].join(','))];
+      // Each indicator gets a companion "<code>_fuente" column: wdi (live API) or respaldo (local fallback).
+      const headers=['Anio','Pais',...codes.flatMap(k=>[k,`${k}_fuente`])];
+      const sourceLabel=(code,y)=>Number.isFinite(runtimeDB[state.country]?.[code]?.[y])?(cellSource(state.country,code,y)==='wdi'?'wdi':'respaldo'):'';
+      const lines=[headers.join(','),...YEARS.filter(y=>codes.some(code=>Number.isFinite(runtimeDB[state.country]?.[code]?.[y]))).reverse().map(y=>[y,`"${COUNTRIES[state.country].name}"`,...codes.flatMap(code=>[runtimeDB[state.country]?.[code]?.[y]??'',sourceLabel(code,y)])].join(','))];
       const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
       const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
       a.download=`macroscope_${state.country}_${YEARS[0]}_${YEARS.at(-1)}.csv`;
@@ -1147,6 +1232,17 @@
       document.body.removeChild(ta);
     }
 
+    // A country cannot be compared with itself: disable it in the benchmark list and move away if selected.
+    function syncBenchmarkOptions() {
+      const select=document.getElementById('benchmarkSelect');
+      if(!select) return;
+      [...select.options].forEach(opt=>{opt.disabled=opt.value===state.country;});
+      if(state.benchmark===state.country){
+        state.benchmark=state.country==='LCN'?'USA':'LCN';
+        select.value=state.benchmark;
+      }
+    }
+
     function renderAll() {
       renderExecutiveBanner();renderHeroPanels();renderInsightCarousel(false);renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();updateSimulation();renderDataTableAndInspector();
     }
@@ -1156,6 +1252,7 @@
       choose('countrySelect',state.country,val=>{
         state.country=val;
         try{localStorage.setItem('macro_country',val);}catch(e){}
+        syncBenchmarkOptions();
         const gdp=getLatestYearAndValue(val,'NY.GDP.MKTP.KD.ZG').value;
         const inf=getLatestYearAndValue(val,'FP.CPI.TOTL.ZG').value;
         if(Number.isFinite(gdp))document.getElementById('simGdpShock').value=Math.min(8,Math.max(-5,gdp));
@@ -1163,13 +1260,14 @@
         renderAll();
       });
       choose('benchmarkSelect',state.benchmark,val=>{state.benchmark=val;renderAll();});
+      syncBenchmarkOptions();
       choose('periodSelect',state.period,val=>{state.period=val;renderExecutiveBanner();renderKpiCards();renderCharts();});
       choose('indicatorSelectChart',state.activeIndicator,val=>{state.activeIndicator=val;renderKpiCards();renderCharts();});
       document.getElementById('syncApiBtn').addEventListener('click',()=>syncLiveWorldBankData(true));
       document.getElementById('copyBriefBtn').addEventListener('click',copyExecutiveBrief);
       document.getElementById('exportCsvBtn').addEventListener('click',exportCsv);
       document.getElementById('tableSearchInput').addEventListener('input',e=>{state.tableFilter=e.target.value;renderDataTableAndInspector();});
-      document.querySelectorAll('.sim-range').forEach(el=>el.addEventListener('input',updateSimulation));
+      document.querySelectorAll('.sim-range').forEach(el=>el.addEventListener('input',()=>updateSimulation()));
       document.getElementById('resetSimBtn').addEventListener('click',()=>{
         [['simRevenueInput',10000],['simMarginInput',22],['simUsdCostInput',35],['simFxShock',2]].forEach(([id,v])=>document.getElementById(id).value=v);
         const gdp=getLatestYearAndValue(state.country,'NY.GDP.MKTP.KD.ZG').value;
@@ -1181,6 +1279,7 @@
       function selectTab(target){
         if(!['overview','simulator','data'].includes(target))return;
         state.activeTab=target;
+        restartCarouselAuto();
         document.querySelectorAll('.tab-btn').forEach(b=>{
           const current=b.dataset.tab===target;
           b.classList.toggle('is-active',current);
@@ -1201,8 +1300,13 @@
       document.documentElement.dataset.theme = mode === 'light' ? 'light' : 'dark';
       document.getElementById('themeIcon').setAttribute('href', mode === 'light' ? '#i-moon' : '#i-sun');
       document.querySelectorAll('.reveal').forEach((el,i)=>el.style.setProperty('--reveal-delay', `${Math.min(i*70,420)}ms`));
-      renderAll(); updateScrollProgress(); setupRevealAnimations(); setupCarouselGestures(); setupHeroScrollCue(); setupParallaxCards(); restartCarouselAuto(); syncLiveWorldBankData(false);
+      renderAll(); updateScrollProgress(); setupRevealAnimations(); setupCarousel(); setupHeroScrollCue(); setupParallaxCards(); restartCarouselAuto(); syncLiveWorldBankData(false);
       window.addEventListener('scroll', updateScrollProgress, {passive:true});
+      // Keep the sticky mobile nav right below the topbar, whatever its rendered height.
+      const topbar=document.querySelector('.topbar');
+      if(topbar && typeof ResizeObserver!=='undefined'){
+        new ResizeObserver(()=>document.documentElement.style.setProperty('--topbar-h',`${topbar.offsetHeight}px`)).observe(topbar);
+      }
     });
 
 
