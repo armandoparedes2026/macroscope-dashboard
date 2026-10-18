@@ -31,7 +31,8 @@ Fecha: 2026-10-18. Base: `origin/main` 7631444. Coordinador: Claude Code.
 | F11 | Narrativa de la UI no explica el aislamiento completo de shocks de NX bajo flotación (propiedad de la especificación). | Baja | Medio | Bajo | Fase laboratorio |
 | F12 | Tipos de cambio de Open ER API: agregador no oficial; correcto que se etiquete como indicativo. | Baja | Bajo | — | Mantener etiqueta |
 | F13 | `package.json`/README/`index.html` aún usan el posicionamiento «inteligencia/observatorio para decidir». | Baja | Medio | Bajo | Fase UI |
-| F14 | El workflow `validate.yml` solo ejecuta `tests/smoke.mjs`; las pruebas unitarias y e2e no corren en CI. | Media | — | Bajo | Codex 1 |
+| F14 | ~~El workflow `validate.yml` solo ejecuta smoke~~ **Corrección del coordinador**: esa lectura correspondía a 0df3892; en 7631444 `validate.yml` ya ejecutaba smoke, unitarias y e2e. Codex 1 lo simplificó a `npm test`. El deploy (`vercel-deploy.yml`) solo ejecuta smoke antes de publicar. | Baja | — | — | — |
+| F15 | A 360 px la insignia de estado («Respaldo local — no act…») queda recortada y la topbar translúcida deja ver el texto del hero detrás (captura de Codex 1). | Baja | Bajo | Bajo | Fase laboratorio/UI |
 
 ## Plan por fases y asignación (Orca)
 
