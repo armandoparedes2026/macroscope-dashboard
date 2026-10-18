@@ -5,7 +5,46 @@
   const ISLM = M.ISLM = globalThis.ISLM;
   // Resolve cross-view callbacks when invoked, after every deferred script has loaded.
   const axisRange = (...args) => M.axisRange(...args);
-  const drawDiagram = (...args) => M.drawDiagram(...args);
+  const diagramFrames = new Map();
+  // Keep the canvas and renderer; interpolate only declarative lines and points.
+  function drawDiagram(canvas, target) {
+    const old = diagramFrames.get(canvas.id);
+    if (old) cancelAnimationFrame(old.frame);
+    const hidden = new Set([...document.querySelectorAll('#islmLayers [data-curve]:not(:checked)')].map(el => el.dataset.curve));
+    if (hidden.has('--blue')) hidden.add('--violet');
+    if (target.lines) target = { ...target, lines: target.lines.filter(l => !hidden.has(l.color) && (document.getElementById('islmInitial').checked || !l.initial)) };
+    const entry = { spec: old?.spec, frame: 0 };
+    diagramFrames.set(canvas.id, entry);
+    const start = performance.now();
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const previous = old?.spec;
+    const animate = previous && !previous.message && !target.message && !reduced && JSON.stringify(previous) !== JSON.stringify(target);
+    canvas.dataset.animating = String(Boolean(animate));
+    canvas.dataset.motion = reduced ? 'reduced' : 'full';
+    const mix = (a, b, t) => a + (b - a) * t;
+    const paint = now => {
+      const t = animate ? Math.min(1, (now - start) / 400) : 1;
+      const f = 1 - (1 - t) ** 3;
+      const spec = t === 1 ? target : { ...target,
+        lines: target.lines.map(l => {
+          const before = previous.lines.find(v => v.color === l.color && v.initial === l.initial) || l;
+          return { ...l, line: Object.fromEntries(['a', 'b', 'c'].map(k => [k, mix(before.line[k], l.line[k], f)])) };
+        }),
+        points: target.points.map(p => {
+          const before = previous.points.find(v => v.label === p.label) || p;
+          return { ...p, x: mix(before.x, p.x, f), y: mix(before.y, p.y, f) };
+        })
+      };
+      M.drawDiagram(canvas, spec);
+      entry.spec = spec;
+      // These are the coordinates actually sent to the renderer, not a separate prediction.
+      canvas.dataset.points = JSON.stringify(spec.points || []);
+      canvas.dataset.curves = JSON.stringify(spec.lines || []);
+      if (t < 1) entry.frame = requestAnimationFrame(paint);
+      else canvas.dataset.animating = 'false';
+    };
+    paint(start);
+  }
   const fmtNum = (...args) => M.fmtNum(...args);
   const fmtSigned = (...args) => M.fmtSigned(...args);
   const formatValue = (...args) => M.formatValue(...args);
@@ -45,6 +84,123 @@
       { id: 'devaluation', label: 'Devaluación (↑ē)', requires: 'fixed', patch: u0 => ({ ebar: u0.ebar + 10 }) }
     ];
     const islm = { regime: 'flex', mobility: 'high', instrument: 'money', params: { ...ISLM.DEFAULT_PARAMS }, u: null, model: null, country: null, mTouched: false, notes: [] };
+    const learning = { level: 'intermediate', executed: false, scenario: null, A: null };
+    const content = () => M.LAB_CONTENT || globalThis.LAB_CONTENT;
+    const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const direction = n => ({1:'↑', '-1':'↓', 0:'sin cambio'})[n];
+    function selectScenario() {
+      learning.scenario = content().SCENARIOS.find(s => s.id === document.getElementById('islmScenario').value);
+      learning.executed = false;
+      const s = learning.scenario;
+      document.getElementById('islmProblem').textContent = `${s.title} ${s.problem}`;
+      document.getElementById('islmPredictions').innerHTML = s.predict.map(key => `<label>${key}<select class="field-select" data-predict="${key}" aria-label="Predicción ${key}"><option value="">Predice…</option><option value="1">↑ Sube</option><option value="-1">↓ Baja</option><option value="0">Sin cambio</option></select></label>`).join('');
+      document.getElementById('islmGrade').textContent = 'Predice cada variable antes de ejecutar.';
+      document.getElementById('islmTheory').textContent = '';
+      document.getElementById('islmRegimeCompare').innerHTML = '';
+    }
+    function scenarioModel(setup) {
+      const m = islm.model;
+      return ISLM.createModel({ ...setup, params: islm.params, i0: m.i0, nx0: m.NX0, cab: m.CA0, istar0: m.baseline.istar });
+    }
+    function runScenario() {
+      const selects = [...document.querySelectorAll('[data-predict]')];
+      if (selects.some(el => !el.value)) {
+        document.getElementById('islmGrade').textContent = 'Completa todas las predicciones para continuar.';
+        selects.find(el => !el.value).focus(); return;
+      }
+      const s = learning.scenario;
+      Object.assign(islm, s.setup);
+      islm.u = null; islmBuildModel();
+      islm.u = { ...islm.model.baseline, ...s.patch(islm.model.baseline) };
+      const E0 = islm.model.solve(islm.model.baseline), E2 = islm.model.solve(islm.u);
+      const prediction = Object.fromEntries(selects.map(el => [el.dataset.predict, Number(el.value)]));
+      learning.grade = content().gradePrediction(prediction, E0, E2);
+      learning.executed = true;
+      learning.runKey = experimentKey();
+      learning.comparison = s.compareWith ? scenarioModel(s.compareWith) : null;
+      renderIslm();
+    }
+    const experimentKey = () => JSON.stringify([islm.country, islm.regime, islm.mobility, islm.instrument, islm.params, islm.u]);
+    function renderLearning(E0, E2) {
+      const s = learning.scenario;
+      document.getElementById('islmLevelText').textContent = {
+        intro:'Empieza por la intuición: ¿qué hace que las empresas produzcan más y cómo reaccionan la tasa y la moneda? Predice antes de mover los controles.',
+        intermediate:'Sigue IS, LM y BP desde E₀ hasta el impacto E₁ y el equilibrio E₂. Distingue el instrumento, el shock y el ajuste externo.',
+        advanced:'Contrasta las ecuaciones estructurales y los multiplicadores numéricos con las derivadas analíticas disponibles. Los resultados dependen de los supuestos de cierre.'
+      }[learning.level];
+      if (learning.executed && learning.runKey !== experimentKey()) {
+        learning.executed = false;
+        document.getElementById('islmGrade').textContent = 'La configuración cambió. Vuelve a predecir y ejecutar el problema para contrastarlo.';
+        document.getElementById('islmTheory').textContent = '';
+        document.getElementById('islmRegimeCompare').innerHTML = '';
+      }
+      if (s && learning.executed) {
+        const grade = Object.entries(learning.grade);
+        document.getElementById('islmGrade').innerHTML = `<strong>Calificación: ${grade.filter(([,g]) => g.ok).length}/${grade.length}</strong><ul>${grade.map(([key,g]) => `<li>${key}: predijiste ${direction(g.predicted)}; resultado ${direction(g.simulated)} · ${g.ok?'Correcto':'Revisa el mecanismo'} · teoría ${direction(s.theory[key])}</li>`).join('')}</ul>`;
+        document.getElementById('islmTheory').innerHTML = `<h4>Resultado → mecanismo → contraste teórico</h4><p>${escapeHTML(s.levels[learning.level])}</p><ul>${s.caveats.map(c => `<li>${escapeHTML(c)}</li>`).join('')}</ul><p class="data-note">Referencias: ${s.refs.map(k => escapeHTML(content().REFERENCES[k])).join(' · ')}</p>`;
+        if (learning.comparison) {
+          const other = learning.comparison, b = other.solve(other.baseline), end = other.solve({...other.baseline,...s.patch(other.baseline)});
+          const card = (title, initial, final, theory) => `<section><h4>${title}</h4>${['Y','i','e','M','NX'].map(key => { const d = ISLM.compareEquilibria(initial,final)[key]; return `<p>${key}: ${fmtNum(initial[key],2)} → ${fmtNum(final[key],2)} · Δ ${fmtSigned(['Y','e','M'].includes(key)?d.pct:d.abs,2)} ${key==='i'?'pp':['Y','e','M'].includes(key)?'%':'puntos de Y₀'}${theory[key]===undefined?'':` · teoría ${direction(theory[key])}`}</p>`; }).join('')}</section>`;
+          document.getElementById('islmRegimeCompare').innerHTML = card('Régimen flexible', E0,E2,s.theory)+card('Régimen fijo', b,end,s.theoryCompare);
+        }
+      }
+      document.getElementById('islmCountry').value = state.country;
+      const eq = document.getElementById('islmEquations');
+      eq.hidden = learning.level !== 'advanced';
+      if (!eq.hidden) {
+        const m = islm.model, a = m.analyticMultipliers();
+        const formula = islm.regime === 'closed' ? (islm.instrument==='rate'?'1 / [1 − c(1 − t)]':'1 / [1 − c(1 − t) + b·k/h]') : islm.regime==='fixed' && m.kappa===Infinity ? '1 / [1 − c(1 − t) + m]' : '0';
+        eq.innerHTML = `<h4>Ecuaciones · precios fijos P = 1</h4><p>Y = C + I + G + NX; C = C₀ + confianza + c[(1 − t)Y − T₀]; I = Ī − b·i</p><p>M/P = kY − h·i${m.open?'; BP = CA + KF = 0; CA = NX + NFI':''}</p><p>${m.open?'NX = NX₀ − m(Y − 100) + n(e − 100) + 0,15(Y* − 100) + nx':'Economía cerrada: NX = 0; no se impone una condición BP.'}</p><p>${Object.keys(a).length ? `Multiplicador fiscal analítico: dY/dG = ${formula} = ${fmtNum(a.fiscal,4)}${a.monetaryPerUnitM===undefined?'':`; dY/dM = 1/k = ${fmtNum(a.monetaryPerUnitM,4)}`}` : 'No hay fórmula cerrada publicada por analyticMultipliers() para esta configuración; consulta el multiplicador numérico.'}</p>`;
+      }
+      const steps = islmNarrative(E0, islm.model.solve(islm.u,'impact'), E2);
+      const shifts = learning.executed ? s.shifts.map(v => `${v.curve} ${{right:'→',left:'←',up:'↑',down:'↓'}[v.direction]} · ${v.cause}`) : steps.filter(v => v.startsWith('Cambio aplicado:') || v.startsWith('Desplazamiento de curvas:'));
+      document.getElementById('islmShifts').textContent = shifts.join(' ');
+      if (!shifts.length) document.getElementById('islmShifts').textContent = 'E₀ · Sin desplazamientos. Aplica un shock para seguir su causa.';
+      const saved = learning.A;
+      document.getElementById('islmClearA').hidden = !saved;
+      document.getElementById('islmABStatus').textContent = saved ? `Comparación A/B · A: ${saved.country}, ${saved.regime} · B: ${COUNTRIES[state.country].name}, ${islm.regime}. Las diferencias incluyen todos los cambios de configuración.` : 'Guarda el estado actual como A y cambia los controles para comparar con B.';
+      document.querySelectorAll('.islm-ab-heading').forEach(n => n.remove());
+      if (saved) {
+        const head = document.querySelector('.islm-table thead tr');
+        head.insertAdjacentHTML('beforeend','<th class="islm-ab-heading">A · final</th><th class="islm-ab-heading">B − A</th>');
+        const diff = ISLM.compareEquilibria(saved.E, E2);
+        document.querySelectorAll('#islmResults tr').forEach(row => {
+          const key = row.dataset.var, d = diff[key];
+          const value = d ? (['Y','e','M'].includes(key)?d.pct:d.abs) : Number.isFinite(E2[key]) && Number.isFinite(saved.E[key]) ? E2[key]-saved.E[key] : null;
+          row.insertAdjacentHTML('beforeend',`<td class="va">${Number.isFinite(saved.E[key])?fmtNum(saved.E[key],2):'—'}</td><td class="dab">${value===null?'—':fmtSigned(value,2)+(key==='i'?' pp':['Y','e','M'].includes(key)?' %':' puntos de Y₀')}</td>`);
+        });
+      }
+    }
+    function setupLearning() {
+      document.querySelector('.islm-controls').open = innerWidth > 1120;
+      const country = document.getElementById('islmCountry');
+      country.innerHTML = document.getElementById('countrySelect').innerHTML;
+      country.addEventListener('change', () => { const main = document.getElementById('countrySelect'); main.value = country.value; main.dispatchEvent(new Event('change')); });
+      const shortTitles = { 'fiscal-closed':'Gasto público', 'foreign-rate-flex':'Tasa internacional', 'devaluation-fixed':'Devaluación', 'fiscal-regimes':'Fiscal: dos regímenes', 'commodity-flex':'Exportaciones', 'confidence-closed':'Confianza privada' };
+      document.getElementById('islmScenario').innerHTML = content().SCENARIOS.map((s,i) => `<option value="${s.id}">${i+1} · ${escapeHTML(shortTitles[s.id] || s.title)}</option>`).join('');
+      document.getElementById('islmScenario').addEventListener('change',selectScenario);
+      document.getElementById('islmRun').addEventListener('click',runScenario);
+      document.getElementById('islmLevel').addEventListener('change', e => { learning.level = e.target.value; renderIslm(); });
+      document.getElementById('islmSaveA').addEventListener('click', () => { learning.A = { E: {...islm.model.solve(islm.u)}, country:COUNTRIES[state.country].name, regime:islm.regime, u:{...islm.u}, params:{...islm.params} }; renderIslm(); });
+      document.getElementById('islmClearA').addEventListener('click', () => { learning.A = null; renderIslm(); });
+      document.getElementById('islmLayers').addEventListener('change',renderIslm);
+      const dialog = document.getElementById('islmHelp');
+      document.getElementById('islmWhy').addEventListener('click', () => {
+        document.getElementById('islmHelpBody').innerHTML = `<p>${escapeHTML(islmRegimeText())}</p><ol>${islmNarrative(islm.model.solve(islm.model.baseline),islm.model.solve(islm.u,'impact'),islm.model.solve(islm.u)).map(v=>`<li>${escapeHTML(v)}</li>`).join('')}</ol>`;
+        dialog.showModal();
+      });
+      document.getElementById('islmCloseHelp').addEventListener('click', () => dialog.close());
+      const glossary = content().GLOSSARY;
+      document.getElementById('islmGlossary').innerHTML = Object.entries(glossary).map(([key,g]) => `<details id="islm-term-${key}"><summary>${escapeHTML(key==='trilemma'?'Trilema':key)}</summary><p>${escapeHTML(g.short)}</p><p>${escapeHTML(g.long)}</p></details>`).join('');
+      ['IS','LM','BP','NX','CA','rho','multiplier','trilemma'].filter(key=>glossary[key]).forEach(key => {
+        const btn = document.createElement('button'); btn.type='button'; btn.className='islm-glossary-button'; btn.textContent=key==='rho'?'ρ':key==='multiplier'?'Multiplicador':key==='trilemma'?'Trilema':key;
+        btn.setAttribute('aria-label',`Definición de ${btn.textContent}`);
+        btn.addEventListener('click',()=>{ document.getElementById('islmHelpBody').innerHTML=`<h4>${escapeHTML(btn.textContent)}</h4><p>${escapeHTML(glossary[key].short)}</p><p>${escapeHTML(glossary[key].long)}</p>`;dialog.showModal(); });
+        document.getElementById('islmLayers').append(btn);
+      });
+      document.getElementById('islmReferences').innerHTML = Object.values(content().REFERENCES).map(r=>`<li>${escapeHTML(r)}</li>`).join('');
+      selectScenario();
+    }
 
     function islmCalibrationData() {
       const exp = getLatestYearAndValue(state.country, 'NE.EXP.GNFS.ZS');
@@ -104,6 +260,16 @@
           const tag = d.tag ? `<span class="islm-tag ${group === 'policy' ? 'control' : 'external'}">${d.tag}</span>` : '';
           return `<div class="sim-field islm-field" data-key="${d.key}"><div class="sim-label"><label for="${inputId}">${d.label}</label><output class="sim-value" id="${inputId}-val" for="${inputId}"></output></div><input class="sim-range" id="${inputId}" type="range" min="${d.min}" max="${d.max}" step="${d.step}"><div class="sim-hint">${tag} <span class="islm-hint-text">${d.help} · <span class="islm-source-kind">${SOURCE_LABELS[ISLM.PARAM_SOURCES[d.key]] || (d.group==='param'?'Valor ilustrativo':'Supuesto teórico')}</span></span></div></div>`;
         }).join('');
+        if (group === 'policy') {
+          [['Política fiscal', ['G', 'T0']], ['Política monetaria', ['Mpct', 'ipol']], ['Política cambiaria', ['ebar']]].forEach(([label, keys]) => {
+            const details = document.createElement('details');
+            details.className = 'islm-details'; details.open = label === 'Política fiscal';
+            const summary = document.createElement('summary'); summary.textContent = label;
+            details.append(summary);
+            keys.forEach(key => details.append(node.querySelector(`[data-key="${key}"]`)));
+            node.append(details);
+          });
+        }
         node.querySelectorAll('input').forEach(input => input.addEventListener('input', () => {
           const key = input.closest('.islm-field').dataset.key;
           const def = ISLM_INPUTS.find(d => d.key === key);
@@ -130,8 +296,6 @@
       }
     }
     function syncIslmControls() {
-      const mKind=document.querySelector('[data-key="m"] .islm-source-kind');
-      if(mKind)mKind.textContent=!islm.mTouched&&Number.isFinite(islmCalibrationData().imp.value)?SOURCE_LABELS.calibrated:SOURCE_LABELS[ISLM.PARAM_SOURCES.m];
       const m = islm.model;
       document.getElementById('islmRegime').value = islm.regime;
       document.getElementById('islmMobility').value = islm.mobility;
@@ -152,7 +316,9 @@
         input.disabled = Boolean(reason);
         const field = input.closest('.islm-field');
         field.classList.toggle('is-disabled', Boolean(reason));
-        field.querySelector('.islm-hint-text').textContent = reason || (d.key === 'ipol' ? `${d.help} Neutral supuesta: ${fmtNum(m.baseline.ipol, 2)}%.` : d.help);
+        const help = reason || (d.key === 'ipol' ? `${d.help} Neutral supuesta: ${fmtNum(m.baseline.ipol, 2)}%.` : d.help);
+        const kind = d.key === 'm' && !islm.mTouched && Number.isFinite(islmCalibrationData().imp.value) ? 'calibrated' : ISLM.PARAM_SOURCES[d.key] || (isParam?'illustrative':'assumption');
+        field.querySelector('.islm-hint-text').innerHTML = `${escapeHTML(help)} · <span class="islm-source-kind">${SOURCE_LABELS[kind]}</span>`;
       });
       document.querySelectorAll('.islm-preset').forEach(btn => {
         const preset = ISLM_PRESETS.find(p => p.id === btn.dataset.preset);
@@ -205,7 +371,7 @@
         const delta = ['Y','e','M'].includes(key) ? comparison[key].pct : comparison[key]?.abs ?? (Number.isFinite(v0) && Number.isFinite(v2) ? v2-v0 : null);
         const unit = key==='i'?' pp':['Y','e','M'].includes(key)?' %':' puntos de Y₀';
         const cls = key === 'Y' && delta !== null && Math.abs(delta) > 0.005 ? (delta > 0 ? 'positive' : 'negative') : '';
-        return `<tr data-var="${key}"><td>${label}<small style="display:block">Resultado del modelo</small></td><td class="v0">${f(v0)}</td><td class="v1">${f(v1)}</td><td class="v2">${f(v2)}</td><td class="dv ${cls}">${delta === null ? '—' : fmtSigned(delta, d)+unit}</td></tr>`;
+        return `<tr data-var="${key}"><td class="variable">${label}<small style="display:block">Resultado del modelo</small></td><td data-label="E₀ · inicial" class="v0">${f(v0)}</td><td data-label="E₁ · impacto" class="v1">${f(v1)}</td><td data-label="E₂ · final" class="v2">${f(v2)}</td><td data-label="Δ E₂ − E₀" class="dv ${cls}">${delta === null ? '—' : fmtSigned(delta, d)+unit}</td></tr>`;
       }).join('');
     }
     function renderIslmMultipliers() {
@@ -279,6 +445,7 @@
       if (fiscalUp && islm.regime === 'fixed' && islm.mobility === 'perfect') steps.push('Resultado clásico de Mundell–Fleming: con tipo de cambio fijo y movilidad perfecta la política fiscal es muy eficaz, porque la expansión monetaria endógena evita que suba la tasa.');
       if (islm.instrument === 'rate' && islm.regime !== 'fixed' && Math.abs(E2.M - E0.M) > 0.05) steps.push(`Con regla de tasa el banco central suministra el dinero que se demande: M pasa de ${fmtNum(E0.M)} a ${fmtNum(E2.M)}.`);
       if (state.country === 'PER' && open && E2.e > 100.5) steps.push('Contexto peruano: con alta dolarización financiera, una depreciación encarece las deudas en dólares (efecto hoja de balance) y puede ser menos expansiva que en este modelo; por eso el BCRP suele intervenir para suavizar el tipo de cambio.');
+      if (islm.regime === 'flex') steps.push('En esta especificación, los shocks autónomos de NX (nx e Y*) quedan totalmente aislados bajo flotación para cualquier movilidad: e compensa el shock en IS y BP. Es una propiedad del modelo lineal, no evidencia empírica; faltan canales de ingreso nacional y de inversión exportadora.');
       return steps;
     }
     function renderIslmClasses() {
@@ -305,7 +472,7 @@
     // --- Diagrams (custom canvas renderer: lines a·x + b·y = c) --------------------------------
     function islmLinePair(initial, final, color, base) {
       const out = [];
-      if (!sameLine(initial, final)) out.push({ line: initial, color, initial: true, label: `${base}₀` });
+      out.push({ line: initial, color, initial: true, label: `${base}₀` });
       out.push({ line: final, color, label: sameLine(initial, final) ? base : `${base}₁` });
       return out;
     }
@@ -318,12 +485,12 @@
       const mRange = axisRange(pts.map(p => p.M), m.M0, Math.max(8, m.M0 * 0.4));
       const points = (fx, fy) => [
         { x: fx(E0), y: fy(E0), label: 'E₀', color: '--subtle' },
-        ...(open && [E0, E2].every(E => Math.abs(E1.Y - E.Y) > 0.01 || Math.abs(E1.i - E.i) > 0.001) ? [{ x: fx(E1), y: fy(E1), label: 'E₁', hollow: true, color: '--muted' }] : []),
+        { x: fx(E1), y: fy(E1), label: 'E₁', hollow: true, color: '--muted' },
         { x: fx(E2), y: fy(E2), label: 'E₂', guides: true }
       ];
       const lmLabel = islm.instrument === 'rate' && islm.regime !== 'fixed' ? 'LM (i fija)' : 'LM';
       drawDiagram(document.getElementById('islmPanelISLM'), {
-        x: { range: yRange, label: 'Y' }, y: { range: iRange, label: 'i (%)' },
+        x: { range: yRange, label: 'Y (índice)' }, y: { range: iRange, label: 'i (%)' },
         lines: [
           ...islmLinePair(c.IS(u0, 100), c.IS(u, E2.e), '--blue', 'IS'),
           ...islmLinePair(c.LM(u0, m.M0), c.LM(u, E2.M), '--teal', lmLabel),
@@ -333,7 +500,7 @@
       });
       const mfLabel = m.kappa === Infinity ? 'LM*' : m.kappa === 0 ? 'BP*' : 'LM–BP';
       drawDiagram(document.getElementById('islmPanelMF'), open ? {
-        x: { range: yRange, label: 'Y' }, y: { range: eRange, label: 'e (↑ depreciación)' },
+        x: { range: yRange, label: 'Y (índice)' }, y: { range: eRange, label: 'e índice ↑ = depreciación' },
         lines: [
           ...islmLinePair(c.ISstar(u0, E0.i), c.ISstar(u, E2.i), '--blue', 'IS*'),
           ...islmLinePair(c.LMstar(u0, m.M0), c.LMstar(u, E2.M), '--teal', mfLabel),
@@ -352,7 +519,7 @@
         points: points(p => p.M, p => p.i)
       });
       drawDiagram(document.getElementById('islmPanelCross'), {
-        x: { range: yRange, label: 'Y' }, y: { range: yRange, label: 'DA' },
+        x: { range: yRange, label: 'Y (índice)' }, y: { range: yRange, label: 'DA (puntos de Y₀)' },
         lines: [
           { line: { a: -1, b: 1, c: 0 }, color: '--subtle', label: '45°' },
           ...islmLinePair(c.aggregateDemand(u0, E0.i, E0.e), c.aggregateDemand(u, E2.i, E2.e), '--violet', 'DA')
@@ -384,16 +551,20 @@
       }
       renderIslmResults(E0, E1, E2);
       renderIslmMultipliers();
+      renderLearning(E0, E2);
       document.getElementById('islmNarrative').innerHTML = islmNarrative(E0, E1, E2).map(s => `<li>${s}</li>`).join('');
       renderIslmClasses();
       drawIslmPanels(E0, E1, E2);
     }
     function setupIslm() {
+      setupLearning();
       const onConfig = (key) => e => { islm[key] = e.target.value; islmBuildModel(); renderIslm(); };
       document.getElementById('islmRegime').addEventListener('change', onConfig('regime'));
       document.getElementById('islmMobility').addEventListener('change', onConfig('mobility'));
       document.getElementById('islmInstrument').addEventListener('change', onConfig('instrument'));
       document.getElementById('islmResetBtn').addEventListener('click', () => {
+        Object.assign(islm, { regime:'flex', mobility:'high', instrument:'money' });
+        learning.A = null;
         islm.params = { ...ISLM.DEFAULT_PARAMS };
         islm.country = null; islm.u = null;
         renderIslm(); showToast('Modelo restablecido al escenario base');
@@ -407,5 +578,13 @@
     }
 
 
+  M.labs = M.labs || {};
+  M.labs.islm = {
+    id:'islm', title:'IS–LM–BP y Mundell–Fleming', createModel:ISLM.createModel,
+    controls:ISLM_INPUTS, diagrams:['islmPanelISLM','islmPanelMF','islmPanelMoney','islmPanelCross'],
+    get content() { return content(); },
+    // Read-only snapshots for consumers and numerical rendering checks.
+    snapshot: () => ({ config:{regime:islm.regime,mobility:islm.mobility,instrument:islm.instrument}, params:{...islm.params}, u:{...islm.u}, E0:islm.model.solve(islm.model.baseline), E1:islm.model.solve(islm.u,'impact'), E2:islm.model.solve(islm.u), model:islm.model })
+  };
   Object.assign(M, { drawIslmPanels, islmBuildModel, islmCalibrationData, islmDisabledReason, islmFmtKF, islmLinePair, islmNarrative, islmRegimeText, islmShiftText, islmSyncCountry, renderIslm, renderIslmClasses, renderIslmInputs, renderIslmMultipliers, renderIslmResults, setupIslm, syncIslmControls });
 })();

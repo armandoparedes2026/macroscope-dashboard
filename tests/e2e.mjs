@@ -338,6 +338,108 @@ await check('economías nuevas y agregado: referencias explícitas y sin calibra
   }
 });
 
+await mkdir('docs/evidence/fase3', {recursive:true});
+const settleLab = page => page.waitForFunction(() => [...document.querySelectorAll('.islm-panel canvas')].every(c => c.dataset.animating === 'false'));
+const verifyDrawnEquilibria = async page => {
+  await settleLab(page);
+  const checks = await page.evaluate(() => {
+    const {model,u} = MacroScope.labs.islm.snapshot();
+    const E = [model.solve(model.baseline),model.solve(u,'impact'),model.solve(u,'final')];
+    return ['islmPanelISLM','islmPanelMF','islmPanelMoney','islmPanelCross'].flatMap((id,index) => {
+      const points = JSON.parse(document.getElementById(id).dataset.points);
+      if (!model.open && index===1) return [];
+      return points.map(p => {
+        const e = E[{'E₀':0,'E₁':1,'E₂':2}[p.label]];
+        return Math.abs(p.x-(index===2?e.M:e.Y)) < 1e-9 && Math.abs(p.y-(index===0||index===2?e.i:index===1?e.e:e.Y)) < 1e-9;
+      });
+    });
+  });
+  assert.ok(checks.length >= 9 && checks.every(Boolean), 'los puntos dibujados deben coincidir con solve() después de la interpolación');
+};
+await check('laboratorio: predecir, ejecutar, calificar, niveles y comparación de regímenes', async page => {
+  await openModel(page);
+  await page.locator('#islmGuided>summary').click();
+  await page.click('#islmRun');
+  assert.match(await page.textContent('#islmGrade'),/Completa/);
+  await page.selectOption('[data-predict="Y"]','1');
+  await page.selectOption('[data-predict="i"]','1');
+  await page.click('#islmRun');
+  assert.match(await page.textContent('#islmGrade'),/Calificación: 2\/2/);
+  for (const level of ['intro','intermediate','advanced']) {
+    await page.selectOption('#islmLevel',level);
+    const expected = await page.evaluate(level => MacroScope.LAB_CONTENT.SCENARIOS[0].levels[level],level);
+    assert.ok((await page.textContent('#islmTheory')).includes(expected));
+    assert.equal(await page.isVisible('#islmEquations'),level==='advanced');
+  }
+  assert.match(await page.textContent('#islmEquations'),/dY\/dG = 1/);
+  await verifyDrawnEquilibria(page);
+  await page.selectOption('#islmScenario','fiscal-regimes');
+  await page.selectOption('[data-predict="Y"]','0');
+  await page.click('#islmRun');
+  assert.match(await page.textContent('#islmGrade'),/Calificación: 1\/1/);
+  assert.equal(await page.locator('#islmRegimeCompare section').count(),2);
+  assert.match(await page.textContent('#islmRegimeCompare'),/Régimen flexible.*Régimen fijo/s);
+  await verifyDrawnEquilibria(page);
+  await page.locator('#islmGuided').screenshot({path:'docs/evidence/fase3/escenario-guiado-completo.png',style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}'});
+  await page.click('#islmWhy');
+  assert.equal(await page.isVisible('#islmHelp'),true);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.isVisible('#islmHelp'),false);
+});
+await check('laboratorio: A/B inmutable, capas, unidades y reduced-motion', async page => {
+  await openModel(page);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.click('#islmSaveA');
+  await page.click('[data-preset="fiscal"]');
+  const a = await page.textContent('#islmResults [data-var="Y"] .va');
+  assert.equal(a,'100.00');
+  assert.match(await cell(page,'i','dv'),/ pp$/);
+  assert.match(await page.textContent('#islmResults [data-var="Y"] .dab'),/%$/);
+  await verifyDrawnEquilibria(page);
+  assert.equal(await page.getAttribute('#islmPanelISLM','data-motion'),'reduced');
+  await page.uncheck('[data-curve="--blue"]');
+  await settleLab(page);
+  assert.ok(await page.$eval('#islmPanelISLM',c=>JSON.parse(c.dataset.curves).every(l=>l.color!=='--blue')));
+  await page.check('[data-curve="--blue"]');
+  await page.uncheck('#islmInitial');
+  assert.ok(await page.$eval('#islmPanelISLM',c=>JSON.parse(c.dataset.curves).every(l=>!l.initial)));
+  await page.click('#islmClearA');
+  assert.equal(await page.locator('#islmResults .va').count(),0);
+  await page.click('#islmResetBtn');
+  assert.equal(await cell(page,'Y','v2'),'100.0');
+});
+for (const width of [1440,768,390,360]) {
+  await check(`laboratorio responsive ${width}: panel, diagramas y F15 operables`, async page => {
+    await page.setViewportSize({width,height:1000});
+    await openOffline(page);
+    await page.locator(`${width<=760?'.mobile-nav':'.sidebar'} [data-tab="simulator"]`).click();
+    const panel=page.locator('.islm-controls');
+    if (!(await panel.getAttribute('open')) && await panel.evaluate(el=>!el.open)) await panel.locator(':scope>summary').click();
+    await page.selectOption('#islmRegime','fixed');
+    await page.selectOption('#islmMobility','perfect');
+    assert.ok(await page.locator('.islm-controls select').evaluateAll(nodes => nodes.every(el => {
+      const ctx=document.createElement('canvas').getContext('2d');ctx.font=getComputedStyle(el).font;
+      return ctx.measureText(el.selectedOptions[0].textContent).width <= el.clientWidth-38;
+    })), 'los textos seleccionados caben dentro de sus controles');
+    await page.click('[data-preset="fiscal"]');
+    await verifyDrawnEquilibria(page);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
+    const boxes=await page.locator('.islm-panel').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,right:r.right,width:r.width};}));
+    assert.ok(boxes.every(b=>b.width>200&&b.x>=0&&b.right<=width));
+    const badge=await page.$eval('#apiStatusBadge',el=>({full:el.scrollWidth<=el.clientWidth,rect:el.getBoundingClientRect().right}));
+    if(width<=390) {assert.ok(badge.full);assert.ok(badge.rect<=width);}
+    if(width<1120) {
+      await panel.screenshot({path:`docs/evidence/fase3/parametros-${width}.png`,style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}.reveal{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'});
+      await panel.locator(':scope>summary').click();
+    }
+    await settleLab(page);
+    await page.locator('#tab-simulator').screenshot({path:`docs/evidence/fase3/laboratorio-${width}.png`,style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}.reveal{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'});
+    await page.locator('.islm-panel').first().scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => { const s=getComputedStyle(document.querySelector('.islm-main>.chart-card'));return s.opacity==='1' && ['none','blur(0px)'].includes(s.filter); });
+    await page.screenshot({path:`docs/evidence/fase3/laboratorio-viewport-${width}.png`});
+  });
+}
+
 await browser.close();
 if (failures) {
   console.error(`\n${failures} comprobación(es) fallida(s)`);

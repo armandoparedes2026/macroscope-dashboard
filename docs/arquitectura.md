@@ -1,5 +1,38 @@
 # Arquitectura de MacroScope
 
+## Registro extensible de laboratorios
+
+`MacroScope.labs` es un registro por identificador; actualmente solo contiene `islm`.
+Cada entrada expone `id` (clave estable), `title` (título accesible), `createModel(config)`
+(factoría del motor independiente del DOM), `controls` (descriptores de controles con
+clave, grupo, límites, formato y ayuda), `diagrams` (IDs de los canvas) y `content`
+(contenido pedagógico: escenarios, glosario, referencias y calificador). El getter
+`content` resuelve `MacroScope.LAB_CONTENT` después de la carga de los scripts diferidos.
+Una futura entrada de oferta y demanda, OA–DA, Phillips o Solow debe seguir este
+contrato y conservar su propio estado y motor; aquí no se implementan esos modelos.
+
+`labs.islm.snapshot()` expone una instantánea de configuración, parámetros, entradas y
+equilibrios E₀/E₁/E₂, además del motor actual para verificaciones numéricas. Los consumidores
+no deben mutar sus resultados. La interfaz sigue usando los callbacks públicos existentes,
+por lo que no altera las dependencias del comparador ni las de la carga WDI.
+
+El laboratorio integra en `index.html`, `js/ui/islm-lab.js` y `css/islm.css` las ideas
+de `prototypes/lab-v2/README.md`: configuración A, experimentación B en acordeones,
+barra de capas, rejilla 2×2, comparación A/B y ayuda contextual. No carga archivos del prototipo.
+Se usa el canvas existente sin instancias nuevas de Chart; `requestAnimationFrame`
+interpola coeficientes de curvas y coordenadas durante 400 ms y entrega exactamente
+el destino calculado en el último cuadro. `prefers-reduced-motion` elimina la interpolación.
+Cada canvas publica `data-points` y `data-curves` con los datos enviados al renderizador,
+`data-animating` y `data-motion`. Los e2e cotejan las coordenadas de los cuatro diagramas
+contra `solve(u, 'impact'|'final')`, y verifican los controles, niveles y tamaños responsive.
+
+El flujo guiado usa exclusivamente `LAB_CONTENT.SCENARIOS` y `gradePrediction`.
+Cambiar los controles invalida una calificación anterior: es necesario ejecutar de nuevo
+el problema para evitar atribuir una predicción al experimento equivocado. Las comparaciones
+de regímenes comparten calibración; A/B guarda el equilibrio A de forma inmutable y
+expresa B−A con `compareEquilibria`. Los datos observados tienen su propio bloque de
+procedencia y los resultados mantienen la etiqueta de simulación teórica.
+
 ## Decisión: scripts clásicos, sin compilación
 
 El contrato de apertura local del README y los e2e usan `file://`. Se conservan scripts clásicos con `defer`: los módulos ES exigirían otra política de origen/servidor en los navegadores y cambiarían ese contrato. No hay framework, bundler ni dependencias nuevas.

@@ -1,0 +1,93 @@
+
+> test
+> node tests/smoke.mjs && node --test tests/islm-model.test.mjs tests/bcrp.test.mjs tests/lab-content.test.mjs tests/wdi.test.mjs tests/compare.test.mjs && node tests/e2e.mjs
+
+MacroScope OK: 24 controles, 17 archivos JS válidos, referencias locales y SRI verificados.
+✔ BCRP: fixture real, series reordenadas y sufijo HTML (32.7152ms)
+✔ BCRP: cada código coincide con su respuesta individual real (20.9467ms)
+✔ BCRP: n.d. es null y respuestas inválidas se rechazan (1.5481ms)
+✔ BCRP proxy: validación de método, allowlist y periodos (2.7247ms)
+✔ BCRP proxy: JSON normalizado, caché y errores upstream (3.7117ms)
+✔ base 100 preserves null and does not mutate source (4.2793ms)
+✔ rates cannot be normalized (1.0352ms)
+✔ chain growth multiplies annual factors and propagates gaps (2.0389ms)
+✔ common years intersects finite observations, retaining zero (0.4672ms)
+✔ convergence uses same-year USA denominator, gaps remain null (0.5601ms)
+✔ la calibración sitúa el equilibrio inicial en Y = 100, i = i0, e = 100 en todos los regímenes (5.6644ms)
+✔ economía cerrada: expansión fiscal sube Y e i y desplaza inversión (crowding out) (0.4673ms)
+✔ Mundell–Fleming, flexible y movilidad perfecta: la política fiscal es ineficaz (aprecia la moneda) (0.3524ms)
+✔ Mundell–Fleming, flexible y movilidad perfecta: la política monetaria es muy eficaz (deprecia) (0.3855ms)
+✔ Mundell–Fleming, fijo y movilidad perfecta: política fiscal muy eficaz, M endógena sube (1.883ms)
+✔ fijo: la oferta monetaria no es instrumento (el impacto se revierte) (2.0346ms)
+✔ flexible: un alza de i* deprecia la moneda; fijo: contrae el producto (0.4458ms)
+✔ movilidad imperfecta: resultados intermedios y ordenados por grado de movilidad (0.479ms)
+✔ impacto vs. ajuste: con flexible el impacto deja un desequilibrio externo que corrige e (0.4184ms)
+✔ regla de tasa: el banco central fija i y M se acomoda; trilema bloquea combinaciones imposibles (0.6852ms)
+✔ las curvas dibujadas pasan por el equilibrio que resuelve el modelo (1.2481ms)
+✔ multiplicadores numéricos = multiplicadores de forma cerrada en los casos de libro (1.9415ms)
+✔ NX (bienes y servicios) y cuenta corriente se distinguen: NFI = CA − NX es autónoma (0.7655ms)
+✔ sin NX observado se usa CA como aproximación y queda etiquetado (0.3437ms)
+✔ fijo: un intento de expansión monetaria baja i en el impacto y se revierte por pérdida de reservas (0.3673ms)
+✔ tabla clásica de signos (Mundell–Fleming, movilidad perfecta) (1.315ms)
+✔ economía cerrada: signos de IS–LM (0.3595ms)
+✔ sensibilidad: h mayor → política monetaria menos eficaz y fiscal más eficaz (cerrada) (0.4671ms)
+✔ el modelo es estable en todo el rango de los controles (2.3627ms)
+✔ variaciones con la unidad correcta: i en pp, niveles en %  (0.5532ms)
+✔ propensión a importar: m = ε·IM/Y, supuesto ε = 1 (0.2519ms)
+✔ las curvas siguen pasando por el equilibrio cuando NFI ≠ 0 (0.5716ms)
+✔ cada escenario guiado coincide con el resultado del modelo (6.2378ms)
+✔ los resultados se mantienen con otra calibración (NX y CA de signo distinto) (1.1827ms)
+✔ escenarios completos en los tres niveles y con referencias existentes (0.5302ms)
+✔ calificación de la predicción (1.7846ms)
+✔ respaldo generado: cobertura, metadatos, obs_status y ausencias WDI preservadas (19.546ms)
+✔ WDI: dos páginas reales normalizadas y orden de observaciones conservado (2.9021ms)
+✔ WDI: null real conserva ausencia; último año y anterior usan observaciones finitas (1.2153ms)
+✔ WDI: conversión estricta impide que null, vacío o cadenas se vuelvan cero (0.6792ms)
+✔ WDI: error oficial message y páginas inválidas se rechazan (6.8674ms)
+✔ WDI: servicio pagina respuestas reales, reutiliza caché y permite actualización forzada (5.1786ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 316.2816
+MacroScope e2e
+  ✓ modo sin conexión: respaldo local y gráficos alternativos
+  ✓ botones del sidebar con nombre accesible
+  ✓ color de la variación según si subir es bueno o malo
+  ✓ inflación clasificada frente a la meta del banco central
+  ✓ el país no puede compararse consigo mismo
+  ✓ IS–LM: calibración con datos del país y cuatro diagramas dibujados
+  ✓ Mundell–Fleming flexible con movilidad perfecta: la política fiscal no mueve Y y aprecia
+  ✓ tipo de cambio fijo: M endógena, devaluación disponible y política fiscal eficaz
+  ✓ economía cerrada: sin Mundell–Fleming y con crowding out
+  ✓ regla de tasa: mover la tasa de política cambia Y y M se acomoda
+  ✓ CSV con columnas de procedencia
+  ✓ procedencia: los datos del API se distinguen del respaldo
+  ✓ tema claro persistente y sin desborde horizontal en móvil
+  ✓ carrusel: sin avance automático con prefers-reduced-motion
+  ✓ hero cue: destino visible y foco a 1440px
+  ✓ hero cue: destino visible y foco a 768px
+  ✓ hero cue: destino visible y foco a 390px
+  ✓ hero cue: destino visible y foco a 360px
+  ✓ calibración: NX, NFI, CA separados y naturaleza explícita
+  ✓ WDI: paginación, nulos, último año real, caché y actualización manual
+  ✓ WDI: respuesta malformada reintenta dos veces y conserva respaldo
+  ✓ BCRP: success
+  ✓ BCRP: failure
+  ✓ BCRP: malformed
+  ✓ comparador: cuatro economías, IPC ausente y años comunes a 1440px
+  ✓ comparador: cuatro economías, IPC ausente y años comunes a 768px
+  ✓ comparador: cuatro economías, IPC ausente y años comunes a 390px
+  ✓ comparador: cuatro economías, IPC ausente y años comunes a 360px
+  ✓ economías nuevas y agregado: referencias explícitas y sin calibración LCN
+  ✓ laboratorio: predecir, ejecutar, calificar, niveles y comparación de regímenes
+  ✓ laboratorio: A/B inmutable, capas, unidades y reduced-motion
+  ✓ laboratorio responsive 1440: panel, diagramas y F15 operables
+  ✓ laboratorio responsive 768: panel, diagramas y F15 operables
+  ✓ laboratorio responsive 390: panel, diagramas y F15 operables
+  ✓ laboratorio responsive 360: panel, diagramas y F15 operables
+
+MacroScope e2e OK

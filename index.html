@@ -141,27 +141,32 @@
    </section>
    <section class="view" id="tab-simulator" hidden aria-label="Modelo IS-LM-BP y Mundell-Fleming">
      <div class="page-heading"><div><div class="eyebrow">MACROECONOMÍA ABIERTA · CORTO PLAZO</div><h1>IS–LM–BP y Mundell–Fleming.</h1><p>Elige el tipo de economía, mueve instrumentos de política o shocks externos y observa cómo se desplazan las curvas en cuatro mercados enlazados: qué controla la economía, qué le viene dado y cómo se transmite cada decisión.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chart"/></svg>Modelo didáctico · supuestos explícitos</div></div>
+     <div class="islm-banner">Simulación teórica — no es evidencia empírica</div>
+     <div class="islm-learning surface soft-panel">
+      <div class="islm-toolbar"><label>Nivel <select id="islmLevel" class="field-select"><option value="intro">Introductorio</option><option value="intermediate" selected>Intermedio</option><option value="advanced">Avanzado</option></select></label><button id="islmWhy" class="control-action" type="button">¿Por qué?</button></div>
+      <p id="islmLevelText"></p><details id="islmGuided"><summary>Aprender con un escenario guiado</summary><label for="islmScenario">Problema</label><select id="islmScenario" class="field-select"></select><p id="islmProblem"></p><div id="islmPredictions" class="islm-predictions"></div><button id="islmRun" class="control-action primary" type="button">Ejecutar y contrastar</button><div id="islmGrade" role="status" aria-live="polite"></div><div id="islmTheory"></div><div id="islmRegimeCompare" class="islm-regime-compare"></div></details>
+     </div>
      <div class="sim-layout islm-layout">
-      <article class="surface sim-block islm-controls reveal" aria-label="Configuración del modelo">
-       <div class="card-top"><div><h3>Configura la economía</h3><p id="islmCalibration">Calibración con datos del país seleccionado.</p></div><button type="button" id="islmResetBtn" class="control-action" style="height:32px;padding:0 10px;font-size:10px">Restablecer</button></div>
-       <div class="sim-section-heading">01 · Tipo de economía</div>
+      <details open class="surface sim-block islm-controls reveal" aria-label="Configuración del modelo"><summary>Parámetros · configurar y experimentar</summary>
+       <div class="card-top"><div><h3>A · Configuración</h3></div><button type="button" id="islmResetBtn" class="control-action" style="height:32px;padding:0 10px;font-size:10px">Restablecer</button></div>
+       <label class="islm-select"><span class="control-label">País · contexto observado</span><select id="islmCountry" class="field-select"></select></label>
        <div class="islm-selects">
-        <label class="islm-select"><span class="control-label">Régimen</span><select class="field-select" id="islmRegime"><option value="closed">Economía cerrada (IS–LM)</option><option value="flex" selected>Abierta · tipo de cambio flexible</option><option value="fixed">Abierta · tipo de cambio fijo</option></select></label>
-        <label class="islm-select"><span class="control-label">Movilidad de capital</span><select class="field-select" id="islmMobility"><option value="none">Nula (BP vertical)</option><option value="low">Baja (BP más inclinada que LM)</option><option value="high" selected>Alta (BP más plana que LM)</option><option value="perfect">Perfecta (BP horizontal · Mundell–Fleming)</option></select></label>
-        <label class="islm-select"><span class="control-label">Instrumento monetario</span><select class="field-select" id="islmInstrument"><option value="money">Oferta monetaria (LM clásica)</option><option value="rate">Tasa de interés de política (LM horizontal)</option></select></label>
+        <label class="islm-select"><span class="control-label">Régimen</span><select class="field-select" id="islmRegime"><option value="closed">Cerrada · IS–LM</option><option value="flex" selected>Flexible · economía abierta</option><option value="fixed">Fijo · economía abierta</option></select></label>
+        <label class="islm-select"><span class="control-label">Movilidad de capital</span><select class="field-select" id="islmMobility"><option value="none">Nula · BP vertical</option><option value="low">Baja</option><option value="high" selected>Alta</option><option value="perfect">Perfecta · BP horizontal</option></select></label>
+        <label class="islm-select"><span class="control-label">Instrumento monetario</span><select class="field-select" id="islmInstrument"><option value="money">Oferta monetaria (M)</option><option value="rate">Tasa de política (i)</option></select></label>
        </div>
        <p class="islm-note" id="islmTrilemma" role="status"></p>
-       <div class="sim-section-heading" style="margin-top:18px">02 · Escenarios guiados</div>
+       <div class="sim-section-heading" style="margin-top:18px">B · Experimentación</div><p class="data-note">Aplica un cambio rápido o ajusta los controles.</p>
        <div class="islm-presets" id="islmPresets"></div>
-       <div class="sim-section-heading" style="margin-top:18px">03 · Instrumentos de política <span class="islm-tag control">Controlables</span></div>
        <div id="islmPolicyInputs"></div>
-       <div class="sim-section-heading" style="margin-top:18px">04 · Shocks externos y del sector privado <span class="islm-tag external">No controlables</span></div>
-       <div id="islmExternalInputs"></div>
+       <details class="islm-details"><summary>Shocks externos y confianza</summary><div id="islmExternalInputs"></div></details>
        <details class="islm-details"><summary class="sim-section-heading">05 · Parámetros estructurales <span class="islm-tag param">Fijos a corto plazo</span></summary><div id="islmParamInputs"></div></details>
-      </article>
+      </details>
       <div class="islm-main">
        <article class="surface chart-card reveal" aria-label="Diagramas del modelo">
         <div class="card-top"><div><h3>Cuatro mercados, un equilibrio</h3><p>Línea discontinua: situación inicial (E₀). Línea continua: nuevo equilibrio (E₂). Punto hueco: impacto antes del ajuste externo (E₁).</p></div><span class="status-pill neutral" id="islmRegimeBadge">FLEXIBLE</span></div>
+        <div class="islm-toolbar" id="islmLayers"><span>Curvas visibles:</span><label><input type="checkbox" data-curve="--blue" checked> IS / demanda</label><label><input type="checkbox" data-curve="--teal" checked> LM / dinero</label><label><input type="checkbox" data-curve="--amber" checked> BP / paridad</label><label><input id="islmInitial" type="checkbox" checked> Iniciales</label><button id="islmSaveA" class="control-action" type="button">Guardar estado como A</button><button id="islmClearA" class="control-action" type="button" hidden>Borrar A</button></div>
+        <p id="islmShifts" class="islm-shifts" role="status"></p><p id="islmABStatus" class="data-note"></p>
         <div class="islm-grid">
          <figure class="islm-panel"><figcaption><strong>1 · IS–LM–BP</strong><span>Tasa de interés (i) vs. producto (Y)</span></figcaption><canvas id="islmPanelISLM" role="img" aria-label="Diagrama IS-LM-BP"></canvas></figure>
          <figure class="islm-panel"><figcaption><strong>2 · Mundell–Fleming</strong><span>Tipo de cambio (e) vs. producto (Y)</span></figcaption><canvas id="islmPanelMF" role="img" aria-label="Diagrama Mundell-Fleming"></canvas></figure>
@@ -171,7 +176,7 @@
        </article>
        <article class="surface soft-panel reveal" aria-label="Resultados del modelo">
         <div class="card-top"><div><h3>Resultado del equilibrio</h3><p>Valores en índice (producto inicial = 100); tasas en %; e = 100 en el punto inicial (sube = depreciación).</p></div></div>
-        <div class="islm-multipliers" id="islmMultipliers"></div>
+        <div class="islm-multipliers" id="islmMultipliers"></div><div id="islmEquations" hidden></div>
         <div class="data-table-wrap"><table class="data-table islm-table"><thead><tr><th>Variable</th><th>Inicial (E₀)</th><th>Impacto (E₁)</th><th>Final (E₂)</th><th>Cambio</th></tr></thead><tbody id="islmResults"></tbody></table></div>
        </article>
        <article class="surface soft-panel reveal" aria-label="Mecanismo de transmisión">
@@ -184,6 +189,9 @@
       <article class="surface soft-panel reveal"><div class="card-top"><div><h3>¿Qué controla esta economía?</h3><p>La clasificación cambia con el régimen: lo que es instrumento en un régimen se vuelve endógeno en otro.</p></div></div><div class="islm-classes" id="islmClasses"></div></article>
       <article class="surface soft-panel reveal"><div class="card-top"><div><h3>Eficacia de las políticas</h3><p>Resultados clásicos de Mundell–Fleming con movilidad perfecta de capital.</p></div></div><div class="data-table-wrap"><table class="data-table islm-policy-table" id="islmPolicyTable"><thead><tr><th>Medida</th><th data-regime="flex">Tipo de cambio flexible</th><th data-regime="fixed">Tipo de cambio fijo</th></tr></thead><tbody><tr><th scope="row">Expansión fiscal (↑G)</th><td data-regime="flex">Ineficaz: la entrada de capitales aprecia la moneda y las exportaciones netas caen tanto como sube G.</td><td data-regime="fixed">Muy eficaz: para sostener ē el banco central compra divisas y expande M.</td></tr><tr><th scope="row">Expansión monetaria (↑M)</th><td data-regime="flex">Muy eficaz: la salida de capitales deprecia la moneda y suben las exportaciones netas.</td><td data-regime="fixed">Ineficaz: la presión sobre ē obliga a vender reservas y M vuelve a su nivel.</td></tr><tr><th scope="row">Alza de la tasa internacional (↑i*)</th><td data-regime="flex">Depreciación; Y sube porque la menor demanda de dinero libera liquidez.</td><td data-regime="fixed">Contracción: la salida de capitales reduce reservas y M; Y cae.</td></tr><tr><th scope="row">Devaluación (↑ē)</th><td data-regime="flex">No aplica: el tipo de cambio lo fija el mercado.</td><td data-regime="fixed">Expansiva: abarata exportaciones, entran divisas y M aumenta.</td></tr></tbody></table></div><p class="data-note">Con movilidad imperfecta los resultados son intermedios: compara los multiplicadores efectivos calculados arriba al cambiar la movilidad. <strong>Trilema de Mundell:</strong> no pueden coexistir tipo de cambio fijo, libre movilidad de capitales y política monetaria autónoma.</p></article>
      </div>
+     <details class="surface soft-panel islm-observed"><summary>Datos observados y procedencia de la calibración</summary><p id="islmCalibration">Calibración con datos del país seleccionado.</p></details>
+     <details class="surface soft-panel"><summary>Glosario y referencias</summary><div id="islmGlossary" class="islm-glossary"></div><ol id="islmReferences" class="data-note"></ol></details>
+     <dialog id="islmHelp" aria-label="Ayuda del laboratorio"><button id="islmCloseHelp" class="control-action" type="button">Cerrar ayuda</button><h3>¿Por qué se desplazan las curvas?</h3><div id="islmHelpBody"></div></dialog>
      <article class="surface soft-panel reveal"><div class="card-top"><div><h3>Tipos de cambio de referencia</h3><p>Un dólar estadounidense (USD) expresado en monedas seleccionadas.</p></div><span id="fxStatusBadge" class="text-chip">Fuente referencial · respaldo local</span></div><div id="fxGrid" class="fx-grid"></div><div class="data-note">Las cotizaciones pueden ser indicativas y no equivalen a tasas de compra/venta bancarias. Verifica fecha y condiciones antes de operar.</div></article>
      <div class="sim-disclaimer"><svg fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-info"/></svg><span id="islmDisclaimer">Modelo didáctico de corto plazo con precios fijos (P = 1) y expectativas estáticas: la prima ρ incluye riesgo país y depreciación esperada. La calibración usa datos observados (apertura comercial y cuenta corriente del WDI, meta de inflación) y supuestos ilustrativos (tasa neutral, parámetros de comportamiento); no es un modelo de pronóstico ni describe con exactitud la política de ningún banco central.</span></div>
    </section>
