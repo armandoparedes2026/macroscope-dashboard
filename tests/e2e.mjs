@@ -576,6 +576,62 @@ await check('preferencia del sistema con almacenamiento restringido y copia de c
   await page.locator('[data-cite-source]').first().click();
   assert.match(await page.evaluate(()=>window.copiedCitation),/Banco Central de Reserva del Perú.*BCRPData.*Recuperado el/);
 });
+// Text over its effective background (walks up through transparent ancestors), WCAG ratio.
+const textContrast=(page,selector)=>page.$eval(selector,el=>{
+  const parse=c=>c.match(/[\d.]+/g).map(Number);
+  const lum=rgb=>rgb.slice(0,3).map(v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4;}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);
+  let node=el,bg=parse(getComputedStyle(node).backgroundColor);
+  while(bg[3]===0&&node.parentElement){node=node.parentElement;bg=parse(getComputedStyle(node).backgroundColor);}
+  const a=lum(parse(getComputedStyle(el).color)),b=lum(bg);
+  return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+});
+await check('colorimetría: encabezados de tabla e inspector legibles en ambos temas',async page=>{
+  await openOffline(page);
+  for(const theme of ['dark','light']){
+    await page.evaluate(theme=>MacroScope.setTheme(theme),theme);
+    await page.waitForTimeout(400); // let the .22s background transitions finish before measuring
+    for(const selector of ['#tab-data .data-table thead th','#compareTableHead th','#rawJsonPreview','#endpointList']){
+      const ratio=await textContrast(page,selector);
+      assert.ok(ratio>=4.5,`${selector} en tema ${theme}: contraste ${ratio.toFixed(2)} < 4.5`);
+    }
+    await page.evaluate(()=>{location.hash='laboratorio';});await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
+    const ratio=await textContrast(page,'#islmPolicyTable thead th');
+    assert.ok(ratio>=4.5,`tabla de eficacia en tema ${theme}: contraste ${ratio.toFixed(2)}`);
+    await page.evaluate(()=>{location.hash='panorama';});await page.waitForFunction(()=>!document.querySelector('#tab-overview').hidden);
+  }
+  const overflow=await page.$eval('#endpointList',el=>el.scrollWidth-el.clientWidth);
+  assert.ok(overflow<=1,'las URL del inspector no deben desbordar en horizontal');
+});
+await check('panorama: un indicador activo para tarjetas, evolución y comparador, en orden lógico',async page=>{
+  await openOffline(page);
+  const inOrder=await page.evaluate(()=>['kpiGrid','trendChart','macroMixChart','comparisonPanel','tab-data'].map(id=>document.getElementById(id))
+    .every((el,i,list)=>!i||(list[i-1].compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING)));
+  assert.ok(inOrder,'orden esperado: indicadores → evolución → crecimiento e inflación → comparador → datos');
+  await page.getByRole('button',{name:/^Explorar Exportaciones:/}).click();
+  assert.equal(await page.inputValue('#compareIndicator'),'NE.EXP.GNFS.ZS');
+  assert.equal(await page.inputValue('#indicatorSelectChart'),'NE.EXP.GNFS.ZS');
+  await page.selectOption('#compareIndicator','NY.GDP.PCAP.PP.KD');
+  assert.equal(await page.inputValue('#indicatorSelectChart'),'NY.GDP.PCAP.PP.KD');
+  assert.match(await page.textContent('.kpi-card.active-kpi .kpi-title'),/PPA constante/);
+  await page.selectOption('#indicatorSelectChart','FP.CPI.TOTL.ZG');
+  assert.equal(await page.inputValue('#compareIndicator'),'FP.CPI.TOTL.ZG');
+});
+await check('laboratorio: controles fijos con scroll propio y transmisión antes del resultado',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='laboratorio';});await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
+  const sections=await page.$$eval('.islm-main > article',list=>list.map(a=>a.getAttribute('aria-label')));
+  assert.deepEqual(sections,['Diagramas del modelo','Mecanismo de transmisión','Resultados del modelo']);
+  // The page uses smooth scrolling; jump instantly so the baseline is not taken mid-animation.
+  await page.evaluate(()=>document.querySelector('.islm-layout').scrollIntoView({behavior:'instant'}));
+  await page.waitForTimeout(300);
+  const before=await page.evaluate(()=>({y:scrollY,diagram:document.getElementById('islmPanelISLM').getBoundingClientRect().top}));
+  await page.locator('.islm-controls').hover();await page.mouse.wheel(0,800);await page.waitForTimeout(300);
+  const after=await page.evaluate(()=>({y:scrollY,controls:document.querySelector('.islm-controls').scrollTop,diagram:document.getElementById('islmPanelISLM').getBoundingClientRect().top}));
+  assert.ok(after.controls>0,'el panel de controles debe desplazarse por sí mismo');
+  assert.ok(Math.abs(after.diagram-before.diagram)<5,'los diagramas no deben moverse al recorrer los controles');
+  const box=await page.$eval('.islm-controls',el=>{const r=el.getBoundingClientRect();return {bottom:r.bottom,vh:innerHeight};});
+  assert.ok(box.bottom<=box.vh+1,'el panel de controles cabe en la pantalla');
+});
 await writeFile('test-results/rediseno/aceptacion.json',JSON.stringify(acceptance,null,2));
 
 await browser.close();

@@ -178,6 +178,13 @@ body::before{display:none!important}
 #tab-simulator .islm-table td{padding:var(--space-px-10) var(--space-px-6);white-space:normal;overflow-wrap:anywhere;font-size:10px;line-height:1.6}
 #tab-simulator .islm-table th:first-child{width:25%}
 #tab-simulator .islm-table small{font-size:9px;color:var(--muted)}
+/* Desktop workbench: the controls panel stays in view and scrolls on its own, so moving a slider never
+   scrolls the page and the four diagrams remain visible while their curves shift. */
+@media(min-width:1121px){
+.islm-layout{align-items:start}
+.islm-controls{position:sticky;top:calc(var(--topbar-h,64px) + var(--space-3));max-height:calc(100vh - var(--topbar-h,64px) - var(--space-6));overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.islm-panel canvas{height:clamp(170px,calc((100vh - var(--topbar-h,64px) - 440px) / 2),260px)}
+}
 @media(max-width:1120px){.islm-layout{grid-template-columns:minmax(0,1fr)}
 .islm-controls{width:100%}
 .islm-controls .field-select{font-size:13px}
