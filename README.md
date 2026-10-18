@@ -1,6 +1,6 @@
-# MacroScope — Dashboard macroeconómico
+# MacroScope — Laboratorio Interactivo de Economía Aplicada
 
-Dashboard interactivo para seguir indicadores macroeconómicos, compararlos entre países y entender la macroeconomía abierta de corto plazo con un simulador IS–LM–BP / Mundell–Fleming.
+Plataforma para aprender, experimentar y analizar economía aplicada: un laboratorio IS–LM–BP / Mundell–Fleming con escenarios guiados en tres niveles, estadísticas oficiales (Banco Mundial WDI y BCRP) y comparaciones internacionales que explicitan sus límites. Distingue siempre la simulación teórica de la evidencia empírica.
 
 ## Abrir el proyecto
 
@@ -8,10 +8,10 @@ Abre [`index.html`](index.html) en un navegador moderno. No requiere un proceso 
 
 ## Funciones
 
-- Panorama ejecutivo con indicadores del Banco Mundial (WDI).
+- Panorama económico con indicadores del Banco Mundial (WDI) y series mensuales del BCRP.
 - Comparación entre países y América Latina y el Caribe.
 - Gráficas de series históricas y comparaciones internacionales.
-- Carrusel de lecturas gerenciales y visualización adaptable.
+- Carrusel de lecturas económicas y visualización adaptable.
 - Referencias cambiarias con Open ER API.
 - Simulador **IS–LM–BP / Mundell–Fleming ampliado** con cuatro diagramas enlazados (ver abajo).
 - Tabla histórica con exportación CSV e inspector de las consultas API.

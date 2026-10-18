@@ -46,7 +46,7 @@ await check('modo sin conexión: respaldo local y gráficos alternativos', async
 
 await check('botones del sidebar con nombre accesible', async (page) => {
   await openOffline(page);
-  for (const name of ['Panorama ejecutivo', 'Modelo IS–LM y divisas', 'Datos e inspector API']) {
+  for (const name of ['Panorama económico', 'Modelo IS–LM y divisas', 'Datos e inspector API']) {
     await page.locator('.sidebar').getByRole('button', { name }).click();
   }
   assert.equal(await page.isHidden('#tab-overview'), true);

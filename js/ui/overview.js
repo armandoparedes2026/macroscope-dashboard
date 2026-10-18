@@ -457,7 +457,7 @@
     function copyExecutiveBrief() {
       const headline = document.getElementById('executiveHeadline')?.textContent || '';
       const narrative = document.getElementById('executiveNarrative')?.textContent || '';
-      const textToCopy = `RESUMEN EJECUTIVO MACROECONÓMICO\n${headline}\n${narrative}\nFuente: World Bank Open Data (WDI), corte anual por indicador`;
+      const textToCopy = `LECTURA ECONÓMICA\n${headline}\n${narrative}\nFuente: World Bank Open Data (WDI), corte anual por indicador`;
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(textToCopy).then(() => {

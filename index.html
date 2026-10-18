@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101e36">
-  <meta name="description" content="Observatorio macroeconómico para análisis ejecutivo, comparaciones internacionales y un simulador IS–LM–BP / Mundell–Fleming con equilibrio inicial anclado en datos WDI y supuestos explícitos.">
-  <title>MacroScope — Inteligencia económica</title>
+  <meta name="description" content="Laboratorio interactivo de economía aplicada: estadísticas oficiales, comparaciones internacionales y un simulador IS–LM–BP / Mundell–Fleming con equilibrio inicial anclado en datos WDI y supuestos explícitos.">
+  <title>MacroScope — Laboratorio Interactivo de Economía Aplicada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -60,14 +60,14 @@
     <span class="brand-logo" role="img" aria-label="MacroScope"><svg fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.5 9 11l4 4 7-9"/><path d="M14.5 6H20v5.5"/><path d="M3 21h18"/></svg></span>
   </div>
   <nav class="side-nav" aria-label="Secciones del dashboard">
-   <button class="tab-btn is-active" type="button" data-tab="overview" aria-current="page" title="Panorama ejecutivo"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-grid"/></svg><span class="nav-text">Panorama ejecutivo</span></button>
+   <button class="tab-btn is-active" type="button" data-tab="overview" aria-current="page" title="Panorama económico"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-grid"/></svg><span class="nav-text">Panorama económico</span></button>
    <button class="tab-btn" type="button" data-tab="simulator" title="Modelo IS–LM y divisas"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-wallet"/></svg><span class="nav-text">Modelo IS–LM y divisas</span></button>
    <button class="tab-btn" type="button" data-tab="data" title="Datos e inspector API"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-database"/></svg><span class="nav-text">Datos e inspector API</span></button>
   </nav>
  </aside>
  <div class="workspace">
   <header class="topbar">
-    <div class="top-left"><div class="crumb">INTELIGENCIA ECONÓMICA <span class="crumb-line"></span> ÁREA GERENCIAL</div><div class="top-title" id="topTitle">Panorama macroeconómico</div></div>
+    <div class="top-left"><div class="crumb">LABORATORIO DE ECONOMÍA APLICADA <span class="crumb-line"></span> TEORÍA, MODELOS Y DATOS</div><div class="top-title" id="topTitle">Panorama macroeconómico</div></div>
     <div class="top-right">
       <div class="api-indicator" id="apiStatusBadge" title="Estado de la última conexión"><span class="status-dot" id="apiStatusDot"></span><span id="apiStatusText">Consultando fuentes...</span></div>
       <button class="icon-button" id="themeBtn" type="button" title="Cambiar entre modo claro y oscuro" aria-label="Cambiar tema"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use id="themeIcon" href="#i-moon"/></svg></button>
@@ -79,8 +79,8 @@
    <button type="button" class="tab-btn" data-tab="data"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Datos y API</button>
   </nav>
   <main class="content">
-   <section class="view" id="tab-overview" aria-label="Panorama ejecutivo">
-     <div class="page-heading"><div><div class="eyebrow">OBSERVATORIO MACROECONÓMICO</div><h1>Inteligencia para decidir mejor.</h1><p>Una lectura clara de la economía, sus tendencias y su posición frente a los mercados de referencia.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-calendar"/></svg><span id="headingPeriod">Serie anual · 2014–2024</span></div><button class="hero-scroll-cue" id="heroScrollCue" type="button" aria-label="Desplazarse hacia el contenido principal"><span class="cue-dot"></span><span>Explorar análisis</span></button></div>
+   <section class="view" id="tab-overview" aria-label="Panorama económico">
+     <div class="page-heading"><div><div class="eyebrow">LABORATORIO INTERACTIVO DE ECONOMÍA APLICADA</div><h1>Teoría, modelos y datos para entender la economía.</h1><p>Una lectura clara de la economía, sus tendencias y su posición frente a los mercados de referencia.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-calendar"/></svg><span id="headingPeriod">Serie anual · 2014–2024</span></div><button class="hero-scroll-cue" id="heroScrollCue" type="button" aria-label="Desplazarse hacia el contenido principal"><span class="cue-dot"></span><span>Explorar análisis</span></button></div>
      <div class="filter-bar" id="overviewFilters" aria-label="Filtros globales">
       <div class="filter-group main-country"><label class="control-label" for="countrySelect">ECONOMÍA PRINCIPAL</label><select class="field-select" id="countrySelect"><option value="PER">🇵🇪 Perú</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="USA">🇺🇸 Estados Unidos</option></select></div>
       <div class="filter-group"><label class="control-label" for="benchmarkSelect">COMPARAR CON</label><select class="field-select" id="benchmarkSelect"><option value="LCN">🌎 América Latina y el Caribe</option><option value="USA">🇺🇸 Estados Unidos</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="PER">🇵🇪 Perú</option></select></div>
@@ -94,7 +94,7 @@
      </article>
      <div class="executive-grid reveal">
       <div class="executive premium-ring">
-       <div class="executive-content"><div class="executive-top"><span class="eyebrow">LECTURA EJECUTIVA</span><span id="summaryYearTag" class="cut-tag">Corte WDI: 2024</span></div><h2 id="executiveHeadline">Preparando síntesis macroeconómica...</h2><p id="executiveNarrative">Consultando los indicadores disponibles.</p></div>
+       <div class="executive-content"><div class="executive-top"><span class="eyebrow">LECTURA ECONÓMICA</span><span id="summaryYearTag" class="cut-tag">Corte WDI: 2024</span></div><h2 id="executiveHeadline">Preparando síntesis macroeconómica...</h2><p id="executiveNarrative">Consultando los indicadores disponibles.</p></div>
        <div class="executive-actions"><button type="button" class="ghost-light" id="copyBriefBtn"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg>Copiar resumen</button></div>
       </div>
       <div class="hero-side">
@@ -106,7 +106,7 @@
       </div>
      </div>
      <article class="surface insight-carousel premium-ring reveal" id="insightCarousel">
-      <div class="insight-head"><div><h2 class="section-title">Señales destacadas</h2><p class="section-sub">Carrusel ejecutivo con los movimientos más relevantes para la gestión.</p></div><div class="carousel-controls"><button class="carousel-btn" id="carouselPrev" type="button" aria-label="Insight anterior"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chevron-left"/></svg></button><div class="carousel-dots" id="carouselDots"></div><button class="carousel-btn" id="carouselNext" type="button" aria-label="Insight siguiente"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chevron"/></svg></button></div></div>
+      <div class="insight-head"><div><h2 class="section-title">Señales destacadas</h2><p class="section-sub">Movimientos recientes más relevantes de los indicadores, para interpretarlos con teoría y datos.</p></div><div class="carousel-controls"><button class="carousel-btn" id="carouselPrev" type="button" aria-label="Insight anterior"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chevron-left"/></svg></button><div class="carousel-dots" id="carouselDots"></div><button class="carousel-btn" id="carouselNext" type="button" aria-label="Insight siguiente"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chevron"/></svg></button></div></div>
       <div class="insight-carousel-inner"><div class="insight-track" id="insightTrack"></div></div>
      </article>
      <div>
@@ -205,7 +205,7 @@
     <article class="surface soft-panel"><div class="card-top"><div><h3>Inspector de consultas y respuestas</h3><p>EndPoints REST consultados y muestra de la respuesta JSON recibida.</p></div><span class="inspector-status" id="inspectorLatencyBadge">API REST v2</span></div><div class="inspector-grid"><div class="code-block"><div class="code-label">Solicitudes recientes</div><ul id="endpointList"></ul></div><div class="code-block"><div class="code-label">Ejemplo de respuesta</div><pre id="rawJsonPreview">Sincronizando...</pre></div></div><p class="data-note">Proveedor principal: <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" class="source-link">World Bank Open Data</a>. Fuente de divisas: <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer" class="source-link">ExchangeRate-API</a>. Estos datos no constituyen una cotización oficial del banco central.</p></article>
    </section>
   </main>
-  <footer class="footer"><span>© 2026 MacroScope · Observatorio económico interactivo</span><span>Datos macroeconómicos anuales · <span id="lastUpdatedLabel">Consulta pendiente</span></span></footer>
+  <footer class="footer"><span>© 2026 MacroScope · Laboratorio Interactivo de Economía Aplicada</span><span>Datos macroeconómicos anuales · <span id="lastUpdatedLabel">Consulta pendiente</span></span></footer>
  </div>
 </div>
 <div class="toast" id="toastContainer" role="status" aria-live="polite" hidden><span class="toast-dot" id="toastIcon"></span><span id="toastMessage">Actualizado</span></div>
