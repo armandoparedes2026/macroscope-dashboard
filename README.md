@@ -1,6 +1,6 @@
-# MacroScope — Dashboard macroeconómico
+# MacroScope — Laboratorio Interactivo de Economía Aplicada
 
-Dashboard interactivo para seguir indicadores macroeconómicos, compararlos entre países y entender la macroeconomía abierta de corto plazo con un simulador IS–LM–BP / Mundell–Fleming.
+Plataforma para aprender, experimentar y analizar economía aplicada: un laboratorio IS–LM–BP / Mundell–Fleming con escenarios guiados en tres niveles, estadísticas oficiales (Banco Mundial WDI y BCRP) y comparaciones internacionales que explicitan sus límites. Distingue siempre la simulación teórica de la evidencia empírica.
 
 ## Abrir el proyecto
 
@@ -8,10 +8,10 @@ Abre [`index.html`](index.html) en un navegador moderno. No requiere un proceso 
 
 ## Funciones
 
-- Panorama ejecutivo con indicadores del Banco Mundial (WDI).
+- Panorama económico con indicadores del Banco Mundial (WDI) y series mensuales del BCRP.
 - Comparación entre países y América Latina y el Caribe.
 - Gráficas de series históricas y comparaciones internacionales.
-- Carrusel de lecturas gerenciales y visualización adaptable.
+- Carrusel de lecturas económicas y visualización adaptable.
 - Referencias cambiarias con Open ER API.
 - Simulador **IS–LM–BP / Mundell–Fleming ampliado** con cuatro diagramas enlazados (ver abajo).
 - Tabla histórica con exportación CSV e inspector de las consultas API.
@@ -86,18 +86,25 @@ HTML, CSS y JavaScript integrados en `index.html`. Chart.js 4.4.1 se carga desde
 
 ```text
 macroscope-dashboard/
-├── index.html                  # Dashboard completo (HTML + CSS + JS)
-├── js/
-│   └── islm-model.js           # Modelo IS–LM–BP / Mundell–Fleming (funciones puras)
-├── package.json                # Scripts de prueba y dependencia de desarrollo (Playwright)
-├── tests/
-│   ├── smoke.mjs               # Comprobación estática sin dependencias
-│   ├── islm-model.test.mjs     # Pruebas unitarias del modelo (node:test)
-│   └── e2e.mjs                 # Pruebas en Chromium sin interfaz, con red controlada
-├── .github/workflows/validate.yml
-├── README.md
-└── .gitignore
+??? index.html                  # Estructura HTML y guardia m?nima de tema antes del pintado
+??? css/                        # tokens, base, layout, componentes e IS?LM (orden de cascada)
+??? js/
+?   ??? config/                 # pa?ses, indicadores, metas, supuestos y estado compartido
+?   ??? data/fallback-wdi.js     # respaldo anual y cambiario con fechas de extracci?n disponibles
+?   ??? services/               # WDI (paginaci?n/cach?/reintentos), BCRP y FX
+?   ??? ui/                     # formato, gr?ficos, panorama/datos y laboratorio IS?LM
+?   ??? app.js                  # arranque y enlaces entre vistas
+?   ??? islm-model.js           # modelo puro (contrato conservado)
+?   ??? lab-content.js          # escenarios y contenido puro de la auditor?a
+??? api/bcrp.js                 # proxy del servidor; no se carga como script del navegador
+??? tests/                      # smoke, unitarias, e2e, comparaci?n visual y fixtures reales
+??? docs/arquitectura.md         # dependencias, orden de carga y l?mites DOM/Node
+??? docs/evidence/fase-modularizacion/
+??? package.json
+??? .github/workflows/validate.yml
 ```
+
+Los scripts del navegador son cl?sicos con `defer` y comparten `globalThis.MacroScope`; no requieren bundler ni m?dulos ES y funcionan abriendo `index.html` por `file://`. La decisi?n y los contratos est?n documentados en [arquitectura](docs/arquitectura.md).
 
 ## Desarrollo seguro con Git y worktrees
 
@@ -117,15 +124,23 @@ Puedes asignar un worktree a Codex y el otro a Claude Code. Revisa los cambios a
 ```bash
 npm install                                  # instala Playwright
 npx playwright install chromium              # solo la primera vez
-npm test                                     # smoke + unitarias del modelo + e2e
-node tests/smoke.mjs                         # solo la comprobación estática (sin dependencias)
+npm test                                     # smoke + todas las unitarias + e2e
+npm run test:unit                            # modelo, BCRP, contenido y WDI
+npm run test:smoke                           # sintaxis y referencias locales
+node tests/visual-modularization.mjs after    # comparaci?n con la referencia versionada
 ```
 
-- `tests/smoke.mjs` valida que existan los controles principales y que el JavaScript integrado tenga sintaxis válida.
-- `tests/islm-model.test.mjs` comprueba que el modelo reproduce los resultados clásicos de IS–LM y Mundell–Fleming y que las curvas dibujadas pasan por el equilibrio calculado.
-- `tests/e2e.mjs` abre la página en Chromium sin interfaz, bloqueando la red o respondiendo con datos de prueba. Verifica el modo de respaldo, la procedencia por celda (tabla y CSV), los colores de variación, la clasificación frente a la meta de inflación, la accesibilidad del sidebar, el simulador IS–LM (regímenes, trilema, diagramas y clasificación de variables), el tema persistente, el diseño móvil y el carrusel con `prefers-reduced-motion`.
+En PowerShell con scripts deshabilitados, usa `npm.cmd` en lugar de `npm`.
 
-GitHub Actions ejecuta ambas pruebas en cada push a `main` y en los pull requests. Las pruebas **no** consultan las APIs reales, así que no garantizan su disponibilidad.
+- `tests/smoke.mjs` comprueba los controles principales, la sintaxis de todos los `.js` del proyecto (excepto dependencias y metadatos Git), los scripts cl?sicos con `defer`, las referencias locales en ambos sentidos, el SRI de Chart.js y el l?mite de 450 l?neas del HTML.
+- `tests/islm-model.test.mjs` valida los resultados cl?sicos, reg?menes, trilema, calibraci?n y curvas del modelo.
+- `tests/lab-content.test.mjs` verifica escenarios y predicciones del laboratorio contra el modelo.
+- `tests/bcrp.test.mjs` comprueba normalizaci?n de respuestas reales y contratos del proxy.
+- `tests/wdi.test.mjs` importa el servicio cl?sico en Node sin DOM y valida paginaci?n con fixtures reales, nulos, ?ltimo a?o disponible, errores oficiales, cach? y actualizaci?n forzada. La procedencia de los fixtures est? en `tests/fixtures/wdi-source.json`.
+- `tests/e2e.mjs` abre `file://` en Chromium con red controlada y verifica respaldo, procedencia por celda y CSV, indicadores, accesibilidad, simulador, temas, m?vil, carrusel, paginaci?n, reintentos y BCRP. Las capturas de este test se guardan en `docs/evidence/fase-modularizacion/e2e-hero-*.png`.
+- `tests/visual-modularization.mjs` compara p?gina completa de Panorama, IS?LM y Datos, en temas claro/oscuro a 1440 y 390 px, con fechas fijas y APIs bloqueadas. Conserva las capturas originales en `before/`; usa `before` ?nicamente para crear una nueva referencia deliberada. El umbral y los resultados est?n en [la evidencia](docs/evidence/fase-modularizacion/README.md).
+
+GitHub Actions ejecuta `npm test` en cada push a `main` y en los pull requests. Estas pruebas usan fixtures y no garantizan disponibilidad de las APIs reales.
 
 ## Estado del repositorio
 

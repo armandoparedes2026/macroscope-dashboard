@@ -1,0 +1,722 @@
+[
+  {
+    "source": "BCRP",
+    "code": "PD04722MM",
+    "title": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria",
+    "unit": "%",
+    "frequency": "monthly",
+    "observations": [
+      {
+        "period": "Ene.2024",
+        "date": "2024-01-01",
+        "value": 6.5
+      },
+      {
+        "period": "Feb.2024",
+        "date": "2024-02-01",
+        "value": 6.25
+      },
+      {
+        "period": "Mar.2024",
+        "date": "2024-03-01",
+        "value": 6.25
+      },
+      {
+        "period": "Abr.2024",
+        "date": "2024-04-01",
+        "value": 6
+      },
+      {
+        "period": "May.2024",
+        "date": "2024-05-01",
+        "value": 5.75
+      },
+      {
+        "period": "Jun.2024",
+        "date": "2024-06-01",
+        "value": 5.75
+      },
+      {
+        "period": "Jul.2024",
+        "date": "2024-07-01",
+        "value": 5.75
+      },
+      {
+        "period": "Ago.2024",
+        "date": "2024-08-01",
+        "value": 5.5
+      },
+      {
+        "period": "Sep.2024",
+        "date": "2024-09-01",
+        "value": 5.25
+      },
+      {
+        "period": "Oct.2024",
+        "date": "2024-10-01",
+        "value": 5.25
+      },
+      {
+        "period": "Nov.2024",
+        "date": "2024-11-01",
+        "value": 5
+      },
+      {
+        "period": "Dic.2024",
+        "date": "2024-12-01",
+        "value": 5
+      },
+      {
+        "period": "Ene.2025",
+        "date": "2025-01-01",
+        "value": 4.75
+      },
+      {
+        "period": "Feb.2025",
+        "date": "2025-02-01",
+        "value": 4.75
+      },
+      {
+        "period": "Mar.2025",
+        "date": "2025-03-01",
+        "value": 4.75
+      },
+      {
+        "period": "Abr.2025",
+        "date": "2025-04-01",
+        "value": 4.75
+      },
+      {
+        "period": "May.2025",
+        "date": "2025-05-01",
+        "value": 4.5
+      },
+      {
+        "period": "Jun.2025",
+        "date": "2025-06-01",
+        "value": 4.5
+      },
+      {
+        "period": "Jul.2025",
+        "date": "2025-07-01",
+        "value": 4.5
+      },
+      {
+        "period": "Ago.2025",
+        "date": "2025-08-01",
+        "value": 4.5
+      },
+      {
+        "period": "Sep.2025",
+        "date": "2025-09-01",
+        "value": 4.25
+      },
+      {
+        "period": "Oct.2025",
+        "date": "2025-10-01",
+        "value": 4.25
+      },
+      {
+        "period": "Nov.2025",
+        "date": "2025-11-01",
+        "value": 4.25
+      },
+      {
+        "period": "Dic.2025",
+        "date": "2025-12-01",
+        "value": 4.25
+      },
+      {
+        "period": "Ene.2026",
+        "date": "2026-01-01",
+        "value": 4.25
+      },
+      {
+        "period": "Feb.2026",
+        "date": "2026-02-01",
+        "value": 4.25
+      },
+      {
+        "period": "Mar.2026",
+        "date": "2026-03-01",
+        "value": 4.25
+      },
+      {
+        "period": "Abr.2026",
+        "date": "2026-04-01",
+        "value": 4.25
+      },
+      {
+        "period": "May.2026",
+        "date": "2026-05-01",
+        "value": 4.25
+      },
+      {
+        "period": "Jun.2026",
+        "date": "2026-06-01",
+        "value": 4.25
+      },
+      {
+        "period": "Jul.2026",
+        "date": "2026-07-01",
+        "value": 4.25
+      },
+      {
+        "period": "Ago.2026",
+        "date": "2026-08-01",
+        "value": 4.25
+      },
+      {
+        "period": "Sep.2026",
+        "date": "2026-09-01",
+        "value": 4.25
+      },
+      {
+        "period": "Oct.2026",
+        "date": "2026-10-01",
+        "value": 4.25
+      }
+    ],
+    "fetchedAt": "2026-10-18T06:42:40.009Z"
+  },
+  {
+    "source": "BCRP",
+    "code": "PN01273PM",
+    "title": "Índice de precios Lima Metropolitana (var% 12 meses) - IPC",
+    "unit": "% en 12 meses",
+    "frequency": "monthly",
+    "observations": [
+      {
+        "period": "Ene.2024",
+        "date": "2024-01-01",
+        "value": 3.02392174826855
+      },
+      {
+        "period": "Feb.2024",
+        "date": "2024-02-01",
+        "value": 3.29406696032184
+      },
+      {
+        "period": "Mar.2024",
+        "date": "2024-03-01",
+        "value": 3.04504592593905
+      },
+      {
+        "period": "Abr.2024",
+        "date": "2024-04-01",
+        "value": 2.42207617792805
+      },
+      {
+        "period": "May.2024",
+        "date": "2024-05-01",
+        "value": 2.00493835958688
+      },
+      {
+        "period": "Jun.2024",
+        "date": "2024-06-01",
+        "value": 2.28538225698791
+      },
+      {
+        "period": "Jul.2024",
+        "date": "2024-07-01",
+        "value": 2.1276637869709
+      },
+      {
+        "period": "Ago.2024",
+        "date": "2024-08-01",
+        "value": 2.03409700303861
+      },
+      {
+        "period": "Sep.2024",
+        "date": "2024-09-01",
+        "value": 1.77501053596859
+      },
+      {
+        "period": "Oct.2024",
+        "date": "2024-10-01",
+        "value": 2.00918040984485
+      },
+      {
+        "period": "Nov.2024",
+        "date": "2024-11-01",
+        "value": 2.27199072148831
+      },
+      {
+        "period": "Dic.2024",
+        "date": "2024-12-01",
+        "value": 1.96630270142824
+      },
+      {
+        "period": "Ene.2025",
+        "date": "2025-01-01",
+        "value": 1.85158283440667
+      },
+      {
+        "period": "Feb.2025",
+        "date": "2025-02-01",
+        "value": 1.4773290589483
+      },
+      {
+        "period": "Mar.2025",
+        "date": "2025-03-01",
+        "value": 1.27718026977924
+      },
+      {
+        "period": "Abr.2025",
+        "date": "2025-04-01",
+        "value": 1.65183401740204
+      },
+      {
+        "period": "May.2025",
+        "date": "2025-05-01",
+        "value": 1.68666289219268
+      },
+      {
+        "period": "Jun.2025",
+        "date": "2025-06-01",
+        "value": 1.69370904576716
+      },
+      {
+        "period": "Jul.2025",
+        "date": "2025-07-01",
+        "value": 1.6888009685144
+      },
+      {
+        "period": "Ago.2025",
+        "date": "2025-08-01",
+        "value": 1.10633077531991
+      },
+      {
+        "period": "Sep.2025",
+        "date": "2025-09-01",
+        "value": 1.35839342135424
+      },
+      {
+        "period": "Oct.2025",
+        "date": "2025-10-01",
+        "value": 1.35177475650182
+      },
+      {
+        "period": "Nov.2025",
+        "date": "2025-11-01",
+        "value": 1.36861256988846
+      },
+      {
+        "period": "Dic.2025",
+        "date": "2025-12-01",
+        "value": 1.50879973918667
+      },
+      {
+        "period": "Ene.2026",
+        "date": "2026-01-01",
+        "value": 1.70091694832201
+      },
+      {
+        "period": "Feb.2026",
+        "date": "2026-02-01",
+        "value": 2.21416625767848
+      },
+      {
+        "period": "Mar.2026",
+        "date": "2026-03-01",
+        "value": 3.80454581291585
+      },
+      {
+        "period": "Abr.2026",
+        "date": "2026-04-01",
+        "value": 4.01414363472928
+      },
+      {
+        "period": "May.2026",
+        "date": "2026-05-01",
+        "value": 3.90505240621645
+      },
+      {
+        "period": "Jun.2026",
+        "date": "2026-06-01",
+        "value": 4.00890965651766
+      },
+      {
+        "period": "Jul.2026",
+        "date": "2026-07-01",
+        "value": 4.06515256208199
+      },
+      {
+        "period": "Ago.2026",
+        "date": "2026-08-01",
+        "value": 4.43780929778608
+      },
+      {
+        "period": "Sep.2026",
+        "date": "2026-09-01",
+        "value": 4.54865469481509
+      },
+      {
+        "period": "Oct.2026",
+        "date": "2026-10-01",
+        "value": null
+      }
+    ],
+    "fetchedAt": "2026-10-18T06:42:40.009Z"
+  },
+  {
+    "source": "BCRP",
+    "code": "PN01207PM",
+    "title": "Tipo de cambio - promedio del periodo (S/ por US$) - Interbancario - Promedio",
+    "unit": "S/ por US$",
+    "frequency": "monthly",
+    "observations": [
+      {
+        "period": "Ene.2024",
+        "date": "2024-01-01",
+        "value": 3.74074285714286
+      },
+      {
+        "period": "Feb.2024",
+        "date": "2024-02-01",
+        "value": 3.8279380952381
+      },
+      {
+        "period": "Mar.2024",
+        "date": "2024-03-01",
+        "value": 3.70898947368421
+      },
+      {
+        "period": "Abr.2024",
+        "date": "2024-04-01",
+        "value": 3.71503181818182
+      },
+      {
+        "period": "May.2024",
+        "date": "2024-05-01",
+        "value": 3.73172727272727
+      },
+      {
+        "period": "Jun.2024",
+        "date": "2024-06-01",
+        "value": 3.7867052631579
+      },
+      {
+        "period": "Jul.2024",
+        "date": "2024-07-01",
+        "value": 3.764135
+      },
+      {
+        "period": "Ago.2024",
+        "date": "2024-08-01",
+        "value": 3.74185
+      },
+      {
+        "period": "Sep.2024",
+        "date": "2024-09-01",
+        "value": 3.7689619047619
+      },
+      {
+        "period": "Oct.2024",
+        "date": "2024-10-01",
+        "value": 3.75436363636364
+      },
+      {
+        "period": "Nov.2024",
+        "date": "2024-11-01",
+        "value": 3.779135
+      },
+      {
+        "period": "Dic.2024",
+        "date": "2024-12-01",
+        "value": 3.73553684210526
+      },
+      {
+        "period": "Ene.2025",
+        "date": "2025-01-01",
+        "value": 3.74692272727273
+      },
+      {
+        "period": "Feb.2025",
+        "date": "2025-02-01",
+        "value": 3.69685
+      },
+      {
+        "period": "Mar.2025",
+        "date": "2025-03-01",
+        "value": 3.65248571428571
+      },
+      {
+        "period": "Abr.2025",
+        "date": "2025-04-01",
+        "value": 3.70003
+      },
+      {
+        "period": "May.2025",
+        "date": "2025-05-01",
+        "value": 3.65991428571429
+      },
+      {
+        "period": "Jun.2025",
+        "date": "2025-06-01",
+        "value": 3.60219523809524
+      },
+      {
+        "period": "Jul.2025",
+        "date": "2025-07-01",
+        "value": 3.556945
+      },
+      {
+        "period": "Ago.2025",
+        "date": "2025-08-01",
+        "value": 3.542385
+      },
+      {
+        "period": "Sep.2025",
+        "date": "2025-09-01",
+        "value": 3.50180454545455
+      },
+      {
+        "period": "Oct.2025",
+        "date": "2025-10-01",
+        "value": 3.41322727272727
+      },
+      {
+        "period": "Nov.2025",
+        "date": "2025-11-01",
+        "value": 3.37263
+      },
+      {
+        "period": "Dic.2025",
+        "date": "2025-12-01",
+        "value": 3.36686315789474
+      },
+      {
+        "period": "Ene.2026",
+        "date": "2026-01-01",
+        "value": 3.356115
+      },
+      {
+        "period": "Feb.2026",
+        "date": "2026-02-01",
+        "value": 3.35664
+      },
+      {
+        "period": "Mar.2026",
+        "date": "2026-03-01",
+        "value": 3.44835909090909
+      },
+      {
+        "period": "Abr.2026",
+        "date": "2026-04-01",
+        "value": 3.44349
+      },
+      {
+        "period": "May.2026",
+        "date": "2026-05-01",
+        "value": 3.435275
+      },
+      {
+        "period": "Jun.2026",
+        "date": "2026-06-01",
+        "value": 3.40596190476191
+      },
+      {
+        "period": "Jul.2026",
+        "date": "2026-07-01",
+        "value": 3.40022631578947
+      },
+      {
+        "period": "Ago.2026",
+        "date": "2026-08-01",
+        "value": 3.36295
+      },
+      {
+        "period": "Sep.2026",
+        "date": "2026-09-01",
+        "value": 3.37910454545455
+      },
+      {
+        "period": "Oct.2026",
+        "date": "2026-10-01",
+        "value": null
+      }
+    ],
+    "fetchedAt": "2026-10-18T06:42:40.009Z"
+  },
+  {
+    "source": "BCRP",
+    "code": "PN00027MM",
+    "title": "Cuentas monetarias del Banco Central de Reserva del Perú - Reservas Internacionales Netas (millones US$)",
+    "unit": "millones US$",
+    "frequency": "monthly",
+    "observations": [
+      {
+        "period": "Ene.2024",
+        "date": "2024-01-01",
+        "value": 73327.465328
+      },
+      {
+        "period": "Feb.2024",
+        "date": "2024-02-01",
+        "value": 73943.03284
+      },
+      {
+        "period": "Mar.2024",
+        "date": "2024-03-01",
+        "value": 73827.928392
+      },
+      {
+        "period": "Abr.2024",
+        "date": "2024-04-01",
+        "value": 74511.669888
+      },
+      {
+        "period": "May.2024",
+        "date": "2024-05-01",
+        "value": 73920.00259
+      },
+      {
+        "period": "Jun.2024",
+        "date": "2024-06-01",
+        "value": 71415.400974
+      },
+      {
+        "period": "Jul.2024",
+        "date": "2024-07-01",
+        "value": 74277.82892
+      },
+      {
+        "period": "Ago.2024",
+        "date": "2024-08-01",
+        "value": 80771.266552
+      },
+      {
+        "period": "Sep.2024",
+        "date": "2024-09-01",
+        "value": 80364.80297
+      },
+      {
+        "period": "Oct.2024",
+        "date": "2024-10-01",
+        "value": 83309.078434
+      },
+      {
+        "period": "Nov.2024",
+        "date": "2024-11-01",
+        "value": 83227.783653
+      },
+      {
+        "period": "Dic.2024",
+        "date": "2024-12-01",
+        "value": 78986.65285
+      },
+      {
+        "period": "Ene.2025",
+        "date": "2025-01-01",
+        "value": 81595.881992
+      },
+      {
+        "period": "Feb.2025",
+        "date": "2025-02-01",
+        "value": 83660.872809
+      },
+      {
+        "period": "Mar.2025",
+        "date": "2025-03-01",
+        "value": 81016.103395
+      },
+      {
+        "period": "Abr.2025",
+        "date": "2025-04-01",
+        "value": 84469.44329
+      },
+      {
+        "period": "May.2025",
+        "date": "2025-05-01",
+        "value": 85957.392664
+      },
+      {
+        "period": "Jun.2025",
+        "date": "2025-06-01",
+        "value": 85263.330184
+      },
+      {
+        "period": "Jul.2025",
+        "date": "2025-07-01",
+        "value": 87480.018817
+      },
+      {
+        "period": "Ago.2025",
+        "date": "2025-08-01",
+        "value": 87752.818921
+      },
+      {
+        "period": "Sep.2025",
+        "date": "2025-09-01",
+        "value": 85148.225305
+      },
+      {
+        "period": "Oct.2025",
+        "date": "2025-10-01",
+        "value": 89960.76524
+      },
+      {
+        "period": "Nov.2025",
+        "date": "2025-11-01",
+        "value": 90898.183584
+      },
+      {
+        "period": "Dic.2025",
+        "date": "2025-12-01",
+        "value": 90214.4843
+      },
+      {
+        "period": "Ene.2026",
+        "date": "2026-01-01",
+        "value": 95072.127701
+      },
+      {
+        "period": "Feb.2026",
+        "date": "2026-02-01",
+        "value": 97294.87359
+      },
+      {
+        "period": "Mar.2026",
+        "date": "2026-03-01",
+        "value": 94716.378355
+      },
+      {
+        "period": "Abr.2026",
+        "date": "2026-04-01",
+        "value": 97020.329087
+      },
+      {
+        "period": "May.2026",
+        "date": "2026-05-01",
+        "value": 98436.178976
+      },
+      {
+        "period": "Jun.2026",
+        "date": "2026-06-01",
+        "value": 95553.176142
+      },
+      {
+        "period": "Jul.2026",
+        "date": "2026-07-01",
+        "value": 97034.428461
+      },
+      {
+        "period": "Ago.2026",
+        "date": "2026-08-01",
+        "value": 96517.905835
+      },
+      {
+        "period": "Sep.2026",
+        "date": "2026-09-01",
+        "value": 92179.513534
+      },
+      {
+        "period": "Oct.2026",
+        "date": "2026-10-01",
+        "value": null
+      }
+    ],
+    "fetchedAt": "2026-10-18T06:42:40.009Z"
+  }
+]

@@ -1,0 +1,1349 @@
+{
+  "fetchedAt": "2026-10-18T06:42:02.301Z",
+  "rows": [
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2025",
+      "value": 17.4707593653367,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2024",
+      "value": 17.6459444987685,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2023",
+      "value": 15.6969055268697,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2022",
+      "value": 19.1853009729027,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2021",
+      "value": 18.5469003909373,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2020",
+      "value": 15.8485265343869,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2019",
+      "value": 14.7673386785785,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2018",
+      "value": 14.2412038808791,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2017",
+      "value": 11.8007665044289,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2016",
+      "value": 12.0670030347037,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2015",
+      "value": 14.0534345189741,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2014",
+      "value": 13.6734629940752,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2025",
+      "value": 30.4208161074476,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2024",
+      "value": 30.2256760867506,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2023",
+      "value": 29.901582730252,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2022",
+      "value": 39.6117335928437,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2021",
+      "value": 32.8656468569676,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2020",
+      "value": 26.8459687305709,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2019",
+      "value": 29.7345891776124,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2018",
+      "value": 29.6480060761165,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2017",
+      "value": 27.6947817505058,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2016",
+      "value": 28.1347025767999,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2015",
+      "value": 30.1580314947545,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2014",
+      "value": 32.6307246042164,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2025",
+      "value": 20.384908937428,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2024",
+      "value": 20.2375393681026,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2023",
+      "value": 22.3255418346774,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2022",
+      "value": 27.8942871185028,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2021",
+      "value": 23.8621404387264,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2020",
+      "value": 20.5332954086799,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2019",
+      "value": 21.6904953267149,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2018",
+      "value": 20.6350331193542,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2017",
+      "value": 20.1376251940583,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2016",
+      "value": 21.4855137060045,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2015",
+      "value": 22.7105526089485,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2014",
+      "value": 20.8527165314594,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2025",
+      "value": 26.4309130863694,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2024",
+      "value": 25.8849383792054,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2023",
+      "value": 25.5562519514196,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2022",
+      "value": 29.9879733405979,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2021",
+      "value": 28.1917937252176,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2020",
+      "value": 24.4245888164455,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2019",
+      "value": 25.0217595708612,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2018",
+      "value": 25.2036154389645,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2017",
+      "value": 22.5465382444257,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2016",
+      "value": 22.845556060854,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2015",
+      "value": 23.6333880896017,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2014",
+      "value": 22.7339202961129,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2025",
+      "value": 40.2786127888756,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2024",
+      "value": 38.1422853106055,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2023",
+      "value": 37.5911414580596,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2022",
+      "value": 45.8661953749018,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2021",
+      "value": 42.500104429993,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2020",
+      "value": 37.6191836198755,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2019",
+      "value": 38.9323214620124,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2018",
+      "value": 41.1687312115588,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2017",
+      "value": 39.4380374225879,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2016",
+      "value": 38.8746261573743,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2015",
+      "value": 36.2502019908254,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2014",
+      "value": 32.6354168333342,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2025",
+      "value": 21.8456559013034,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2024",
+      "value": 22.7972140350108,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2023",
+      "value": 23.736868907826,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2022",
+      "value": 28.4530550594954,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2021",
+      "value": 26.1824464676564,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2020",
+      "value": 21.2345240547509,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2019",
+      "value": 22.9044179405342,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2018",
+      "value": 23.4392854994888,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2017",
+      "value": 22.7936783872998,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2016",
+      "value": 22.7885274554247,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2015",
+      "value": 23.875443403219,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2014",
+      "value": 24.2461507154749,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2025",
+      "value": null,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2024",
+      "value": 14.0413208226783,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2023",
+      "value": 13.878624456192,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2022",
+      "value": 15.2538011117724,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2021",
+      "value": 14.4060572431224,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2020",
+      "value": 13.0168627958622,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2019",
+      "value": 14.4692832148142,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2018",
+      "value": 15.1582483706352,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2017",
+      "value": 14.9478571955214,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2016",
+      "value": 14.5644385592212,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2015",
+      "value": 15.2770653039497,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2014",
+      "value": 16.3983551242045,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    }
+  ]
+}

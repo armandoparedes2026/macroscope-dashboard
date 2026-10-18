@@ -1,0 +1,300 @@
+v22.23.3
+
+> test
+> node tests/smoke.mjs && node --test tests/islm-model.test.mjs tests/bcrp.test.mjs tests/lab-content.test.mjs tests/wdi.test.mjs tests/compare.test.mjs && node tests/e2e.mjs
+
+MacroScope OK: 24 controles, 16 archivos JS válidos, referencias locales y SRI verificados.
+TAP version 13
+# Subtest: BCRP: fixture real, series reordenadas y sufijo HTML
+ok 1 - BCRP: fixture real, series reordenadas y sufijo HTML
+  ---
+  duration_ms: 21.0283
+  type: 'test'
+  ...
+# Subtest: BCRP: cada código coincide con su respuesta individual real
+ok 2 - BCRP: cada código coincide con su respuesta individual real
+  ---
+  duration_ms: 17.8262
+  type: 'test'
+  ...
+# Subtest: BCRP: n.d. es null y respuestas inválidas se rechazan
+ok 3 - BCRP: n.d. es null y respuestas inválidas se rechazan
+  ---
+  duration_ms: 1.1504
+  type: 'test'
+  ...
+# Subtest: BCRP proxy: validación de método, allowlist y periodos
+ok 4 - BCRP proxy: validación de método, allowlist y periodos
+  ---
+  duration_ms: 1.0561
+  type: 'test'
+  ...
+# Subtest: BCRP proxy: JSON normalizado, caché y errores upstream
+ok 5 - BCRP proxy: JSON normalizado, caché y errores upstream
+  ---
+  duration_ms: 2
+  type: 'test'
+  ...
+# Subtest: base 100 preserves null and does not mutate source
+ok 6 - base 100 preserves null and does not mutate source
+  ---
+  duration_ms: 2.5002
+  type: 'test'
+  ...
+# Subtest: rates cannot be normalized
+ok 7 - rates cannot be normalized
+  ---
+  duration_ms: 0.7811
+  type: 'test'
+  ...
+# Subtest: chain growth multiplies annual factors and propagates gaps
+ok 8 - chain growth multiplies annual factors and propagates gaps
+  ---
+  duration_ms: 1.4514
+  type: 'test'
+  ...
+# Subtest: common years intersects finite observations, retaining zero
+ok 9 - common years intersects finite observations, retaining zero
+  ---
+  duration_ms: 0.3336
+  type: 'test'
+  ...
+# Subtest: convergence uses same-year USA denominator, gaps remain null
+ok 10 - convergence uses same-year USA denominator, gaps remain null
+  ---
+  duration_ms: 0.4648
+  type: 'test'
+  ...
+# Subtest: la calibración sitúa el equilibrio inicial en Y = 100, i = i0, e = 100 en todos los regímenes
+ok 11 - la calibración sitúa el equilibrio inicial en Y = 100, i = i0, e = 100 en todos los regímenes
+  ---
+  duration_ms: 7.9503
+  type: 'test'
+  ...
+# Subtest: economía cerrada: expansión fiscal sube Y e i y desplaza inversión (crowding out)
+ok 12 - economía cerrada: expansión fiscal sube Y e i y desplaza inversión (crowding out)
+  ---
+  duration_ms: 0.4177
+  type: 'test'
+  ...
+# Subtest: Mundell–Fleming, flexible y movilidad perfecta: la política fiscal es ineficaz (aprecia la moneda)
+ok 13 - Mundell–Fleming, flexible y movilidad perfecta: la política fiscal es ineficaz (aprecia la moneda)
+  ---
+  duration_ms: 0.2664
+  type: 'test'
+  ...
+# Subtest: Mundell–Fleming, flexible y movilidad perfecta: la política monetaria es muy eficaz (deprecia)
+ok 14 - Mundell–Fleming, flexible y movilidad perfecta: la política monetaria es muy eficaz (deprecia)
+  ---
+  duration_ms: 0.7169
+  type: 'test'
+  ...
+# Subtest: Mundell–Fleming, fijo y movilidad perfecta: política fiscal muy eficaz, M endógena sube
+ok 15 - Mundell–Fleming, fijo y movilidad perfecta: política fiscal muy eficaz, M endógena sube
+  ---
+  duration_ms: 1.4151
+  type: 'test'
+  ...
+# Subtest: fijo: la oferta monetaria no es instrumento (el impacto se revierte)
+ok 16 - fijo: la oferta monetaria no es instrumento (el impacto se revierte)
+  ---
+  duration_ms: 1.1389
+  type: 'test'
+  ...
+# Subtest: flexible: un alza de i* deprecia la moneda; fijo: contrae el producto
+ok 17 - flexible: un alza de i* deprecia la moneda; fijo: contrae el producto
+  ---
+  duration_ms: 0.4115
+  type: 'test'
+  ...
+# Subtest: movilidad imperfecta: resultados intermedios y ordenados por grado de movilidad
+ok 18 - movilidad imperfecta: resultados intermedios y ordenados por grado de movilidad
+  ---
+  duration_ms: 0.3795
+  type: 'test'
+  ...
+# Subtest: impacto vs. ajuste: con flexible el impacto deja un desequilibrio externo que corrige e
+ok 19 - impacto vs. ajuste: con flexible el impacto deja un desequilibrio externo que corrige e
+  ---
+  duration_ms: 0.61
+  type: 'test'
+  ...
+# Subtest: regla de tasa: el banco central fija i y M se acomoda; trilema bloquea combinaciones imposibles
+ok 20 - regla de tasa: el banco central fija i y M se acomoda; trilema bloquea combinaciones imposibles
+  ---
+  duration_ms: 0.7909
+  type: 'test'
+  ...
+# Subtest: las curvas dibujadas pasan por el equilibrio que resuelve el modelo
+ok 21 - las curvas dibujadas pasan por el equilibrio que resuelve el modelo
+  ---
+  duration_ms: 0.9464
+  type: 'test'
+  ...
+# Subtest: multiplicadores numéricos = multiplicadores de forma cerrada en los casos de libro
+ok 22 - multiplicadores numéricos = multiplicadores de forma cerrada en los casos de libro
+  ---
+  duration_ms: 0.8348
+  type: 'test'
+  ...
+# Subtest: NX (bienes y servicios) y cuenta corriente se distinguen: NFI = CA − NX es autónoma
+ok 23 - NX (bienes y servicios) y cuenta corriente se distinguen: NFI = CA − NX es autónoma
+  ---
+  duration_ms: 0.5091
+  type: 'test'
+  ...
+# Subtest: sin NX observado se usa CA como aproximación y queda etiquetado
+ok 24 - sin NX observado se usa CA como aproximación y queda etiquetado
+  ---
+  duration_ms: 0.1771
+  type: 'test'
+  ...
+# Subtest: fijo: un intento de expansión monetaria baja i en el impacto y se revierte por pérdida de reservas
+ok 25 - fijo: un intento de expansión monetaria baja i en el impacto y se revierte por pérdida de reservas
+  ---
+  duration_ms: 0.2591
+  type: 'test'
+  ...
+# Subtest: tabla clásica de signos (Mundell–Fleming, movilidad perfecta)
+ok 26 - tabla clásica de signos (Mundell–Fleming, movilidad perfecta)
+  ---
+  duration_ms: 0.564
+  type: 'test'
+  ...
+# Subtest: economía cerrada: signos de IS–LM
+ok 27 - economía cerrada: signos de IS–LM
+  ---
+  duration_ms: 1.0218
+  type: 'test'
+  ...
+# Subtest: sensibilidad: h mayor → política monetaria menos eficaz y fiscal más eficaz (cerrada)
+ok 28 - sensibilidad: h mayor → política monetaria menos eficaz y fiscal más eficaz (cerrada)
+  ---
+  duration_ms: 0.4104
+  type: 'test'
+  ...
+# Subtest: el modelo es estable en todo el rango de los controles
+ok 29 - el modelo es estable en todo el rango de los controles
+  ---
+  duration_ms: 2.3827
+  type: 'test'
+  ...
+# Subtest: variaciones con la unidad correcta: i en pp, niveles en % 
+ok 30 - variaciones con la unidad correcta: i en pp, niveles en % 
+  ---
+  duration_ms: 0.4707
+  type: 'test'
+  ...
+# Subtest: propensión a importar: m = ε·IM/Y, supuesto ε = 1
+ok 31 - propensión a importar: m = ε·IM/Y, supuesto ε = 1
+  ---
+  duration_ms: 0.1926
+  type: 'test'
+  ...
+# Subtest: las curvas siguen pasando por el equilibrio cuando NFI ≠ 0
+ok 32 - las curvas siguen pasando por el equilibrio cuando NFI ≠ 0
+  ---
+  duration_ms: 0.4972
+  type: 'test'
+  ...
+# Subtest: cada escenario guiado coincide con el resultado del modelo
+ok 33 - cada escenario guiado coincide con el resultado del modelo
+  ---
+  duration_ms: 4.5922
+  type: 'test'
+  ...
+# Subtest: los resultados se mantienen con otra calibración (NX y CA de signo distinto)
+ok 34 - los resultados se mantienen con otra calibración (NX y CA de signo distinto)
+  ---
+  duration_ms: 1.3768
+  type: 'test'
+  ...
+# Subtest: escenarios completos en los tres niveles y con referencias existentes
+ok 35 - escenarios completos en los tres niveles y con referencias existentes
+  ---
+  duration_ms: 0.5236
+  type: 'test'
+  ...
+# Subtest: calificación de la predicción
+ok 36 - calificación de la predicción
+  ---
+  duration_ms: 1.5692
+  type: 'test'
+  ...
+# Subtest: respaldo generado: cobertura, metadatos, obs_status y ausencias WDI preservadas
+ok 37 - respaldo generado: cobertura, metadatos, obs_status y ausencias WDI preservadas
+  ---
+  duration_ms: 21.1455
+  type: 'test'
+  ...
+# Subtest: WDI: dos páginas reales normalizadas y orden de observaciones conservado
+ok 38 - WDI: dos páginas reales normalizadas y orden de observaciones conservado
+  ---
+  duration_ms: 4.2532
+  type: 'test'
+  ...
+# Subtest: WDI: null real conserva ausencia; último año y anterior usan observaciones finitas
+ok 39 - WDI: null real conserva ausencia; último año y anterior usan observaciones finitas
+  ---
+  duration_ms: 0.8618
+  type: 'test'
+  ...
+# Subtest: WDI: conversión estricta impide que null, vacío o cadenas se vuelvan cero
+ok 40 - WDI: conversión estricta impide que null, vacío o cadenas se vuelvan cero
+  ---
+  duration_ms: 0.5304
+  type: 'test'
+  ...
+# Subtest: WDI: error oficial message y páginas inválidas se rechazan
+ok 41 - WDI: error oficial message y páginas inválidas se rechazan
+  ---
+  duration_ms: 3.3145
+  type: 'test'
+  ...
+# Subtest: WDI: servicio pagina respuestas reales, reutiliza caché y permite actualización forzada
+ok 42 - WDI: servicio pagina respuestas reales, reutiliza caché y permite actualización forzada
+  ---
+  duration_ms: 5.0424
+  type: 'test'
+  ...
+1..42
+# tests 42
+# suites 0
+# pass 42
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 232.2362
+MacroScope e2e
+  ✓ modo sin conexión: respaldo local y gráficos alternativos
+  ✓ botones del sidebar con nombre accesible
+  ✓ color de la variación según si subir es bueno o malo
+  ✓ inflación clasificada frente a la meta del banco central
+  ✓ el país no puede compararse consigo mismo
+  ✓ IS–LM: calibración con datos del país y cuatro diagramas dibujados
+  ✓ Mundell–Fleming flexible con movilidad perfecta: la política fiscal no mueve Y y aprecia
+  ✓ tipo de cambio fijo: M endógena, devaluación disponible y política fiscal eficaz
+  ✓ economía cerrada: sin Mundell–Fleming y con crowding out
+  ✓ regla de tasa: mover la tasa de política cambia Y y M se acomoda
+  ✓ CSV con columnas de procedencia
+  ✓ procedencia: los datos del API se distinguen del respaldo
+  ✓ tema claro persistente y sin desborde horizontal en móvil
+  ✓ carrusel: sin avance automático con prefers-reduced-motion
+  ✓ hero cue: destino visible y foco a 1440px
+  ✓ hero cue: destino visible y foco a 768px
+  ✓ hero cue: destino visible y foco a 390px
+  ✓ hero cue: destino visible y foco a 360px
+  ✓ calibración: NX, NFI, CA separados y naturaleza explícita
+  ✓ WDI: paginación, nulos, último año real, caché y actualización manual
+  ✓ WDI: respuesta malformada reintenta dos veces y conserva respaldo
+  ✓ BCRP: success
+  ✓ BCRP: failure
+  ✓ BCRP: malformed
+  ✓ comparador: cuatro economías, IPC ausente y años comunes a 1440px
+  ✓ comparador: cuatro economías, IPC ausente y años comunes a 768px
+  ✓ comparador: cuatro economías, IPC ausente y años comunes a 390px
+  ✓ comparador: cuatro economías, IPC ausente y años comunes a 360px
+  ✓ economías nuevas y agregado: referencias explícitas y sin calibración LCN
+
+MacroScope e2e OK

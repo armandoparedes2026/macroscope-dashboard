@@ -1,0 +1,166 @@
+{
+"config":
+{
+"title":"Tipo de cambio - promedio del periodo (S/ por US$)",
+"series":
+[
+{
+"name":"Tipo de cambio - promedio del periodo (S/ por US$) - Interbancario - Promedio",
+"dec":"3"
+}]
+},
+"periods":
+[
+{
+"name":"Ene.2024",
+"values":["3.74074285714286"]
+},
+{
+"name":"Feb.2024",
+"values":["3.8279380952381"]
+},
+{
+"name":"Mar.2024",
+"values":["3.70898947368421"]
+},
+{
+"name":"Abr.2024",
+"values":["3.71503181818182"]
+},
+{
+"name":"May.2024",
+"values":["3.73172727272727"]
+},
+{
+"name":"Jun.2024",
+"values":["3.7867052631579"]
+},
+{
+"name":"Jul.2024",
+"values":["3.764135"]
+},
+{
+"name":"Ago.2024",
+"values":["3.74185"]
+},
+{
+"name":"Sep.2024",
+"values":["3.7689619047619"]
+},
+{
+"name":"Oct.2024",
+"values":["3.75436363636364"]
+},
+{
+"name":"Nov.2024",
+"values":["3.779135"]
+},
+{
+"name":"Dic.2024",
+"values":["3.73553684210526"]
+},
+{
+"name":"Ene.2025",
+"values":["3.74692272727273"]
+},
+{
+"name":"Feb.2025",
+"values":["3.69685"]
+},
+{
+"name":"Mar.2025",
+"values":["3.65248571428571"]
+},
+{
+"name":"Abr.2025",
+"values":["3.70003"]
+},
+{
+"name":"May.2025",
+"values":["3.65991428571429"]
+},
+{
+"name":"Jun.2025",
+"values":["3.60219523809524"]
+},
+{
+"name":"Jul.2025",
+"values":["3.556945"]
+},
+{
+"name":"Ago.2025",
+"values":["3.542385"]
+},
+{
+"name":"Sep.2025",
+"values":["3.50180454545455"]
+},
+{
+"name":"Oct.2025",
+"values":["3.41322727272727"]
+},
+{
+"name":"Nov.2025",
+"values":["3.37263"]
+},
+{
+"name":"Dic.2025",
+"values":["3.36686315789474"]
+},
+{
+"name":"Ene.2026",
+"values":["3.356115"]
+},
+{
+"name":"Feb.2026",
+"values":["3.35664"]
+},
+{
+"name":"Mar.2026",
+"values":["3.44835909090909"]
+},
+{
+"name":"Abr.2026",
+"values":["3.44349"]
+},
+{
+"name":"May.2026",
+"values":["3.435275"]
+},
+{
+"name":"Jun.2026",
+"values":["3.40596190476191"]
+},
+{
+"name":"Jul.2026",
+"values":["3.40022631578947"]
+},
+{
+"name":"Ago.2026",
+"values":["3.36295"]
+},
+{
+"name":"Sep.2026",
+"values":["3.37910454545455"]
+}
+]
+}<br />
+<font size='1'><table class='xdebug-error xe-notice' dir='ltr' border='1' cellspacing='0' cellpadding='1'>
+<tr><th align='left' bgcolor='#f57900' colspan="5"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> Notice: Undefined offset: 1 in /var/www/html/estadisticas/application/views/scripts/api/index.phtml on line <i>1862</i></th></tr>
+<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>
+<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
+<tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>0.0000</td><td bgcolor='#eeeeec' align='right'>417376</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='/var/www/html/estadisticas/series/index.php' bgcolor='#eeeeec'>.../index.php<b>:</b>0</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>0.0014</td><td bgcolor='#eeeeec' align='right'>980552</td><td bgcolor='#eeeeec'>Zend_Application->run(  )</td><td title='/var/www/html/estadisticas/series/index.php' bgcolor='#eeeeec'>.../index.php<b>:</b>30</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>0.0014</td><td bgcolor='#eeeeec' align='right'>980552</td><td bgcolor='#eeeeec'>Bootstrap->run(  )</td><td title='/var/www/html/library/Zend/Application.php' bgcolor='#eeeeec'>.../Application.php<b>:</b>366</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>4</td><td bgcolor='#eeeeec' align='center'>0.0014</td><td bgcolor='#eeeeec' align='right'>980552</td><td bgcolor='#eeeeec'>Zend_Controller_Front->dispatch(  )</td><td title='/var/www/html/library/Zend/Application/Bootstrap/Bootstrap.php' bgcolor='#eeeeec'>.../Bootstrap.php<b>:</b>101</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>5</td><td bgcolor='#eeeeec' align='center'>0.0015</td><td bgcolor='#eeeeec' align='right'>999448</td><td bgcolor='#eeeeec'>Zend_Controller_Dispatcher_Standard->dispatch(  )</td><td title='/var/www/html/library/Zend/Controller/Front.php' bgcolor='#eeeeec'>.../Front.php<b>:</b>954</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>6</td><td bgcolor='#eeeeec' align='center'>0.0061</td><td bgcolor='#eeeeec' align='right'>1180712</td><td bgcolor='#eeeeec'>ApiController->dispatch(  )</td><td title='/var/www/html/library/Zend/Controller/Dispatcher/Standard.php' bgcolor='#eeeeec'>.../Standard.php<b>:</b>308</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>7</td><td bgcolor='#eeeeec' align='center'>0.0115</td><td bgcolor='#eeeeec' align='right'>1252944</td><td bgcolor='#eeeeec'>Zend_Controller_Action_HelperBroker->notifyPostDispatch(  )</td><td title='/var/www/html/library/Zend/Controller/Action.php' bgcolor='#eeeeec'>.../Action.php<b>:</b>527</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>8</td><td bgcolor='#eeeeec' align='center'>0.0115</td><td bgcolor='#eeeeec' align='right'>1253688</td><td bgcolor='#eeeeec'>Zend_Controller_Action_Helper_ViewRenderer->postDispatch(  )</td><td title='/var/www/html/library/Zend/Controller/Action/HelperBroker.php' bgcolor='#eeeeec'>.../HelperBroker.php<b>:</b>277</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>9</td><td bgcolor='#eeeeec' align='center'>0.0115</td><td bgcolor='#eeeeec' align='right'>1253688</td><td bgcolor='#eeeeec'>Zend_Controller_Action_Helper_ViewRenderer->render(  )</td><td title='/var/www/html/library/Zend/Controller/Action/Helper/ViewRenderer.php' bgcolor='#eeeeec'>.../ViewRenderer.php<b>:</b>960</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>10</td><td bgcolor='#eeeeec' align='center'>0.0116</td><td bgcolor='#eeeeec' align='right'>1254064</td><td bgcolor='#eeeeec'>Zend_Controller_Action_Helper_ViewRenderer->renderScript(  )</td><td title='/var/www/html/library/Zend/Controller/Action/Helper/ViewRenderer.php' bgcolor='#eeeeec'>.../ViewRenderer.php<b>:</b>921</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>11</td><td bgcolor='#eeeeec' align='center'>0.0116</td><td bgcolor='#eeeeec' align='right'>1254064</td><td bgcolor='#eeeeec'>Zend_View->render(  )</td><td title='/var/www/html/library/Zend/Controller/Action/Helper/ViewRenderer.php' bgcolor='#eeeeec'>.../ViewRenderer.php<b>:</b>900</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>12</td><td bgcolor='#eeeeec' align='center'>0.0116</td><td bgcolor='#eeeeec' align='right'>1270672</td><td bgcolor='#eeeeec'>Zend_View->_run(  )</td><td title='/var/www/html/library/Zend/View/Abstract.php' bgcolor='#eeeeec'>.../Abstract.php<b>:</b>888</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>13</td><td bgcolor='#eeeeec' align='center'>0.0116</td><td bgcolor='#eeeeec' align='right'>1286640</td><td bgcolor='#eeeeec'>include( <font color='#00bb00'>'/var/www/html/estadisticas/application/views/scripts/api/index.phtml'</font> )</td><td title='/var/www/html/library/Zend/View.php' bgcolor='#eeeeec'>.../View.php<b>:</b>108</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>14</td><td bgcolor='#eeeeec' align='center'>0.0119</td><td bgcolor='#eeeeec' align='right'>1306488</td><td bgcolor='#eeeeec'>getBrowser(  )</td><td title='/var/www/html/estadisticas/application/views/scripts/api/index.phtml' bgcolor='#eeeeec'>.../index.phtml<b>:</b>1882</td></tr>
+</table></font>

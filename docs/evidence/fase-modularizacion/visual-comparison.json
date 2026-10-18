@@ -1,0 +1,128 @@
+{
+  "threshold": {
+    "channelDelta": 8,
+    "maxChangedPixelRatio": 0.001
+  },
+  "results": [
+    {
+      "name": "1440-dark-overview.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 1440,
+      "height": 3328,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "1440-dark-simulator.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 1440,
+      "height": 3412,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "1440-dark-data.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 1440,
+      "height": 1697,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "1440-light-overview.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 1440,
+      "height": 3328,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "1440-light-simulator.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 1440,
+      "height": 3412,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "1440-light-data.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 1440,
+      "height": 1697,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "390-dark-overview.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 390,
+      "height": 6767,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "390-dark-simulator.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 390,
+      "height": 8534,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "390-dark-data.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 390,
+      "height": 2252,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "390-light-overview.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 390,
+      "height": 6767,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "390-light-simulator.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 390,
+      "height": 8534,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "390-light-data.png",
+      "identicalBuffer": true,
+      "sameSize": true,
+      "width": 390,
+      "height": 2252,
+      "changed": 0,
+      "ratio": 0,
+      "maxDelta": 0
+    }
+  ]
+}

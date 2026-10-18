@@ -7,12 +7,17 @@
  *                I = Ī − b·i
  *                NX = NX0 + nx + n·(e − 100) − m·(Y − 100) + f·(Y* − 100)
  * Dinero (LM):   M/P = k·Y − h·i              (o regla de tasa: i = i_pol)
- * Balanza (BP):  NX + KF = 0,  KF = KF0 + κ·(i − i* − ρ)
+ * Balanza (BP):  CA + KF = 0,  CA = NX + NFI,  KF = KF0 + κ·(i − i* − ρ)
  *
  * Y es un índice (producto inicial = 100), i en %, e es un índice del tipo de cambio nominal = real
  * (precios fijos) con base 100; e sube = depreciación de la moneda local (unidades de moneda local por USD).
- * La calibración fija el equilibrio inicial en Y = 100, i = i0, e = 100, con exportaciones netas iguales
- * al saldo en cuenta corriente observado y flujos de capital autónomos que lo financian.
+ * La calibración fija el equilibrio inicial en Y = 100, i = i0, e = 100.
+ *
+ * NX es la balanza de bienes y servicios (componente del PBI, WDI NE.RSB.GNFS.ZS). La cuenta corriente
+ * (WDI BN.CAB.XOKA.GD.ZS) añade la renta primaria y secundaria netas, NFI = CA − NX, que el modelo trata
+ * como autónoma: entra en la BP pero no en la demanda agregada. Los flujos de capital autónomos
+ * KF0 = −CA financian la cuenta corriente inicial. Si no se dispone de NX observado, se usa CA como
+ * aproximación (provenance.nx = 'approximation') y NFI = 0.
  */
 (function () {
   'use strict';
@@ -32,6 +37,35 @@
   };
 
   const DEFAULT_PARAMS = { c: 0.75, t: 0.2, b: 1.5, h: 2, m: 0.2, n: 0.25 };
+
+  /**
+   * Naturaleza de cada magnitud del simulador. La interfaz debe mostrarla junto al valor:
+   *  observed     dato estadístico observado (con fuente, código y año)
+   *  calibrated   parámetro fijado para que el modelo reproduzca un dato observado en el equilibrio inicial
+   *  assumption   supuesto teórico o de política sin estimación propia
+   *  illustrative valor didáctico elegido para obtener magnitudes legibles; no proviene de una estimación
+   *  result       resultado endógeno del modelo
+   */
+  const SOURCE_KINDS = ['observed', 'calibrated', 'assumption', 'illustrative', 'result'];
+  const PARAM_SOURCES = {
+    c: 'illustrative', t: 'illustrative', b: 'illustrative', h: 'illustrative', n: 'illustrative',
+    k: 'illustrative', f: 'illustrative', G0: 'illustrative', I0: 'illustrative',
+    m: 'illustrative',        // pasa a 'calibrated' cuando se deriva de la importación observada
+    nx0: 'observed', cab: 'observed', nfi: 'calibrated', kf0: 'calibrated',
+    i0: 'assumption', istar0: 'assumption', rho0: 'calibrated', C0: 'calibrated', Ibar: 'calibrated', M0: 'calibrated'
+  };
+
+  /**
+   * Aproximación de la propensión marginal a importar: m = ε_Y · (IM/Y), donde IM/Y es la importación
+   * de bienes y servicios observada (% del PBI, WDI NE.IMP.GNFS.ZS) y ε_Y la elasticidad-ingreso de las
+   * importaciones. ε_Y = 1 es un SUPUESTO (propensión marginal = media); las estimaciones empíricas para
+   * América Latina suelen ser mayores que 1, por lo que m tiende a quedar subestimada. No es una estimación
+   * econométrica.
+   */
+  function importPropensityFromShare(importsPctGdp, incomeElasticity = 1) {
+    if (!Number.isFinite(importsPctGdp) || importsPctGdp < 0) return null;
+    return Math.min(0.6, Math.round(incomeElasticity * importsPctGdp) / 100);
+  }
 
   /** Instrumentos disponibles según régimen y movilidad (trilema de Mundell). */
   function availableInstruments(regime, mobility) {
@@ -56,7 +90,8 @@
 
   /**
    * Construye el modelo calibrado.
-   * @param {object} cfg { regime: 'closed'|'flex'|'fixed', mobility, instrument: 'money'|'rate', params, i0, cab }
+   * @param {object} cfg { regime: 'closed'|'flex'|'fixed', mobility, instrument: 'money'|'rate', params,
+   *   i0, istar0, cab (cuenta corriente, % PBI), nx0 (balanza de bienes y servicios, % PBI) }
    */
   function createModel(cfg) {
     const { config } = normalizeConfig(cfg);
@@ -67,8 +102,11 @@
     const fEff = open ? F_WORLD : 0;
     const kappa = MOBILITY[config.mobility]?.kappa ?? MOBILITY.high.kappa;
     const i0 = config.i0;
-    const NX0 = open ? (Number.isFinite(config.cab) ? config.cab : 0) : 0;
-    const KF0 = -NX0;
+    const CA0 = open && Number.isFinite(config.cab) ? config.cab : 0;
+    const nxObserved = open && Number.isFinite(config.nx0);
+    const NX0 = !open ? 0 : nxObserved ? config.nx0 : CA0;
+    const NFI = open ? CA0 - NX0 : 0;   // renta primaria + secundaria netas (autónomas)
+    const KF0 = -CA0;
     const s = 1 - p.c * (1 - p.t) + mEff;           // inversa del multiplicador keynesiano abierto
     const Abar = (1 - p.c * (1 - p.t)) * Y0 + p.b * i0 - G0 - NX0; // C0 + Ī
     const Ibar = I0 + p.b * i0;
@@ -96,7 +134,7 @@
       e: (value) => [0, 0, 1, 0, value],
       BP: (u) => kappa === Infinity
         ? [0, 1, 0, 0, u.istar + u.rho]
-        : [-mEff, kappa, nEff, 0, -(nxAuto(u) + KF0) + kappa * (u.istar + u.rho)]
+        : [-mEff, kappa, nEff, 0, -(nxAuto(u) + NFI + KF0) + kappa * (u.istar + u.rho)]
     };
 
     function components(u, Y, i, e, M) {
@@ -109,14 +147,14 @@
       if (open) {
         if (kappa === Infinity) {
           const gap = i - u.istar - u.rho;
-          KF = Math.abs(gap) < 1e-9 ? -NX : Math.sign(gap) * Infinity;
+          KF = Math.abs(gap) < 1e-9 ? -(NX + NFI) : Math.sign(gap) * Infinity;
           BP = Math.abs(gap) < 1e-9 ? 0 : KF;
         } else {
           KF = KF0 + kappa * (i - u.istar - u.rho);
-          BP = NX + KF;
+          BP = NX + NFI + KF;
         }
       }
-      return { Y, i, e, M, C, I, G: u.G, NX, KF, BP, T };
+      return { Y, i, e, M, C, I, G: u.G, NX, NFI: open ? NFI : null, CA: open ? NX + NFI : null, KF, BP, T };
     }
 
     /**
@@ -132,8 +170,9 @@
       } else if (config.regime === 'flex') {
         eqs.push(monetary, stage === 'impact' ? rows.e(E0) : rows.BP(u));
       } else {
-        // Tipo de cambio fijo: la devaluación (ē) actúa ya en el impacto; M se ajusta vía reservas después.
-        eqs.push(rows.e(u.ebar), stage === 'impact' ? [0, 0, 0, 1, M0] : rows.BP(u));
+        // Tipo de cambio fijo: la devaluación (ē) actúa ya en el impacto. En el impacto M es la que decide el
+        // banco central (un intento de expansión monetaria baja i); después M se ajusta vía reservas hasta la BP.
+        eqs.push(rows.e(u.ebar), stage === 'impact' ? rows.M(u) : rows.BP(u));
       }
       const x = solveLinear(eqs);
       if (!x) return null;
@@ -151,13 +190,13 @@
       /** BP en (Y, i) dado e. */
       BP: (u, e) => kappa === Infinity
         ? { a: 0, b: 1, c: u.istar + u.rho }
-        : { a: -mEff, b: kappa, c: -(nxAuto(u) + KF0) + kappa * (u.istar + u.rho) - nEff * e },
+        : { a: -mEff, b: kappa, c: -(nxAuto(u) + NFI + KF0) + kappa * (u.istar + u.rho) - nEff * e },
       /** IS* en (Y, e) dado i. */
       ISstar: (u, i) => ({ a: s, b: -nEff, c: K(u) - p.b * i }),
       /** LM* en (Y, e): combina LM y BP (vertical con movilidad perfecta). */
       LMstar: (u, M) => {
         if (kappa === Infinity) return { a: K_MONEY, b: 0, c: M + p.h * (u.istar + u.rho) };
-        const bpC = -(nxAuto(u) + KF0) + kappa * (u.istar + u.rho);
+        const bpC = -(nxAuto(u) + NFI + KF0) + kappa * (u.istar + u.rho);
         if (config.instrument === 'rate') return { a: -mEff, b: nEff, c: bpC - kappa * u.ipol };
         return { a: -mEff + kappa * K_MONEY / p.h, b: nEff, c: bpC + kappa * M / p.h };
       },
@@ -183,9 +222,34 @@
       };
     }
 
+    /**
+     * Multiplicadores de forma cerrada (derivados a mano de las ecuaciones estructurales) para los casos
+     * de libro; sirven para validar el resultado numérico y para la vista avanzada.
+     */
+    function analyticMultipliers() {
+      const sClosed = 1 - p.c * (1 - p.t);
+      const out = {};
+      if (config.regime === 'closed') {
+        out.fiscal = config.instrument === 'rate' ? 1 / sClosed : 1 / (sClosed + p.b * K_MONEY / p.h);
+      } else if (kappa === Infinity && config.regime === 'flex') {
+        out.fiscal = 0;
+        out.monetaryPerUnitM = 1 / K_MONEY;
+      } else if (kappa === Infinity && config.regime === 'fixed') {
+        out.fiscal = 1 / s;
+      } else if (kappa === 0 && config.regime === 'fixed') {
+        out.fiscal = 0;               // Y queda fijado por el equilibrio de la cuenta corriente
+      }
+      return out;
+    }
+
     return {
-      config, params: p, open, kappa, i0, M0, NX0, baseline, money,
-      solve, curves, multipliers,
+      config, params: p, open, kappa, i0, M0, NX0, NFI, CA0, KF0, baseline, money,
+      solve, curves, multipliers, analyticMultipliers,
+      provenance: {
+        ...PARAM_SOURCES,
+        nx: !open ? 'not-applicable' : nxObserved ? 'observed' : 'approximation',
+        nfi: !open ? 'not-applicable' : nxObserved ? 'calibrated' : 'omitted'
+      },
       constants: { Y0, E0, G0, I0, K_MONEY, F_WORLD }
     };
   }
@@ -208,5 +272,24 @@
     return A.map((r, i) => r[n] / r[i]);
   }
 
-  globalThis.ISLM = { createModel, normalizeConfig, availableInstruments, solveLinear, MOBILITY, DEFAULT_PARAMS };
+  /**
+   * Variaciones entre dos equilibrios con la unidad correcta de cada variable:
+   * Y, e, M en nivel (índice) → absoluta y porcentual; i en % → puntos porcentuales (pp), nunca "%";
+   * NX, CA, C, I, G en % del producto inicial → puntos del producto inicial.
+   */
+  function compareEquilibria(from, to) {
+    if (!from || !to) return null;
+    const level = (k) => ({ abs: to[k] - from[k], pct: from[k] ? (to[k] / from[k] - 1) * 100 : null, unit: 'index' });
+    const share = (k) => (Number.isFinite(from[k]) && Number.isFinite(to[k]) ? { abs: to[k] - from[k], unit: 'pts-of-Y0' } : null);
+    return {
+      Y: level('Y'), e: level('e'), M: level('M'),
+      i: { abs: to.i - from.i, unit: 'pp' },
+      C: share('C'), I: share('I'), G: share('G'), NX: share('NX'), CA: share('CA')
+    };
+  }
+
+  globalThis.ISLM = {
+    createModel, normalizeConfig, availableInstruments, solveLinear, compareEquilibria,
+    importPropensityFromShare, MOBILITY, DEFAULT_PARAMS, PARAM_SOURCES, SOURCE_KINDS
+  };
 })();

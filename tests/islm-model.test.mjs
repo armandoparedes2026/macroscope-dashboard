@@ -110,3 +110,140 @@ test('las curvas dibujadas pasan por el equilibrio que resuelve el modelo', () =
     on(m.curves.aggregateDemand(u, r.i, r.e), r.Y, r.Y);
   }
 });
+
+// ---------------------------------------------------------------------------------------------
+// Auditoría económica: derivaciones de forma cerrada, tabla clásica de signos y descomposición CA.
+// ---------------------------------------------------------------------------------------------
+const { compareEquilibria, importPropensityFromShare } = globalThis.ISLM;
+
+test('multiplicadores numéricos = multiplicadores de forma cerrada en los casos de libro', () => {
+  const cases = [['closed', 'perfect', 'money'], ['closed', 'perfect', 'rate'], ['flex', 'perfect', 'money'],
+    ['fixed', 'perfect', 'money'], ['fixed', 'none', 'money']];
+  for (const [regime, mobility, instrument] of cases) {
+    const m = model(regime, mobility, instrument);
+    const a = m.analyticMultipliers();
+    close(m.multipliers().fiscal, a.fiscal, 1e-9);
+    if (a.monetaryPerUnitM !== undefined) {
+      const dM = m.M0 * 0.01;
+      close((shock(m, { Mpct: 1 }).Y - 100) / dM, a.monetaryPerUnitM, 1e-9);
+    }
+  }
+  // 1/(1 − c(1 − t) + b·k/h) con los parámetros por defecto: 1/(0,4 + 0,375)
+  close(model('closed').analyticMultipliers().fiscal, 1 / 0.775, 1e-12);
+});
+
+test('NX (bienes y servicios) y cuenta corriente se distinguen: NFI = CA − NX es autónoma', () => {
+  // Magnitudes del orden de Perú 2025 (WDI): NX ≈ +8,1 % y CA ≈ +3,6 % del PBI.
+  for (const mobility of ['none', 'low', 'high', 'perfect']) {
+    const m = createModel({ regime: 'flex', mobility, instrument: 'money', i0: 4, istar0: 3, cab: 3.6, nx0: 8.1 });
+    const r0 = m.solve(m.baseline);
+    close(r0.Y, 100); close(r0.NX, 8.1); close(r0.CA, 3.6); close(r0.NFI, -4.5); close(r0.BP, 0);
+    close(r0.C + r0.I + r0.G + r0.NX, r0.Y);           // la identidad del PBI usa NX, no CA
+    assert.equal(m.provenance.nx, 'observed');
+    const r = shock(m, { G: 21, istar: 3.5 });
+    close(r.NFI, -4.5); close(r.CA, r.NX + r.NFI); close(r.BP, 0);
+    close(r.C + r.I + r.G + r.NX, r.Y);
+  }
+  // Movilidad nula y flotación: e equilibra la cuenta corriente, NX vuelve a su valor inicial.
+  const none = createModel({ regime: 'flex', mobility: 'none', instrument: 'money', i0: 4, istar0: 3, cab: 3.6, nx0: 8.1 });
+  close(shock(none, { G: 21 }).NX, 8.1);
+});
+
+test('sin NX observado se usa CA como aproximación y queda etiquetado', () => {
+  const m = model('flex', 'high');
+  assert.equal(m.provenance.nx, 'approximation');
+  assert.equal(m.NFI, 0); close(m.solve(m.baseline).NX, -2);
+  assert.equal(model('closed').provenance.nx, 'not-applicable');
+});
+
+test('fijo: un intento de expansión monetaria baja i en el impacto y se revierte por pérdida de reservas', () => {
+  for (const mobility of ['low', 'high']) {
+    const m = model('fixed', mobility);
+    const impact = shock(m, { Mpct: 10 }, 'impact');
+    assert.ok(impact.i < 4 && impact.Y > 100, 'impacto expansivo');
+    assert.ok(impact.BP < 0, 'déficit de balanza de pagos: salen capitales');
+    const final = shock(m, { Mpct: 10 });
+    close(final.Y, 100); close(final.M, m.M0); close(final.i, 4); close(final.e, 100);
+  }
+});
+
+test('tabla clásica de signos (Mundell–Fleming, movilidad perfecta)', () => {
+  const sign = (x) => (Math.abs(x) < 1e-9 ? 0 : Math.sign(x));
+  const flex = model('flex', 'perfect');
+  const fixed = model('fixed', 'perfect');
+  const b = flex.baseline;
+  // [shock, signo ΔY flexible, signo Δe flexible, signo ΔY fijo]
+  const table = [
+    [{ G: b.G + 2 }, 0, -1, 1],
+    [{ T0: 2 }, 0, 1, -1],
+    [{ istar: b.istar + 1 }, 1, 1, -1],
+    [{ rho: b.rho + 1 }, 1, 1, -1],
+    [{ Ystar: 105 }, 0, -1, 1],
+    [{ nxShock: -2 }, 0, 1, -1],
+    [{ confShock: -2 }, 0, 1, -1]
+  ];
+  for (const [patch, yFlex, eFlex, yFixed] of table) {
+    const f = shock(flex, patch);
+    const x = shock(fixed, patch);
+    const label = JSON.stringify(patch);
+    assert.equal(sign(f.Y - 100), yFlex, `ΔY flexible ${label}`);
+    assert.equal(sign(f.e - 100), eFlex, `Δe flexible ${label}`);
+    assert.equal(sign(x.Y - 100), yFixed, `ΔY fijo ${label}`);
+    close(x.e, 100);
+  }
+  const deval = shock(fixed, { ebar: 110 });
+  assert.ok(deval.Y > 100 && deval.M > fixed.M0 && deval.NX > -2);
+});
+
+test('economía cerrada: signos de IS–LM', () => {
+  const m = model('closed');
+  const g = shock(m, { G: 20 }); assert.ok(g.Y > 100 && g.i > 4);
+  const mon = shock(m, { Mpct: 5 }); assert.ok(mon.Y > 100 && mon.i < 4);
+  const tax = shock(m, { T0: 1 }); assert.ok(tax.Y < 100 && tax.i < 4);
+  // Multiplicador de impuestos: −c veces el de gasto.
+  close((tax.Y - 100), -0.75 * (g.Y - 100) / 2, 1e-9);
+});
+
+test('sensibilidad: h mayor → política monetaria menos eficaz y fiscal más eficaz (cerrada)', () => {
+  const mult = (h) => {
+    const m = createModel({ regime: 'closed', mobility: 'perfect', instrument: 'money', i0: 4, params: { h } });
+    return { fiscal: m.multipliers().fiscal, monetary: (shock(m, { Mpct: 1 }).Y - 100) / (m.M0 * 0.01) };
+  };
+  const lo = mult(1), hi = mult(4);
+  assert.ok(hi.fiscal > lo.fiscal && hi.monetary < lo.monetary);
+});
+
+test('el modelo es estable en todo el rango de los controles', () => {
+  for (const c of [0.5, 0.9]) for (const t of [0.1, 0.4]) for (const mm of [0, 0.5]) for (const h of [0.5, 4]) for (const bb of [0.5, 4]) {
+    for (const regime of ['closed', 'flex', 'fixed']) {
+      const m = createModel({ regime, mobility: 'high', instrument: 'money', i0: 4, istar0: 3, cab: -2, nx0: 1, params: { c, t, m: mm, h, b: bb } });
+      const r = shock(m, { G: 25, Mpct: regime === 'fixed' ? 0 : 10, istar: 5 });
+      assert.ok(r && [r.Y, r.i, r.e, r.M].every(Number.isFinite), `${regime} c=${c} t=${t} m=${mm}`);
+    }
+  }
+});
+
+test('variaciones con la unidad correcta: i en pp, niveles en % ', () => {
+  const m = model('closed');
+  const d = compareEquilibria(m.solve(m.baseline), shock(m, { G: 20 }));
+  assert.equal(d.i.unit, 'pp'); assert.equal(d.Y.unit, 'index');
+  close(d.Y.pct, d.Y.abs);     // Y0 = 100 → Δ% = Δ absoluto
+  assert.equal(d.CA, null);
+});
+
+test('propensión a importar: m = ε·IM/Y, supuesto ε = 1', () => {
+  assert.equal(importPropensityFromShare(21.8456), 0.22);
+  assert.equal(importPropensityFromShare(40.28, 1.5), 0.6);
+  assert.equal(importPropensityFromShare(NaN), null);
+});
+
+test('las curvas siguen pasando por el equilibrio cuando NFI ≠ 0', () => {
+  for (const [regime, mobility, instrument] of [['flex', 'high', 'money'], ['flex', 'low', 'rate'], ['fixed', 'low', 'money'], ['fixed', 'perfect', 'money']]) {
+    const m = createModel({ regime, mobility, instrument, i0: 4, istar0: 3, cab: 3.6, nx0: 8.1 });
+    const u = { ...m.baseline, G: 21, istar: 3.5, nxShock: -1 };
+    const r = m.solve(u);
+    const on = (l, x, y) => close(l.a * x + l.b * y, l.c, 1e-6);
+    on(m.curves.IS(u, r.e), r.Y, r.i); on(m.curves.BP(u, r.e), r.Y, r.i);
+    on(m.curves.ISstar(u, r.i), r.Y, r.e); on(m.curves.LMstar(u, r.M), r.Y, r.e);
+  }
+});

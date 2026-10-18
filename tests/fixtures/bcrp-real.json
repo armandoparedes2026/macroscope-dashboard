@@ -1,0 +1,182 @@
+{
+"config":
+{
+"title":"Tasas de interés del Banco Central de Reserva",
+"series":
+[
+{
+"name":"Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria",
+"dec":"2"
+},
+{
+"name":"Cuentas monetarias del Banco Central de Reserva del Perú - Reservas Internacionales Netas (millones US$)",
+"dec":"0"
+},
+{
+"name":"Tipo de cambio - promedio del periodo (S/ por US$) - Interbancario - Promedio",
+"dec":"3"
+},
+{
+"name":"Índice de precios Lima Metropolitana (var% 12 meses) - IPC",
+"dec":"2"
+}]
+},
+"periods":
+[
+{
+"name":"Ene.2024",
+"values":["6.5","73327.465328","3.74074285714286","3.02392174826855"]
+},
+{
+"name":"Feb.2024",
+"values":["6.25","73943.03284","3.8279380952381","3.29406696032184"]
+},
+{
+"name":"Mar.2024",
+"values":["6.25","73827.928392","3.70898947368421","3.04504592593905"]
+},
+{
+"name":"Abr.2024",
+"values":["6","74511.669888","3.71503181818182","2.42207617792805"]
+},
+{
+"name":"May.2024",
+"values":["5.75","73920.00259","3.73172727272727","2.00493835958688"]
+},
+{
+"name":"Jun.2024",
+"values":["5.75","71415.400974","3.7867052631579","2.28538225698791"]
+},
+{
+"name":"Jul.2024",
+"values":["5.75","74277.82892","3.764135","2.1276637869709"]
+},
+{
+"name":"Ago.2024",
+"values":["5.5","80771.266552","3.74185","2.03409700303861"]
+},
+{
+"name":"Sep.2024",
+"values":["5.25","80364.80297","3.7689619047619","1.77501053596859"]
+},
+{
+"name":"Oct.2024",
+"values":["5.25","83309.078434","3.75436363636364","2.00918040984485"]
+},
+{
+"name":"Nov.2024",
+"values":["5","83227.783653","3.779135","2.27199072148831"]
+},
+{
+"name":"Dic.2024",
+"values":["5","78986.65285","3.73553684210526","1.96630270142824"]
+},
+{
+"name":"Ene.2025",
+"values":["4.75","81595.881992","3.74692272727273","1.85158283440667"]
+},
+{
+"name":"Feb.2025",
+"values":["4.75","83660.872809","3.69685","1.4773290589483"]
+},
+{
+"name":"Mar.2025",
+"values":["4.75","81016.103395","3.65248571428571","1.27718026977924"]
+},
+{
+"name":"Abr.2025",
+"values":["4.75","84469.44329","3.70003","1.65183401740204"]
+},
+{
+"name":"May.2025",
+"values":["4.5","85957.392664","3.65991428571429","1.68666289219268"]
+},
+{
+"name":"Jun.2025",
+"values":["4.5","85263.330184","3.60219523809524","1.69370904576716"]
+},
+{
+"name":"Jul.2025",
+"values":["4.5","87480.018817","3.556945","1.6888009685144"]
+},
+{
+"name":"Ago.2025",
+"values":["4.5","87752.818921","3.542385","1.10633077531991"]
+},
+{
+"name":"Sep.2025",
+"values":["4.25","85148.225305","3.50180454545455","1.35839342135424"]
+},
+{
+"name":"Oct.2025",
+"values":["4.25","89960.76524","3.41322727272727","1.35177475650182"]
+},
+{
+"name":"Nov.2025",
+"values":["4.25","90898.183584","3.37263","1.36861256988846"]
+},
+{
+"name":"Dic.2025",
+"values":["4.25","90214.4843","3.36686315789474","1.50879973918667"]
+},
+{
+"name":"Ene.2026",
+"values":["4.25","95072.127701","3.356115","1.70091694832201"]
+},
+{
+"name":"Feb.2026",
+"values":["4.25","97294.87359","3.35664","2.21416625767848"]
+},
+{
+"name":"Mar.2026",
+"values":["4.25","94716.378355","3.44835909090909","3.80454581291585"]
+},
+{
+"name":"Abr.2026",
+"values":["4.25","97020.329087","3.44349","4.01414363472928"]
+},
+{
+"name":"May.2026",
+"values":["4.25","98436.178976","3.435275","3.90505240621645"]
+},
+{
+"name":"Jun.2026",
+"values":["4.25","95553.176142","3.40596190476191","4.00890965651766"]
+},
+{
+"name":"Jul.2026",
+"values":["4.25","97034.428461","3.40022631578947","4.06515256208199"]
+},
+{
+"name":"Ago.2026",
+"values":["4.25","96517.905835","3.36295","4.43780929778608"]
+},
+{
+"name":"Sep.2026",
+"values":["4.25","92179.513534","3.37910454545455","4.54865469481509"]
+},
+{
+"name":"Oct.2026",
+"values":["4.25","n.d.","n.d.","n.d."]
+}
+]
+}<br />
+<font size='1'><table class='xdebug-error xe-notice' dir='ltr' border='1' cellspacing='0' cellpadding='1'>
+<tr><th align='left' bgcolor='#f57900' colspan="5"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> Notice: Undefined offset: 1 in /var/www/html/estadisticas/application/views/scripts/api/index.phtml on line <i>1862</i></th></tr>
+<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>
+<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
+<tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>0.0000</td><td bgcolor='#eeeeec' align='right'>417504</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='/var/www/html/estadisticas/series/index.php' bgcolor='#eeeeec'>.../index.php<b>:</b>0</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>0.0014</td><td bgcolor='#eeeeec' align='right'>980680</td><td bgcolor='#eeeeec'>Zend_Application->run(  )</td><td title='/var/www/html/estadisticas/series/index.php' bgcolor='#eeeeec'>.../index.php<b>:</b>30</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>0.0014</td><td bgcolor='#eeeeec' align='right'>980680</td><td bgcolor='#eeeeec'>Bootstrap->run(  )</td><td title='/var/www/html/library/Zend/Application.php' bgcolor='#eeeeec'>.../Application.php<b>:</b>366</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>4</td><td bgcolor='#eeeeec' align='center'>0.0014</td><td bgcolor='#eeeeec' align='right'>980680</td><td bgcolor='#eeeeec'>Zend_Controller_Front->dispatch(  )</td><td title='/var/www/html/library/Zend/Application/Bootstrap/Bootstrap.php' bgcolor='#eeeeec'>.../Bootstrap.php<b>:</b>101</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>5</td><td bgcolor='#eeeeec' align='center'>0.0015</td><td bgcolor='#eeeeec' align='right'>999664</td><td bgcolor='#eeeeec'>Zend_Controller_Dispatcher_Standard->dispatch(  )</td><td title='/var/www/html/library/Zend/Controller/Front.php' bgcolor='#eeeeec'>.../Front.php<b>:</b>954</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>6</td><td bgcolor='#eeeeec' align='center'>0.0061</td><td bgcolor='#eeeeec' align='right'>1180928</td><td bgcolor='#eeeeec'>ApiController->dispatch(  )</td><td title='/var/www/html/library/Zend/Controller/Dispatcher/Standard.php' bgcolor='#eeeeec'>.../Standard.php<b>:</b>308</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>7</td><td bgcolor='#eeeeec' align='center'>0.0127</td><td bgcolor='#eeeeec' align='right'>1344336</td><td bgcolor='#eeeeec'>Zend_Controller_Action_HelperBroker->notifyPostDispatch(  )</td><td title='/var/www/html/library/Zend/Controller/Action.php' bgcolor='#eeeeec'>.../Action.php<b>:</b>527</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>8</td><td bgcolor='#eeeeec' align='center'>0.0127</td><td bgcolor='#eeeeec' align='right'>1345080</td><td bgcolor='#eeeeec'>Zend_Controller_Action_Helper_ViewRenderer->postDispatch(  )</td><td title='/var/www/html/library/Zend/Controller/Action/HelperBroker.php' bgcolor='#eeeeec'>.../HelperBroker.php<b>:</b>277</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>9</td><td bgcolor='#eeeeec' align='center'>0.0127</td><td bgcolor='#eeeeec' align='right'>1345080</td><td bgcolor='#eeeeec'>Zend_Controller_Action_Helper_ViewRenderer->render(  )</td><td title='/var/www/html/library/Zend/Controller/Action/Helper/ViewRenderer.php' bgcolor='#eeeeec'>.../ViewRenderer.php<b>:</b>960</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>10</td><td bgcolor='#eeeeec' align='center'>0.0128</td><td bgcolor='#eeeeec' align='right'>1345456</td><td bgcolor='#eeeeec'>Zend_Controller_Action_Helper_ViewRenderer->renderScript(  )</td><td title='/var/www/html/library/Zend/Controller/Action/Helper/ViewRenderer.php' bgcolor='#eeeeec'>.../ViewRenderer.php<b>:</b>921</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>11</td><td bgcolor='#eeeeec' align='center'>0.0128</td><td bgcolor='#eeeeec' align='right'>1345456</td><td bgcolor='#eeeeec'>Zend_View->render(  )</td><td title='/var/www/html/library/Zend/Controller/Action/Helper/ViewRenderer.php' bgcolor='#eeeeec'>.../ViewRenderer.php<b>:</b>900</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>12</td><td bgcolor='#eeeeec' align='center'>0.0128</td><td bgcolor='#eeeeec' align='right'>1362064</td><td bgcolor='#eeeeec'>Zend_View->_run(  )</td><td title='/var/www/html/library/Zend/View/Abstract.php' bgcolor='#eeeeec'>.../Abstract.php<b>:</b>888</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>13</td><td bgcolor='#eeeeec' align='center'>0.0129</td><td bgcolor='#eeeeec' align='right'>1378032</td><td bgcolor='#eeeeec'>include( <font color='#00bb00'>'/var/www/html/estadisticas/application/views/scripts/api/index.phtml'</font> )</td><td title='/var/www/html/library/Zend/View.php' bgcolor='#eeeeec'>.../View.php<b>:</b>108</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>14</td><td bgcolor='#eeeeec' align='center'>0.0131</td><td bgcolor='#eeeeec' align='right'>1400320</td><td bgcolor='#eeeeec'>getBrowser(  )</td><td title='/var/www/html/estadisticas/application/views/scripts/api/index.phtml' bgcolor='#eeeeec'>.../index.phtml<b>:</b>1882</td></tr>
+</table></font>

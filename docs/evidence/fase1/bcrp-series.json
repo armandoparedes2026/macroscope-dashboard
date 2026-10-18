@@ -1,0 +1,38 @@
+[
+  {
+    "code": "PD04722MM",
+    "title": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria",
+    "frequency": "monthly",
+    "lastPeriod": "Oct.2026",
+    "url": "https://estadisticas.bcrp.gob.pe/estadisticas/series/api/PD04722MM/json/2024-1/2026-10",
+    "fetchedAt": "2026-10-18T06:42:39.405Z",
+    "status": 200
+  },
+  {
+    "code": "PN01273PM",
+    "title": "Índice de precios Lima Metropolitana (var% 12 meses) - IPC",
+    "frequency": "monthly",
+    "lastPeriod": "Sep.2026",
+    "url": "https://estadisticas.bcrp.gob.pe/estadisticas/series/api/PN01273PM/json/2024-1/2026-10",
+    "fetchedAt": "2026-10-18T06:42:39.621Z",
+    "status": 200
+  },
+  {
+    "code": "PN01207PM",
+    "title": "Tipo de cambio - promedio del periodo (S/ por US$) - Interbancario - Promedio",
+    "frequency": "monthly",
+    "lastPeriod": "Sep.2026",
+    "url": "https://estadisticas.bcrp.gob.pe/estadisticas/series/api/PN01207PM/json/2024-1/2026-10",
+    "fetchedAt": "2026-10-18T06:42:39.816Z",
+    "status": 200
+  },
+  {
+    "code": "PN00027MM",
+    "title": "Cuentas monetarias del Banco Central de Reserva del Perú - Reservas Internacionales Netas (millones US$)",
+    "frequency": "monthly",
+    "lastPeriod": "Sep.2026",
+    "url": "https://estadisticas.bcrp.gob.pe/estadisticas/series/api/PN00027MM/json/2024-1/2026-10",
+    "fetchedAt": "2026-10-18T06:42:40.009Z",
+    "status": 200
+  }
+]

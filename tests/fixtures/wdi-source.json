@@ -1,0 +1,9 @@
+{
+  "fetchedAt": "2026-10-18",
+  "pages": [
+    "https://api.worldbank.org/v2/country/PER/indicator/NE.IMP.GNFS.ZS?date=2023:2025&format=json&per_page=2&page=1",
+    "https://api.worldbank.org/v2/country/PER/indicator/NE.IMP.GNFS.ZS?date=2023:2025&format=json&per_page=2&page=2"
+  ],
+  "error": "https://api.worldbank.org/v2/country/PER/indicator/INVALID.INDICATOR?format=json",
+  "nulls": "https://api.worldbank.org/v2/country/USA/indicator/NE.IMP.GNFS.ZS?date=2023:2025&format=json&per_page=10"
+}

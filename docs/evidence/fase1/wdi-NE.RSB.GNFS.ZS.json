@@ -1,0 +1,1349 @@
+{
+  "fetchedAt": "2026-10-18T06:42:01.906Z",
+  "rows": [
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2025",
+      "value": 0.34996353083392,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2024",
+      "value": 0.292634941087382,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2023",
+      "value": 2.27241877640431,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2022",
+      "value": 0.445464030534397,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2021",
+      "value": 0.562529977933522,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2020",
+      "value": 0.60502547502016,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2019",
+      "value": -0.644419487260711,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2018",
+      "value": 0.393795614628458,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2017",
+      "value": 0.718201365447856,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2016",
+      "value": 0.39967600829311,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2015",
+      "value": -1.15324310058813,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "BR",
+        "value": "Brazil"
+      },
+      "countryiso3code": "BRA",
+      "date": "2014",
+      "value": -2.66152017502132,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2025",
+      "value": 4.1427448273858,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2024",
+      "value": 3.50639435675522,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2023",
+      "value": 0.873479013111739,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2022",
+      "value": -3.99004743231151,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2021",
+      "value": -0.891301234761545,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2020",
+      "value": 4.47683193219555,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2019",
+      "value": -1.86226256957105,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2018",
+      "value": -1.11896084864475,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2017",
+      "value": 0.636595138309788,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2016",
+      "value": -0.21154484650037,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2015",
+      "value": -0.966952421385889,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CL",
+        "value": "Chile"
+      },
+      "countryiso3code": "CHL",
+      "date": "2014",
+      "value": 0.373178226337891,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2025",
+      "value": -5.4008614063524,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2024",
+      "value": -4.15708485766782,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2023",
+      "value": -4.51776713709677,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2022",
+      "value": -7.50591912466972,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2021",
+      "value": -7.66513448383997,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2020",
+      "value": -7.01101984934966,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2019",
+      "value": -5.82245667259081,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2018",
+      "value": -4.73531344181107,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2017",
+      "value": -4.99233544565771,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2016",
+      "value": -6.76837442780702,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2015",
+      "value": -7.06034109945172,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "CO",
+        "value": "Colombia"
+      },
+      "countryiso3code": "COL",
+      "date": "2014",
+      "value": -4.21796742180854,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2025",
+      "value": -0.284641658200215,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2024",
+      "value": -0.119121936558187,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2023",
+      "value": -0.35443609898816,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2022",
+      "value": -1.90912470502399,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2021",
+      "value": -1.01658302785292,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2020",
+      "value": 0.576234808202216,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2019",
+      "value": -0.289495305576875,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2018",
+      "value": -0.673167431083261,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2017",
+      "value": -0.168361206711744,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2016",
+      "value": -0.254706140676308,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2015",
+      "value": -1.16817709862852,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "ZJ",
+        "value": "Latin America & Caribbean"
+      },
+      "countryiso3code": "LCN",
+      "date": "2014",
+      "value": -1.00026262477277,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2025",
+      "value": -0.633272996185723,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2024",
+      "value": -0.858669079704223,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2023",
+      "value": -1.4432070905527,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2022",
+      "value": -2.93390516007755,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2021",
+      "value": -1.93091123353361,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2020",
+      "value": 1.6161884754227,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2019",
+      "value": -0.402670673078944,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2018",
+      "value": -2.1248007728556,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2017",
+      "value": -1.92394880103589,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2016",
+      "value": -2.05894890589345,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2015",
+      "value": -2.08742930172503,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "MX",
+        "value": "Mexico"
+      },
+      "countryiso3code": "MEX",
+      "date": "2014",
+      "value": -1.17242463508096,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2025",
+      "value": 8.12417116525793,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2024",
+      "value": 6.08671991702003,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2023",
+      "value": 3.43329290569731,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2022",
+      "value": 0.366590192202994,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2021",
+      "value": 3.04343025856466,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2020",
+      "value": 1.77691908824219,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2019",
+      "value": 1.13466949437259,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2018",
+      "value": 1.75289917275844,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2017",
+      "value": 1.92619358739747,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2016",
+      "value": -0.188213714433938,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2015",
+      "value": -2.58811811732317,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2014",
+      "value": -1.63918033965978,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2025",
+      "value": null,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2024",
+      "value": -3.06662434752828,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2023",
+      "value": -2.82795073709931,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2022",
+      "value": -3.59970406777088,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2021",
+      "value": -3.57938846341164,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2020",
+      "value": -2.89378184080948,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2019",
+      "value": -2.68008580508563,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2018",
+      "value": -2.87113761100856,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2017",
+      "value": -2.77037616875539,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2016",
+      "value": -2.67627933189587,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2015",
+      "value": -2.86591667382253,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.RSB.GNFS.ZS",
+        "value": "External balance on goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "US",
+        "value": "United States"
+      },
+      "countryiso3code": "USA",
+      "date": "2014",
+      "value": -2.89014091098105,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    }
+  ]
+}
