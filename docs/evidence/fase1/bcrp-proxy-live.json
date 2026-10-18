@@ -1,0 +1,69 @@
+{
+  "runtime": "v22.23.3",
+  "status": 200,
+  "headers": {
+    "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=86400"
+  },
+  "series": [
+    {
+      "source": "BCRP",
+      "code": "PD04722MM",
+      "title": "Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria",
+      "unit": "%",
+      "frequency": "monthly",
+      "observations": [
+        {
+          "period": "Oct.2026",
+          "date": "2026-10-01",
+          "value": 4.25
+        }
+      ],
+      "fetchedAt": "2026-10-18T06:49:13.230Z"
+    },
+    {
+      "source": "BCRP",
+      "code": "PN01273PM",
+      "title": "Índice de precios Lima Metropolitana (var% 12 meses) - IPC",
+      "unit": "% en 12 meses",
+      "frequency": "monthly",
+      "observations": [
+        {
+          "period": "Oct.2026",
+          "date": "2026-10-01",
+          "value": null
+        }
+      ],
+      "fetchedAt": "2026-10-18T06:49:13.230Z"
+    },
+    {
+      "source": "BCRP",
+      "code": "PN01207PM",
+      "title": "Tipo de cambio - promedio del periodo (S/ por US$) - Interbancario - Promedio",
+      "unit": "S/ por US$",
+      "frequency": "monthly",
+      "observations": [
+        {
+          "period": "Oct.2026",
+          "date": "2026-10-01",
+          "value": null
+        }
+      ],
+      "fetchedAt": "2026-10-18T06:49:13.230Z"
+    },
+    {
+      "source": "BCRP",
+      "code": "PN00027MM",
+      "title": "Cuentas monetarias del Banco Central de Reserva del Perú - Reservas Internacionales Netas (millones US$)",
+      "unit": "millones US$",
+      "frequency": "monthly",
+      "observations": [
+        {
+          "period": "Oct.2026",
+          "date": "2026-10-01",
+          "value": null
+        }
+      ],
+      "fetchedAt": "2026-10-18T06:49:13.230Z"
+    }
+  ]
+}

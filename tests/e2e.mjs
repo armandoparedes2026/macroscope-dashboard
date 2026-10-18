@@ -28,7 +28,7 @@ async function check(name, fn) {
 async function openOffline(page) {
   await page.route(/^https?:/, (route) => route.abort());
   await page.goto(PAGE_URL);
-  await page.waitForFunction(() => document.getElementById('apiStatusText').textContent === 'Respaldo histórico local');
+  await page.waitForFunction(() => document.getElementById('apiStatusText').textContent === 'Respaldo local — no actualizado');
 }
 
 const deltaClass = (page, title) =>
@@ -39,7 +39,7 @@ console.log('MacroScope e2e');
 await check('modo sin conexión: respaldo local y gráficos alternativos', async (page) => {
   await openOffline(page);
   assert.equal(await page.evaluate(() => window.Chart.name), 'ChartFallback');
-  assert.equal(await page.locator('.kpi-card').count(), 6);
+  assert.equal(await page.locator('.kpi-card').count(), 8);
   assert.ok(await page.locator('#macroTableBody td.cell-fallback').count() > 0, 'las celdas de respaldo deben marcarse');
 });
 
@@ -106,7 +106,7 @@ await check('Mundell–Fleming flexible con movilidad perfecta: la política fis
   await openModel(page);
   await page.selectOption('#islmMobility', 'perfect');
   await page.click('[data-preset="fiscal"]');
-  assert.equal(await cell(page, 'Y', 'dv'), '0.0');
+  assert.equal(await cell(page, 'Y', 'dv'), '0.0 %');
   assert.match(await cell(page, 'e', 'dv'), /^−/);
   assert.match(await page.textContent('#islmNarrative'), /Resultado clásico de Mundell–Fleming/);
   // Playwright's isDisabled() does not report <option> state, so read the DOM property.
@@ -168,7 +168,7 @@ await check('procedencia: los datos del API se distinguen del respaldo', async (
     if (url.includes('api.worldbank.org') && url.includes('NY.GDP.MKTP.KD.ZG')) {
       return route.fulfill({
         contentType: 'application/json',
-        body: JSON.stringify([{ page: 1 }, [{ countryiso3code: 'PER', date: '2024', value: 3.05, indicator: { id: 'NY.GDP.MKTP.KD.ZG' }, country: { value: 'Peru' } }]]),
+        body: JSON.stringify([{ page: 1, pages: 1 }, [{ countryiso3code: 'PER', date: '2024', value: 3.05, indicator: { id: 'NY.GDP.MKTP.KD.ZG' }, country: { value: 'Peru' } }]]),
       });
     }
     return route.abort();
@@ -204,6 +204,93 @@ await check('carrusel: sin avance automático con prefers-reduced-motion', async
   assert.equal(await page.evaluate(() => state.carouselIndex), 1);
   assert.equal(await page.locator('#carouselDots .carousel-dot').nth(1).getAttribute('aria-current'), 'true');
 });
+
+
+for(const [width,height] of [[1440,900],[768,1024],[390,844],[360,740]]) {
+  await check(`hero cue: destino visible y foco a ${width}px`, async page=>{
+    await page.setViewportSize({width,height});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await openOffline(page);
+    await page.click('#heroScrollCue');
+    await page.waitForFunction(()=>{
+      const target=document.querySelector('#overviewFilters').getBoundingClientRect();
+      const bottom=Math.max(...[...document.querySelectorAll('.topbar,.mobile-nav')].filter(el=>getComputedStyle(el).position==='sticky'&&el.getBoundingClientRect().height>0).map(el=>el.getBoundingClientRect().bottom));
+      return target.top>=bottom&&target.top<innerHeight;
+    });
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'overviewFilters');
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
+    await page.screenshot({path:`docs/evidence/fase1/hero-${width}.png`});
+    for(const tab of ['simulator','data']) {
+      await page.locator(`.tab-btn[data-tab="${tab}"]`).locator('visible=true').first().click();
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0,`${tab} sin desborde a ${width}`);
+    }
+  });
+}
+
+await check('calibración: NX, NFI, CA separados y naturaleza explícita',async page=>{
+  await openModel(page);
+  assert.match(await page.textContent('#islmCalibration'),/propensión media × elasticidad-ingreso supuesta = 1/);
+  assert.match(await page.textContent('#islmCalibration'),/supuesto ilustrativo/);
+  assert.match(await page.textContent('#islmCalibration'),/NE.RSB.GNFS.ZS/);
+  for(const key of ['NX','NFI','CA'])assert.equal(await page.locator(`#islmResults tr[data-var="${key}"]`).count(),1);
+  await page.click('[data-preset="fiscal"]');
+  assert.match(await cell(page,'i','dv'),/ pp$/);
+  for(const key of ['Y','e','M'])assert.match(await cell(page,key,'dv'),/ %$/);
+});
+
+const wdiRow=(code,year,value)=>({countryiso3code:'PER',date:year,value,indicator:{id:code},country:{value:'Peru'}});
+await check('WDI: paginación, nulos, último año real, caché y actualización manual',async page=>{
+  let calls=0;
+  await page.route(/^https?:/,route=>{
+    const url=new URL(route.request().url());
+    if(url.hostname==='api.worldbank.org'&&url.pathname.includes('NE.IMP.GNFS.ZS')) {
+      calls++;
+      const pageNumber=Number(url.searchParams.get('page'));
+      return route.fulfill({contentType:'application/json',body:JSON.stringify([{page:pageNumber,pages:2},[wdiRow('NE.IMP.GNFS.ZS',pageNumber===1?'2025':'2023',pageNumber===1?null:19.75)]])});
+    }
+    return route.abort();
+  });
+  await page.goto(PAGE_URL);
+  await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
+  assert.equal(calls,2);
+  assert.deepEqual(await page.evaluate(()=>getLatestYearAndValue('PER','NE.IMP.GNFS.ZS').year),'2023');
+  assert.equal(await page.evaluate(()=>runtimeDB.PER['NE.IMP.GNFS.ZS']['2025']),null);
+  await page.reload();
+  await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
+  assert.equal(calls,2,'caché vigente evita red');
+  await page.click('#syncApiBtn');
+  await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
+  assert.equal(calls,4,'actualización manual evita caché');
+  await page.evaluate(()=>{const key='macroscope_wdi_v2_NE.IMP.GNFS.ZS';const d=JSON.parse(localStorage.getItem(key));d.fetchedAt='2000-01-01T00:00:00Z';localStorage.setItem(key,JSON.stringify(d));});
+  await page.reload();
+  await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
+  assert.equal(calls,6,'caché vencida se renueva');
+});
+
+await check('WDI: respuesta malformada reintenta dos veces y conserva respaldo',async page=>{
+  let calls=0;
+  await page.route(/^https?:/,route=>{
+    if(route.request().url().includes('api.worldbank.org')) {calls++;return route.fulfill({contentType:'application/json',body:JSON.stringify([{page:1,pages:1},[{date:'2025',value:'inválido'}]])});}
+    return route.abort();
+  });
+  await page.goto(PAGE_URL);
+  await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
+  assert.equal(calls,24);
+  assert.equal(await page.textContent('#apiStatusText'),'Respaldo local — no actualizado');
+});
+
+for(const mode of ['success','failure','malformed']) {
+  await check(`BCRP: ${mode}`,async page=>{
+    const fixture=JSON.parse(await readFile(new URL('./fixtures/bcrp-normalized.json',import.meta.url),'utf8'));
+    await page.route(/^https?:/,route=>{
+      if(route.request().url().includes('/api/bcrp'))return route.fulfill({status:mode==='failure'?502:200,contentType:'application/json',body:JSON.stringify(mode==='success'?fixture:mode==='malformed'?{unexpected:true}:{error:'No disponible'})});
+      return route.abort();
+    });
+    await page.goto(PAGE_URL);
+    await page.waitForFunction(()=>!document.querySelector('#bcrpResults').textContent.includes('Consultando'));
+    assert.match(await page.textContent('#bcrpResults'),mode==='success'?/PD04722MM.*Fuente: BCRP/:/BCRP no disponible/);
+  });
+}
 
 await browser.close();
 if (failures) {

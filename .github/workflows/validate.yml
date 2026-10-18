@@ -23,9 +23,5 @@ jobs:
         run: npm ci
       - name: Install Chromium for Playwright
         run: npx playwright install --with-deps chromium
-      - name: Smoke tests
-        run: npm run test:smoke
-      - name: IS-LM model unit tests
-        run: npm run test:unit
-      - name: End-to-end tests
-        run: npm run test:e2e
+      - name: All checks
+        run: npm test

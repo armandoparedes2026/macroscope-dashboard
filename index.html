@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101e36">
-  <meta name="description" content="Observatorio macroeconómico para análisis ejecutivo, comparaciones internacionales y un simulador IS–LM–BP / Mundell–Fleming calibrado con indicadores del Banco Mundial.">
+  <meta name="description" content="Observatorio macroeconómico para análisis ejecutivo, comparaciones internacionales y un simulador IS–LM–BP / Mundell–Fleming con equilibrio inicial anclado en datos WDI y supuestos explícitos.">
   <title>MacroScope — Inteligencia económica</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -133,7 +133,7 @@
     .data-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.02)}.data-table{width:100%;border-collapse:collapse;min-width:880px}.data-table thead th{position:sticky;top:0;background:rgba(14,25,42,.98);color:#b6c7dc;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;padding:14px 16px;border-bottom:1px solid var(--line);text-align:left}.data-table tbody td{padding:14px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink)}.data-table tbody tr:hover{background:rgba(115,168,255,.04)}.data-table tbody td:not(:first-child),.data-table thead th:not(:first-child){text-align:right}
     [data-theme="light"] .data-table thead th{background:#f8fbff;color:#697e99}
     .data-note{margin-top:12px;color:var(--muted);font-size:11px;line-height:1.7}.source-link{color:var(--blue)}
-    .inspector-status{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(115,168,255,.08);border:1px solid rgba(115,168,255,.18);font-size:11px;font-weight:800;color:#a8c0eb}.inspector-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.code-block{border:1px solid var(--line);border-radius:18px;background:rgba(6,12,22,.54);padding:16px}.code-label{font-size:11px;font-weight:800;color:var(--subtle);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase}.code-block pre,.code-block ul{margin:0;color:#9fc0ea;font:12px/1.7 'IBM Plex Mono',ui-monospace,monospace;max-height:240px;overflow:auto;white-space:pre-wrap}.code-block ul{padding-left:18px}
+    .inspector-status{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(115,168,255,.08);border:1px solid rgba(115,168,255,.18);font-size:11px;font-weight:800;color:#a8c0eb}.inspector-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.code-block{min-width:0;border:1px solid var(--line);border-radius:18px;background:rgba(6,12,22,.54);padding:16px}.code-label{font-size:11px;font-weight:800;color:var(--subtle);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase}.code-block pre,.code-block ul{margin:0;color:#9fc0ea;font:12px/1.7 'IBM Plex Mono',ui-monospace,monospace;max-height:240px;overflow:auto;white-space:pre-wrap}.code-block ul{padding-left:18px}
     .footer{margin:24px 28px 0;padding:18px 6px 0;color:var(--subtle);font-size:11px;display:flex;justify-content:space-between;gap:14px;border-top:1px solid var(--line)}
     .toast{position:fixed;right:22px;bottom:22px;z-index:30;display:flex;align-items:center;gap:10px;background:rgba(12,21,37,.92);border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;border-radius:16px;color:#eaf2ff;backdrop-filter:blur(14px)}.toast[hidden]{display:none}.toast-dot{width:9px;height:9px;border-radius:50%;background:#49d8bb;box-shadow:0 0 0 4px rgba(73,216,187,.12)}.toast-dot.warning{background:#d6a144;box-shadow:0 0 0 4px rgba(214,161,68,.14)}
     .data-table td.table-empty{text-align:center;color:var(--muted);padding:28px 16px}.data-table td.value-pos{color:var(--teal)}.data-table td.value-neg{color:var(--rose)}.data-table td.value-blue{color:var(--blue)}
@@ -255,7 +255,7 @@
     .data-table.islm-policy-table{min-width:520px}.islm-policy-table td,.islm-policy-table th{text-align:left!important;vertical-align:top;line-height:1.55;white-space:normal}.islm-policy-table tbody th{font-size:12px;color:var(--ink-deep);padding:14px 16px;border-bottom:1px solid var(--line)}.islm-policy-table .is-current{background:rgba(115,168,255,.09);color:var(--ink-deep)}.islm-policy-table thead th.is-current{color:var(--blue)}
     @media(max-width:1400px){.executive-grid,.insight-slide{grid-template-columns:1fr}.pulse-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fx-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.charts-grid{grid-template-columns:1fr}.charts-grid.half{grid-template-columns:1fr 1fr}}
     @media(max-width:1120px){.app-shell{grid-template-columns:88px minmax(0,1fr)}.topbar{margin:0 12px;padding-left:20px;padding-right:20px}.content{padding:24px 16px 0}.footer{margin-left:16px;margin-right:16px}.page-heading{padding:28px 26px 48px}.filter-bar{padding:16px;flex-wrap:wrap}.filter-group{flex:1 1 calc(50% - 14px)}.sim-layout{grid-template-columns:1fr}.selector-summary,.pulse-strip{grid-template-columns:1fr 1fr}.fx-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media(max-width:760px){.islm-grid,.islm-classes{grid-template-columns:1fr}.islm-panel canvas{height:240px}.app-shell{display:block}.sidebar{display:none}.topbar{margin:0;padding:16px 16px 14px}.top-title{font-size:20px}.crumb{display:none}.api-indicator{max-width:165px;overflow:hidden;text-overflow:ellipsis;padding:9px 11px;font-size:10px}.api-indicator span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mobile-nav{display:flex;position:sticky;top:var(--topbar-h,74px);z-index:21;gap:8px;padding:10px 16px;background:rgba(7,14,25,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}.mobile-nav::-webkit-scrollbar{display:none}.mobile-nav .tab-btn{width:auto;flex:none;padding:11px 14px;min-height:auto;gap:7px;font-size:11px;color:var(--muted);border-color:var(--line);background:rgba(255,255,255,.02)}.mobile-nav .tab-btn svg{width:15px;height:15px}.mobile-nav .tab-btn.is-active{color:white;border-color:rgba(115,168,255,.4);background:rgba(115,168,255,.16)}.mobile-nav .tab-btn.is-active:before{display:none}.content{padding:18px 14px 0}.page-heading{display:block;border-radius:24px;padding:24px 20px 40px}.page-heading h1{font-size:29px}.page-heading p{font-size:13px}.page-badge{display:none}.hero-scroll-cue{left:20px;bottom:12px;padding:10px 12px}.filter-bar{margin-top:-26px;border-radius:18px;padding:12px;gap:10px}.filter-group{flex-basis:100%}.control-action,.field-select{height:46px;font-size:13px}.executive-grid{grid-template-columns:1fr}.executive{display:block;padding:20px;border-radius:20px}.executive-actions{margin-top:18px}.ghost-light{width:100%}.selector-summary,.pulse-strip{grid-template-columns:1fr}.summary-mini,.pulse-card{padding:15px}.insight-head{padding:18px 18px 0;display:block}.carousel-controls{margin-top:12px;justify-content:space-between}.insight-carousel-inner{padding:14px 18px 18px}.insight-slide{grid-template-columns:1fr}.insight-copy,.signal-board{padding:18px;border-radius:20px}.section-top{display:block}.text-chip{display:inline-flex;margin-top:10px}.kpi-grid{grid-template-columns:1fr;gap:12px}.kpi-card{padding:18px;min-height:170px}.kpi-top{display:block}.kpi-number{font-size:29px}.status-pill{position:absolute;top:16px;right:16px;font-size:8px;padding:5px 7px}.kpi-title{max-width:calc(100% - 72px)}.kpi-spark{display:none}.chart-card,.decisions-card,.soft-panel,.sim-block{padding:18px}.chart-wrap,.chart-wrap.tall{height:250px}.card-top{flex-wrap:wrap}.card-top .field-select{max-width:none;width:100%}.fx-grid,.charts-grid.half,.sim-results,.inspector-grid{grid-template-columns:1fr}.result-card{display:flex;justify-content:space-between;align-items:center;gap:12px}.result-number{font-size:20px}.result-delta{text-align:right}.data-actions{width:100%;flex-wrap:wrap}.data-actions .search-box{flex:1}.data-actions .search-box input{width:100%;min-width:85px}.footer{margin:22px 14px 0;flex-wrap:wrap}.toast{right:14px;bottom:14px;left:14px}}
+    @media(max-width:760px){.islm-grid,.islm-classes{grid-template-columns:1fr}.islm-panel canvas{height:240px}.app-shell{display:block}.sidebar{display:none}.topbar{margin:0;padding:16px 16px 14px}.top-title{font-size:20px}.crumb{display:none}.api-indicator{max-width:165px;overflow:hidden;text-overflow:ellipsis;padding:9px 11px;font-size:10px}.api-indicator span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mobile-nav{display:flex;position:sticky;top:var(--topbar-h,74px);z-index:21;gap:8px;padding:10px 16px;background:rgba(7,14,25,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}.mobile-nav::-webkit-scrollbar{display:none}.mobile-nav .tab-btn{width:auto;flex:none;padding:11px 14px;min-height:auto;gap:7px;font-size:11px;color:var(--muted);border-color:var(--line);background:rgba(255,255,255,.02)}.mobile-nav .tab-btn svg{width:15px;height:15px}.mobile-nav .tab-btn.is-active{color:white;border-color:rgba(115,168,255,.4);background:rgba(115,168,255,.16)}.mobile-nav .tab-btn.is-active:before{display:none}.content{padding:18px 14px 0}.page-heading{display:block;border-radius:24px;padding:24px 20px 40px}.page-heading h1{font-size:29px}.page-heading p{font-size:13px}.page-badge{display:none}.hero-scroll-cue{left:20px;bottom:12px;padding:10px 12px}.filter-bar{margin-top:-26px;border-radius:18px;padding:12px;gap:10px}.filter-group{flex-basis:100%}.control-action,.field-select{height:46px;font-size:13px}.executive-grid{grid-template-columns:1fr}.executive{display:block;padding:20px;border-radius:20px}.executive-actions{margin-top:18px}.ghost-light{width:100%}.selector-summary,.pulse-strip{grid-template-columns:1fr}.summary-mini,.pulse-card{padding:15px}.insight-head{padding:18px 18px 0;display:block}.carousel-controls{margin-top:12px;justify-content:space-between}.insight-carousel-inner{padding:14px 18px 18px}.insight-slide{grid-template-columns:1fr}.insight-copy,.signal-board{padding:18px;border-radius:20px}.section-top{display:block}.text-chip{display:inline-flex;margin-top:10px}.kpi-grid{grid-template-columns:1fr;gap:12px}.kpi-card{padding:18px;min-height:170px}.kpi-top{display:block}.kpi-number{font-size:29px}.status-pill{position:absolute;top:16px;right:16px;font-size:8px;padding:5px 7px}.kpi-title{max-width:calc(100% - 72px)}.kpi-spark{display:none}.chart-card,.decisions-card,.soft-panel,.sim-block{padding:18px}.chart-wrap,.chart-wrap.tall{height:250px}.card-top{flex-wrap:wrap}.card-top .field-select{max-width:none;width:100%}.fx-grid,.charts-grid.half,.sim-results,.inspector-grid{grid-template-columns:minmax(0,1fr)}.result-card{display:flex;justify-content:space-between;align-items:center;gap:12px}.result-number{font-size:20px}.result-delta{text-align:right}.data-actions{width:100%;flex-wrap:wrap}.data-actions .search-box{flex:1}.data-actions .search-box input{width:100%;min-width:85px}.footer{margin:22px 14px 0;flex-wrap:wrap}.toast{right:14px;bottom:14px;left:14px}}
     @media print{body{background:white;color:#111}body::before,.sidebar,.mobile-nav,.top-right,.filter-bar,.executive-actions,.data-actions,.footer,.toast{display:none!important}.app-shell{display:block}.topbar,.content{padding:10px 0;margin:0;background:#fff}.surface,.kpi-card,.page-heading,.executive{box-shadow:none;background:#fff;color:#111;border-color:#ddd;break-inside:avoid}.page-heading h1,.top-title,.section-title,.card-top h3,.kpi-number,.executive h2{color:#111}.page-heading p,.executive p,.section-sub,.data-note,.card-top p{color:#444}.chart-card{break-inside:avoid}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
@@ -313,6 +313,11 @@
       <div class="filter-group"><label class="control-label" for="periodSelect">PERIODO DE ANÁLISIS</label><select class="field-select" id="periodSelect"><option value="5">Últimos 5 años disponibles</option><option value="10" selected>Últimos 10 años disponibles</option><option value="all">Toda la serie (2014 en adelante)</option></select></div>
       <button type="button" id="syncApiBtn" class="control-action primary"><svg id="syncIcon" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg><span>Actualizar datos</span></button>
      </div>
+     <article class="surface" style="padding:20px;margin-bottom:20px" aria-labelledby="bcrpTitle">
+       <h2 id="bcrpTitle">Perú en profundidad (BCRP)</h2>
+       <p>Series mensuales oficiales · Banco Central de Reserva del Perú</p>
+       <div id="bcrpResults" aria-live="polite">Consultando BCRP…</div>
+     </article>
      <div class="executive-grid reveal">
       <div class="executive premium-ring">
        <div class="executive-content"><div class="executive-top"><span class="eyebrow">LECTURA EJECUTIVA</span><span id="summaryYearTag" class="cut-tag">Corte WDI: 2024</span></div><h2 id="executiveHeadline">Preparando síntesis macroeconómica...</h2><p id="executiveNarrative">Consultando los indicadores disponibles.</p></div>
@@ -335,7 +340,7 @@
       <div class="kpi-grid" id="kpiGrid" aria-label="Tarjetas de indicadores"></div>
      </div>
      <div class="charts-grid">
-      <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="trendChartTitle">Evolución histórica</h3><p id="trendChartSubtitle">Comparación temporal de indicadores</p></div><select id="indicatorSelectChart" class="field-select" aria-label="Indicador para el gráfico principal"><option value="NY.GDP.MKTP.KD.ZG">Crecimiento del PBI</option><option value="FP.CPI.TOTL.ZG">Inflación IPC</option><option value="SL.UEM.TOTL.ZS">Desempleo</option><option value="NY.GDP.PCAP.CD">PBI per cápita</option><option value="NE.EXP.GNFS.ZS">Exportaciones</option><option value="BN.CAB.XOKA.GD.ZS">Cuenta corriente</option></select></div><div class="chart-wrap tall"><canvas id="trendChart" role="img" aria-label="Evolución histórica del indicador seleccionado comparada con la economía de referencia"></canvas></div></article>
+      <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="trendChartTitle">Evolución histórica</h3><p id="trendChartSubtitle">Comparación temporal de indicadores</p></div><select id="indicatorSelectChart" class="field-select" aria-label="Indicador para el gráfico principal"><option value="NY.GDP.MKTP.KD.ZG">Crecimiento del PBI</option><option value="FP.CPI.TOTL.ZG">Inflación IPC</option><option value="SL.UEM.TOTL.ZS">Desempleo</option><option value="NY.GDP.PCAP.CD">PBI per cápita</option><option value="NE.EXP.GNFS.ZS">Exportaciones</option><option value="BN.CAB.XOKA.GD.ZS">Cuenta corriente</option><option value="NE.RSB.GNFS.ZS">Balanza de bienes y servicios</option><option value="NE.IMP.GNFS.ZS">Importaciones</option></select></div><div class="chart-wrap tall"><canvas id="trendChart" role="img" aria-label="Evolución histórica del indicador seleccionado comparada con la economía de referencia"></canvas></div></article>
       <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="regionalChartTitle">Comparación entre economías</h3><p id="regionalChartSubtitle">Mismo año para todos los países</p></div></div><div class="chart-wrap tall"><canvas id="regionalChart" role="img" aria-label="Ranking de economías por el indicador activo"></canvas></div></article>
      </div>
      <div class="charts-grid half">
@@ -344,7 +349,7 @@
      </div>
    </section>
    <section class="view" id="tab-simulator" hidden aria-label="Modelo IS-LM-BP y Mundell-Fleming">
-     <div class="page-heading"><div><div class="eyebrow">MACROECONOMÍA ABIERTA · CORTO PLAZO</div><h1>IS–LM–BP y Mundell–Fleming.</h1><p>Elige el tipo de economía, mueve instrumentos de política o shocks externos y observa cómo se desplazan las curvas en cuatro mercados enlazados: qué controla la economía, qué le viene dado y cómo se transmite cada decisión.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chart"/></svg>Modelo didáctico calibrado</div></div>
+     <div class="page-heading"><div><div class="eyebrow">MACROECONOMÍA ABIERTA · CORTO PLAZO</div><h1>IS–LM–BP y Mundell–Fleming.</h1><p>Elige el tipo de economía, mueve instrumentos de política o shocks externos y observa cómo se desplazan las curvas en cuatro mercados enlazados: qué controla la economía, qué le viene dado y cómo se transmite cada decisión.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chart"/></svg>Modelo didáctico · supuestos explícitos</div></div>
      <div class="sim-layout islm-layout">
       <article class="surface sim-block islm-controls reveal" aria-label="Configuración del modelo">
        <div class="card-top"><div><h3>Configura la economía</h3><p id="islmCalibration">Calibración con datos del país seleccionado.</p></div><button type="button" id="islmResetBtn" class="control-action" style="height:32px;padding:0 10px;font-size:10px">Restablecer</button></div>
@@ -394,7 +399,7 @@
    <section class="view" id="tab-data" hidden aria-label="Matriz de datos e inspector API">
     <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD Y EXPLORACIÓN</div><h1>Datos claros. Fuentes visibles.</h1><p>Explora la serie anual, exporta observaciones y consulta los endpoints solicitados a las fuentes públicas.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Banco Mundial · WDI</div></div>
     <article class="surface soft-panel"><div class="card-top" style="flex-wrap:wrap"><div><h3>Histórico de indicadores</h3><p id="tableCountrySubtitle">Datos anuales de la economía seleccionada, por indicador y año.</p></div><div class="data-actions"><label class="search-box"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-search"/></svg><input id="tableSearchInput" type="search" placeholder="Filtrar por año" aria-label="Filtrar filas por año"></label><button class="control-action primary" id="exportCsvBtn" type="button"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-download"/></svg>Exportar CSV</button></div></div>
-      <div class="data-table-wrap"><table class="data-table"><thead><tr><th>Año</th><th>Crecimiento PBI<br>(% anual)</th><th>Inflación IPC<br>(% anual)</th><th>Desempleo<br>(%)</th><th>PBI per cápita<br>(US$ corrientes)</th><th>Exportaciones<br>(% del PBI)</th><th>Cuenta corriente<br>(% del PBI)</th></tr></thead><tbody id="macroTableBody"></tbody></table></div>
+      <div class="data-table-wrap"><table class="data-table"><thead><tr><th>Año</th><th>Crecimiento PBI<br>(% anual)</th><th>Inflación IPC<br>(% anual)</th><th>Desempleo<br>(%)</th><th>PBI per cápita<br>(US$ corrientes)</th><th>Exportaciones<br>(% del PBI)</th><th>Cuenta corriente<br>(% del PBI)</th><th>NX bienes y servicios<br>(% del PBI)</th><th>Importaciones<br>(% del PBI)</th></tr></thead><tbody id="macroTableBody"></tbody></table></div>
       <div class="data-note" id="tableProvenanceNote">N/D indica un registro no disponible. Las celdas en cursiva con <span style="color:var(--amber)">*</span> proceden del respaldo local incorporado (no confirmadas por la API en esta sesión); el resto fue devuelto por el API del Banco Mundial. El proveedor puede revisar las cifras posteriormente.</div>
       <div class="data-note"><strong>Notas metodológicas.</strong> Inflación (FP.CPI.TOTL.ZG): variación del IPC <em>promedio anual</em>; no equivale a la variación diciembre–diciembre que usan los bancos centrales (p. ej., el BCRP) para evaluar su meta. Desempleo (SL.UEM.TOTL.ZS): estimación <em>modelada de la OIT</em> a nivel nacional; no es comparable con la tasa de Lima Metropolitana publicada por el INEI.</div>
     </article>
@@ -621,6 +626,10 @@
       }
     };
 
+    Object.assign(INDICATORS, {
+      'NE.RSB.GNFS.ZS': {code:'NE.RSB.GNFS.ZS',title:'Balanza de bienes y servicios',unit:'% PBI',decimals:2,prefix:'',suffix:'%',goodDirection:'high'},
+      'NE.IMP.GNFS.ZS': {code:'NE.IMP.GNFS.ZS',title:'Importaciones de bienes y servicios',unit:'% PBI',decimals:2,prefix:'',suffix:'%',goodDirection:'high'}
+    });
     const YEARS = Array.from({length: new Date().getFullYear() - 2013}, (_, i) => String(2014 + i));
 
     // Inflation targets of each central bank (center ± tolerance, in %). Used to classify the latest CPI reading.
@@ -706,6 +715,10 @@
       EUR: { code: 'EUR', name: 'Euro', flag: '🇪🇺', rate: 0.92 }
     };
 
+
+    const FALLBACK_EXTRACTED_AT = {"NE.RSB.GNFS.ZS": "2026-10-18T06:42:01.906Z", "NE.IMP.GNFS.ZS": "2026-10-18T06:42:02.301Z"};
+    const verifiedTradeFallback = {"BRA": {"NE.RSB.GNFS.ZS": {"2025": 0.34996353083392, "2024": 0.292634941087382, "2023": 2.27241877640431, "2022": 0.445464030534397, "2021": 0.562529977933522, "2020": 0.60502547502016, "2019": -0.644419487260711, "2018": 0.393795614628458, "2017": 0.718201365447856, "2016": 0.39967600829311, "2015": -1.15324310058813, "2014": -2.66152017502132}, "NE.IMP.GNFS.ZS": {"2025": 17.4707593653367, "2024": 17.6459444987685, "2023": 15.6969055268697, "2022": 19.1853009729027, "2021": 18.5469003909373, "2020": 15.8485265343869, "2019": 14.7673386785785, "2018": 14.2412038808791, "2017": 11.8007665044289, "2016": 12.0670030347037, "2015": 14.0534345189741, "2014": 13.6734629940752}}, "CHL": {"NE.RSB.GNFS.ZS": {"2025": 4.1427448273858, "2024": 3.50639435675522, "2023": 0.873479013111739, "2022": -3.99004743231151, "2021": -0.891301234761545, "2020": 4.47683193219555, "2019": -1.86226256957105, "2018": -1.11896084864475, "2017": 0.636595138309788, "2016": -0.21154484650037, "2015": -0.966952421385889, "2014": 0.373178226337891}, "NE.IMP.GNFS.ZS": {"2025": 30.4208161074476, "2024": 30.2256760867506, "2023": 29.901582730252, "2022": 39.6117335928437, "2021": 32.8656468569676, "2020": 26.8459687305709, "2019": 29.7345891776124, "2018": 29.6480060761165, "2017": 27.6947817505058, "2016": 28.1347025767999, "2015": 30.1580314947545, "2014": 32.6307246042164}}, "COL": {"NE.RSB.GNFS.ZS": {"2025": -5.4008614063524, "2024": -4.15708485766782, "2023": -4.51776713709677, "2022": -7.50591912466972, "2021": -7.66513448383997, "2020": -7.01101984934966, "2019": -5.82245667259081, "2018": -4.73531344181107, "2017": -4.99233544565771, "2016": -6.76837442780702, "2015": -7.06034109945172, "2014": -4.21796742180854}, "NE.IMP.GNFS.ZS": {"2025": 20.384908937428, "2024": 20.2375393681026, "2023": 22.3255418346774, "2022": 27.8942871185028, "2021": 23.8621404387264, "2020": 20.5332954086799, "2019": 21.6904953267149, "2018": 20.6350331193542, "2017": 20.1376251940583, "2016": 21.4855137060045, "2015": 22.7105526089485, "2014": 20.8527165314594}}, "LCN": {"NE.RSB.GNFS.ZS": {"2025": -0.284641658200215, "2024": -0.119121936558187, "2023": -0.35443609898816, "2022": -1.90912470502399, "2021": -1.01658302785292, "2020": 0.576234808202216, "2019": -0.289495305576875, "2018": -0.673167431083261, "2017": -0.168361206711744, "2016": -0.254706140676308, "2015": -1.16817709862852, "2014": -1.00026262477277}, "NE.IMP.GNFS.ZS": {"2025": 26.4309130863694, "2024": 25.8849383792054, "2023": 25.5562519514196, "2022": 29.9879733405979, "2021": 28.1917937252176, "2020": 24.4245888164455, "2019": 25.0217595708612, "2018": 25.2036154389645, "2017": 22.5465382444257, "2016": 22.845556060854, "2015": 23.6333880896017, "2014": 22.7339202961129}}, "MEX": {"NE.RSB.GNFS.ZS": {"2025": -0.633272996185723, "2024": -0.858669079704223, "2023": -1.4432070905527, "2022": -2.93390516007755, "2021": -1.93091123353361, "2020": 1.6161884754227, "2019": -0.402670673078944, "2018": -2.1248007728556, "2017": -1.92394880103589, "2016": -2.05894890589345, "2015": -2.08742930172503, "2014": -1.17242463508096}, "NE.IMP.GNFS.ZS": {"2025": 40.2786127888756, "2024": 38.1422853106055, "2023": 37.5911414580596, "2022": 45.8661953749018, "2021": 42.500104429993, "2020": 37.6191836198755, "2019": 38.9323214620124, "2018": 41.1687312115588, "2017": 39.4380374225879, "2016": 38.8746261573743, "2015": 36.2502019908254, "2014": 32.6354168333342}}, "PER": {"NE.RSB.GNFS.ZS": {"2025": 8.12417116525793, "2024": 6.08671991702003, "2023": 3.43329290569731, "2022": 0.366590192202994, "2021": 3.04343025856466, "2020": 1.77691908824219, "2019": 1.13466949437259, "2018": 1.75289917275844, "2017": 1.92619358739747, "2016": -0.188213714433938, "2015": -2.58811811732317, "2014": -1.63918033965978}, "NE.IMP.GNFS.ZS": {"2025": 21.8456559013034, "2024": 22.7972140350108, "2023": 23.736868907826, "2022": 28.4530550594954, "2021": 26.1824464676564, "2020": 21.2345240547509, "2019": 22.9044179405342, "2018": 23.4392854994888, "2017": 22.7936783872998, "2016": 22.7885274554247, "2015": 23.875443403219, "2014": 24.2461507154749}}, "USA": {"NE.RSB.GNFS.ZS": {"2025": null, "2024": -3.06662434752828, "2023": -2.82795073709931, "2022": -3.59970406777088, "2021": -3.57938846341164, "2020": -2.89378184080948, "2019": -2.68008580508563, "2018": -2.87113761100856, "2017": -2.77037616875539, "2016": -2.67627933189587, "2015": -2.86591667382253, "2014": -2.89014091098105}, "NE.IMP.GNFS.ZS": {"2025": null, "2024": 14.0413208226783, "2023": 13.878624456192, "2022": 15.2538011117724, "2021": 14.4060572431224, "2020": 13.0168627958622, "2019": 14.4692832148142, "2018": 15.1582483706352, "2017": 14.9478571955214, "2016": 14.5644385592212, "2015": 15.2770653039497, "2014": 16.3983551242045}}};
+    Object.entries(verifiedTradeFallback).forEach(([country,series])=>Object.assign(FALLBACK_DB[country],series));
     // Deep clone fallback into runtime DB
     const runtimeDB = JSON.parse(JSON.stringify(FALLBACK_DB));
     const runtimeFX = JSON.parse(JSON.stringify(FALLBACK_FX));
@@ -973,7 +986,15 @@
       const cue=document.getElementById('heroScrollCue');
       const target=document.getElementById('overviewFilters');
       if(!cue || !target) return;
-      cue.addEventListener('click',()=>target.scrollIntoView({behavior:'smooth',block:'start'}));
+      target.tabIndex = -1;
+      cue.addEventListener('click',()=>{
+        const stickyHeight = [...document.querySelectorAll('.topbar,.mobile-nav')]
+          .filter(el=>getComputedStyle(el).position==='sticky' && el.getBoundingClientRect().height>0)
+          .reduce((sum,el)=>sum+el.getBoundingClientRect().height,0);
+        target.focus({preventScroll:true});
+        window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-stickyHeight-12,
+          behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+      });
     }
     function setupParallaxCards(){
       document.querySelectorAll('.page-heading,.executive').forEach(el=>{
@@ -997,6 +1018,65 @@
     // ============================================================================
     // 3. LIVE WORLD BANK API & FX API FETCHER
     // ============================================================================
+    async function loadBcrp() {
+      const node=document.getElementById('bcrpResults');
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+      try {
+        const origin=location.protocol==='file:'?'http://localhost':location.origin;
+        const response=await fetch(origin+'/api/bcrp?codes=PD04722MM-PN01273PM-PN01207PM-PN00027MM&start=2024-1&end='+new Date().getFullYear()+'-'+(new Date().getMonth()+1),{signal:controller.signal});
+        if(!response.ok)throw Error('BCRP no disponible');
+        const data=await response.json();
+        if(!Array.isArray(data)||data.length!==4||data.some(row=>row.source!=='BCRP'||typeof row.title!=='string'||!Array.isArray(row.observations)))throw Error('Respuesta BCRP inválida');
+        node.replaceChildren();
+        data.forEach(row=>{
+          const latest=row.observations.filter(obs=>Number.isFinite(obs.value)).at(-1);
+          const item=document.createElement('p');
+          item.textContent=row.title+': '+(latest?latest.value.toLocaleString('es-PE')+' '+row.unit+' · Observación: '+latest.period:'N/D')+' · '+row.code+' · Fuente: BCRP · Extracción: '+row.fetchedAt;
+          node.appendChild(item);
+        });
+      }catch{node.textContent='BCRP no disponible. No se pudieron consultar las series oficiales; vuelva a actualizar los datos. En una copia local se requiere el proxy del servidor.';}
+      finally{clearTimeout(timer);}
+    }
+    const wdiFetchedAt = {};
+    const WDI_TTL = 24*60*60*1000;
+    const validWdiRow=(row,indicator)=>row&&COUNTRIES[row.countryiso3code]&&row.indicator?.id===indicator&&/^\d{4}$/.test(row.date)&&(row.value===null||Number.isFinite(row.value));
+    async function fetchWdiPage(url, indicator) {
+      for(let attempt=0;attempt<3;attempt++) {
+        const controller=new AbortController();
+        const timer=setTimeout(()=>controller.abort(),12000);
+        try {
+          const response=await fetch(url,{signal:controller.signal});
+          if(!response.ok) throw Error('WDI HTTP '+response.status);
+          const data=await response.json();
+          if(!Array.isArray(data)||data.length!==2||!data[0]||!Array.isArray(data[1])||
+            !Number.isInteger(Number(data[0].pages))||Number(data[0].pages)<1||Number(data[0].pages)>100||
+            !Number.isInteger(Number(data[0].page))||Number(data[0].page)<1||
+            data[1].some(row=>!validWdiRow(row,indicator))) throw Error('Respuesta WDI malformada');
+          return data;
+        } catch(error) {
+          if(attempt===2) throw error;
+        } finally {clearTimeout(timer);}
+        await new Promise(resolve=>setTimeout(resolve,250*2**attempt));
+      }
+    }
+    async function loadWdiSeries(url,indicator,force) {
+      const key='macroscope_wdi_v2_'+indicator;
+      if(!force) {try {
+        const cached=JSON.parse(localStorage.getItem(key));
+        if(cached&&Date.now()-Date.parse(cached.fetchedAt)<WDI_TTL&&Date.now()>=Date.parse(cached.fetchedAt)&&Array.isArray(cached.rows)&&cached.rows.every(row=>validWdiRow(row,indicator))) return cached;
+      }catch{}}
+      const first=await fetchWdiPage(url+'&page=1',indicator);
+      if(Number(first[0].page)!==1)throw Error('Paginación WDI inválida');
+      const rows=[...first[1]];
+      for(let page=2;page<=Number(first[0].pages);page++) {
+        const next=await fetchWdiPage(url+'&page='+page,indicator);
+        if(Number(next[0].page)!==page||Number(next[0].pages)!==Number(first[0].pages))throw Error('Paginación WDI inválida');
+        rows.push(...next[1]);
+      }
+      const result={rows,fetchedAt:new Date().toISOString()};
+      try {localStorage.setItem(key,JSON.stringify(result));}catch{}
+      return result;
+    }
     async function syncLiveWorldBankData(showNotification = false) {
       const token = ++state.syncToken;
       const syncBtn = document.getElementById('syncApiBtn');
@@ -1020,23 +1100,24 @@
         const tasks = ids.map(ind=> {
           const url = `https://api.worldbank.org/v2/country/${countries.join(';')}/indicator/${ind}?date=2014:${YEARS.at(-1)}&format=json&per_page=250`;
           endpoints.push(url);
-          return fetch(url,{signal:controller.signal})
-            .then(r=>r.ok?r.json():null)
-            .then(data=> {
-              if (!Array.isArray(data) || !Array.isArray(data[1])) return;
-              macroSuccess++;
-              if (!rawSample) rawSample=data[1].filter(item=>item?.value!==null).slice(0,3).map(item=>({country:item.country?.value, countryiso3code:item.countryiso3code, indicator:item.indicator?.id, date:item.date, value:Number(Number(item.value).toFixed(3))}));
-              data[1].forEach(entry=>{
-                const yr=String(entry.date);
-                const code = entry.countryiso3code || entry.country?.id;
-                if (COUNTRIES[code] && YEARS.includes(yr) && Number.isFinite(entry.value)) {
-                  runtimeDB[code] ||= {};
-                  runtimeDB[code][ind] ||= {};
-                  runtimeDB[code][ind][yr]=Number(entry.value);
-                  ((runtimeSource[code] ||= {})[ind] ||= {})[yr]='wdi';
-                }
-              });
-            }).catch(()=>null);
+          return loadWdiSeries(url,ind,showNotification).then(data=> {
+            if(token!==state.syncToken)return;
+            macroSuccess++;
+            wdiFetchedAt[ind]=data.fetchedAt;
+            if(!rawSample)rawSample=data.rows.slice(0,3);
+            // Replace the entire series: an API null must never silently become a fallback number.
+            countries.forEach(country=>{
+              runtimeDB[country][ind]={};
+              ((runtimeSource[country] ||= {})[ind])={};
+            });
+            data.rows.forEach(entry=>{
+              const country=entry.countryiso3code,year=String(entry.date);
+              if(COUNTRIES[country]&&YEARS.includes(year)){
+                runtimeDB[country][ind][year]=entry.value;
+                runtimeSource[country][ind][year]='wdi';
+              }
+            });
+          }).catch(()=>null);
         });
         const fxUrl='https://open.er-api.com/v6/latest/USD';
         endpoints.push(fxUrl);
@@ -1060,7 +1141,7 @@
       const ms=Math.round(performance.now()-start);
       syncBtn.disabled=false;
       syncIcon.classList.remove('spinner');
-      badgeText.textContent=macroSuccess===ids.length?'Banco Mundial conectado':macroSuccess>0?'Conexión parcial · WDI':'Respaldo histórico local';
+      badgeText.textContent=macroSuccess===ids.length?'Banco Mundial conectado':macroSuccess>0?'Conexión parcial · WDI':'Respaldo local — no actualizado';
       badgeDot.className=macroSuccess?'status-dot online':'status-dot cache';
       latencyBadge.textContent=macroSuccess?`${macroSuccess}/${ids.length} indicadores · ${ms} ms`:'Sin respuesta API · respaldo local';
       document.getElementById('lastUpdatedLabel').textContent=`Consulta: ${new Date().toLocaleString('es-PE',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}`;
@@ -1116,7 +1197,7 @@
         card.className='kpi-card'+(state.activeIndicator===code?' active-kpi':'');
         card.setAttribute('aria-pressed',String(state.activeIndicator===code));
         card.setAttribute('aria-label',`Explorar ${meta.title}: ${formatValue(latest.value,code)} en ${latest.year}`);
-        card.innerHTML=`<span class="kpi-top"><span class="kpi-col"><span class="kpi-title">${meta.title}</span><span class="kpi-number">${formatValue(latest.value,code)}</span><span class="kpi-year">Último dato: ${latest.year} · ${meta.unit}${cellSource(state.country,code,latest.year)==='fallback'&&latest.year!=='N/D'?' · respaldo local':''}</span></span><span class="status-pill neutral">${pill}</span></span><span class="kpi-bottom"><span class="kpi-col"><span class="kpi-delta ${deltaCls}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</span><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></span>${sparkSvg(code)}</span>`;
+        card.innerHTML=`<span class="kpi-top"><span class="kpi-col"><span class="kpi-title">${meta.title}</span><span class="kpi-number">${formatValue(latest.value,code)}</span><span class="kpi-year">Último dato: ${latest.year} · ${meta.unit} · Extracción: ${wdiFetchedAt[code]||FALLBACK_EXTRACTED_AT[code]||'no registrada'}${cellSource(state.country,code,latest.year)==='fallback'&&latest.year!=='N/D'?' · Respaldo local — no actualizado':''}</span></span><span class="status-pill neutral">${pill}</span></span><span class="kpi-bottom"><span class="kpi-col"><span class="kpi-delta ${deltaCls}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</span><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></span>${sparkSvg(code)}</span>`;
         card.addEventListener('click',()=>{state.activeIndicator=code;document.getElementById('indicatorSelectChart').value=code;renderKpiCards();renderCharts();});
         node.appendChild(card);
       });
@@ -1181,6 +1262,7 @@
       BRA: { neutralReal: 5.0, note: 'Brasil: flotación con una tasa neutral elevada y comercio exterior relativamente bajo respecto del PBI.' },
       USA: { neutralReal: 1.0, note: 'EE. UU. es una economía grande: su política monetaria mueve la tasa internacional i*, por lo que el supuesto de economía pequeña de Mundell–Fleming no se cumple bien.' }
     };
+    const SOURCE_LABELS = {observed:'Dato observado',calibrated:'Parámetro calibrado',assumption:'Supuesto teórico',illustrative:'Valor ilustrativo',result:'Resultado del modelo'};
     const ISLM_FOREIGN_RATE = 3; // reference international rate (assumption)
     // Round first so tiny residuals never print as "-0.0"/"+0.0"; use a true minus sign.
     const roundTo = (n, d) => Math.round(n * 10 ** d) / 10 ** d || 0;
@@ -1202,7 +1284,7 @@
       { key: 't', group: 'param', label: 'Tasa impositiva (t)', min: 0.1, max: 0.4, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Estabilizador automático: reduce el multiplicador.' },
       { key: 'b', group: 'param', label: 'Sensibilidad de la inversión a i (b)', min: 0.5, max: 4, step: 0.1, fmt: v => fmtNum(v), help: 'Mayor b → IS más plana y más crowding out.' },
       { key: 'h', group: 'param', label: 'Sensibilidad de la demanda de dinero a i (h)', min: 0.5, max: 4, step: 0.1, fmt: v => fmtNum(v), help: 'Mayor h → LM más plana (hacia la trampa de liquidez).' },
-      { key: 'm', group: 'param', label: 'Propensión marginal a importar (m)', min: 0, max: 0.5, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Calibrada con la apertura comercial del país.' },
+      { key: 'm', group: 'param', label: 'Propensión marginal a importar (m)', min: 0, max: 0.5, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Aproximación: propensión media × elasticidad-ingreso supuesta = 1; no es una estimación.' },
       { key: 'n', group: 'param', label: 'Sensibilidad de NX al tipo de cambio (n)', min: 0.05, max: 0.5, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Condición de Marshall–Lerner: una depreciación mejora NX.' }
     ];
     const ISLM_PRESETS = [
@@ -1219,10 +1301,12 @@
 
     function islmCalibrationData() {
       const exp = getLatestYearAndValue(state.country, 'NE.EXP.GNFS.ZS');
+      const imp = getLatestYearAndValue(state.country, 'NE.IMP.GNFS.ZS');
+      const nx = getLatestYearAndValue(state.country, 'NE.RSB.GNFS.ZS');
       const cab = getLatestYearAndValue(state.country, 'BN.CAB.XOKA.GD.ZS');
       const target = INFLATION_TARGETS[state.country];
       const i0 = (target ? target.center : 3) + (ISLM_COUNTRY[state.country]?.neutralReal ?? 1.5);
-      return { exp, cab, target, i0 };
+      return { exp, imp, nx, cab, target, i0 };
     }
     function islmDisabledReason(def) {
       const open = islm.regime !== 'closed';
@@ -1241,18 +1325,18 @@
       const { config, notes } = ISLM.normalizeConfig({ regime: islm.regime, mobility: islm.mobility, instrument: islm.instrument });
       islm.instrument = config.instrument;
       islm.notes = notes;
-      const { cab, i0 } = islmCalibrationData();
-      islm.model = ISLM.createModel({ ...config, params: islm.params, i0, cab: cab.value, istar0: Math.min(ISLM_FOREIGN_RATE, i0) });
+      const { cab, nx, i0 } = islmCalibrationData();
+      islm.model = ISLM.createModel({ ...config, params: islm.params, i0, nx0: nx.value, cab: cab.value, istar0: Math.min(ISLM_FOREIGN_RATE, i0) });
       if (!islm.u) islm.u = { ...islm.model.baseline };
       // Inputs that are not instruments under the current regime go back to baseline so the display never lies.
       ISLM_INPUTS.filter(d => d.group !== 'param' && islmDisabledReason(d)).forEach(d => { islm.u[d.key] = islm.model.baseline[d.key]; });
     }
-    const islmCalibrationKey = () => { const { exp, cab } = islmCalibrationData(); return `${state.country}|${exp.year}:${exp.value}|${cab.year}:${cab.value}`; };
+    const islmCalibrationKey = () => JSON.stringify([state.country, islmCalibrationData()]);
     /** Re-calibrates when the country or its data change. */
     function islmSyncCountry() {
-      const { exp } = islmCalibrationData();
+      const { imp } = islmCalibrationData();
       islm.calKey = islmCalibrationKey();
-      const dataM = Number.isFinite(exp.value) ? Math.round(exp.value * 0.8) / 100 : ISLM.DEFAULT_PARAMS.m;
+      const dataM = ISLM.importPropensityFromShare(imp.value) ?? ISLM.DEFAULT_PARAMS.m;
       if (islm.country !== state.country) {
         islm.country = state.country;
         islm.params = { ...ISLM.DEFAULT_PARAMS, m: dataM };
@@ -1271,7 +1355,7 @@
         node.innerHTML = ISLM_INPUTS.filter(d => d.group === group).map(d => {
           const inputId = group === 'param' ? `islm-p-${d.key}` : `islm-${d.key}`;
           const tag = d.tag ? `<span class="islm-tag ${group === 'policy' ? 'control' : 'external'}">${d.tag}</span>` : '';
-          return `<div class="sim-field islm-field" data-key="${d.key}"><div class="sim-label"><label for="${inputId}">${d.label}</label><output class="sim-value" id="${inputId}-val" for="${inputId}"></output></div><input class="sim-range" id="${inputId}" type="range" min="${d.min}" max="${d.max}" step="${d.step}"><div class="sim-hint">${tag} <span class="islm-hint-text">${d.help}</span></div></div>`;
+          return `<div class="sim-field islm-field" data-key="${d.key}"><div class="sim-label"><label for="${inputId}">${d.label}</label><output class="sim-value" id="${inputId}-val" for="${inputId}"></output></div><input class="sim-range" id="${inputId}" type="range" min="${d.min}" max="${d.max}" step="${d.step}"><div class="sim-hint">${tag} <span class="islm-hint-text">${d.help} · <span class="islm-source-kind">${SOURCE_LABELS[ISLM.PARAM_SOURCES[d.key]] || (d.group==='param'?'Valor ilustrativo':'Supuesto teórico')}</span></span></div></div>`;
         }).join('');
         node.querySelectorAll('input').forEach(input => input.addEventListener('input', () => {
           const key = input.closest('.islm-field').dataset.key;
@@ -1299,6 +1383,8 @@
       }
     }
     function syncIslmControls() {
+      const mKind=document.querySelector('[data-key="m"] .islm-source-kind');
+      if(mKind)mKind.textContent=!islm.mTouched&&Number.isFinite(islmCalibrationData().imp.value)?SOURCE_LABELS.calibrated:SOURCE_LABELS[ISLM.PARAM_SOURCES.m];
       const m = islm.model;
       document.getElementById('islmRegime').value = islm.regime;
       document.getElementById('islmMobility').value = islm.mobility;
@@ -1355,6 +1441,7 @@
     }
     function renderIslmResults(E0, E1, E2) {
       const open = islm.model.open;
+      const comparison = ISLM.compareEquilibria(E0,E2);
       const rows = [
         ['Y', 'Producto (Y)', r => r.Y, 1],
         ['i', 'Tasa de interés (i, %)', r => r.i, 2],
@@ -1363,14 +1450,15 @@
         ['C', 'Consumo (C)', r => r.C, 1],
         ['I', 'Inversión (I)', r => r.I, 1],
         ['G', 'Gasto público (G)', r => r.G, 1],
-        ...(open ? [['NX', 'Exportaciones netas (NX)', r => r.NX, 1], ['KF', 'Flujos de capital (KF)', r => r.KF, 1, true], ['BP', 'Saldo de balanza de pagos', r => r.BP, 1, true]] : [])
+        ...(open ? [['NX', 'NX (bienes y servicios)', r => r.NX, 1], ['NFI','Renta primaria y secundaria neta (NFI)',r=>r.NFI,1], ['CA','Cuenta corriente (CA)',r=>r.CA,1], ['KF', 'Flujos de capital (KF)', r => r.KF, 1, true], ['BP', 'Saldo de balanza de pagos', r => r.BP, 1, true]] : [])
       ];
       document.getElementById('islmResults').innerHTML = rows.map(([key, label, get, d, special]) => {
         const v0 = get(E0), v1 = get(E1), v2 = get(E2);
         const f = v => special ? islmFmtKF(v) : fmtNum(v, d);
-        const delta = Number.isFinite(v0) && Number.isFinite(v2) ? v2 - v0 : null;
+        const delta = ['Y','e','M'].includes(key) ? comparison[key].pct : comparison[key]?.abs ?? (Number.isFinite(v0) && Number.isFinite(v2) ? v2-v0 : null);
+        const unit = key==='i'?' pp':['Y','e','M'].includes(key)?' %':' puntos de Y₀';
         const cls = key === 'Y' && delta !== null && Math.abs(delta) > 0.005 ? (delta > 0 ? 'positive' : 'negative') : '';
-        return `<tr data-var="${key}"><td>${label}</td><td class="v0">${f(v0)}</td><td class="v1">${f(v1)}</td><td class="v2">${f(v2)}</td><td class="dv ${cls}">${delta === null ? '—' : fmtSigned(delta, d)}</td></tr>`;
+        return `<tr data-var="${key}"><td>${label}<small style="display:block">Resultado del modelo</small></td><td class="v0">${f(v0)}</td><td class="v1">${f(v1)}</td><td class="v2">${f(v2)}</td><td class="dv ${cls}">${delta === null ? '—' : fmtSigned(delta, d)+unit}</td></tr>`;
       }).join('');
     }
     function renderIslmMultipliers() {
@@ -1642,8 +1730,9 @@
       const m = islm.model, u = islm.u;
       const E0 = m.solve(m.baseline), E1 = m.solve(u, 'impact'), E2 = m.solve(u);
       document.getElementById('islmTrilemma').textContent = islmRegimeText();
-      const { exp, cab, target, i0 } = islmCalibrationData();
-      document.getElementById('islmCalibration').textContent = `Calibrado para ${COUNTRIES[state.country].name}: apertura ${formatValue(exp.value, 'NE.EXP.GNFS.ZS')} del PBI (${exp.year}) → m = ${fmtNum(islm.params.m, 2)}; cuenta corriente ${formatValue(cab.value, 'BN.CAB.XOKA.GD.ZS')} (${cab.year}) como exportaciones netas iniciales; tasa inicial ${fmtNum(i0, 2)}% = meta ${target ? `${target.bank} ${fmtNum(target.center)}%` : 'genérica'} + tasa real neutral supuesta.`;
+      const { imp, nx, cab, target, i0 } = islmCalibrationData();
+      const observed = (label,code,data) => `${label}: ${formatValue(data.value,code)} — ${Number.isFinite(data.value)?'Dato observado':'N/D'} (WDI, ${code}, observación ${data.year}; ${cellSource(state.country,code,data.year)==='wdi'?'extracción '+(wdiFetchedAt[code]||'N/D'):'Respaldo local — no actualizado; extracción '+(FALLBACK_EXTRACTED_AT[code]||'no registrada')})`;
+      document.getElementById('islmCalibration').textContent = `${COUNTRIES[state.country].name}: ${observed('Importaciones','NE.IMP.GNFS.ZS',imp)}. ${observed('NX bienes y servicios','NE.RSB.GNFS.ZS',nx)}. ${observed('Cuenta corriente','BN.CAB.XOKA.GD.ZS',cab)}. NX: ${m.provenance.nx==='observed'?'Dato observado':'aproximación con CA, no NX observado'}. m = ${fmtNum(islm.params.m,2)} — ${islm.mTouched||!Number.isFinite(imp.value)?'Valor ilustrativo':'Parámetro calibrado; aproximación: propensión media × elasticidad-ingreso supuesta = 1'}. i₀ = ${fmtNum(i0,2)}% = meta ${target?.bank||'genérica'} + tasa real neutral — supuesto ilustrativo. i* = ${Math.min(ISLM_FOREIGN_RATE,i0)}% — Supuesto teórico. NFI = CA − NX — Parámetro calibrado (cortes de cada serie indicados arriba). Y₀ = e₀ = 100 — normalización ilustrativa. G₀ = 18, I₀ = 20, k = 0,5 y f = 0,15 — Valor ilustrativo. C₀, Ī, M₀, ρ₀ y KF₀ — Parámetro calibrado.`;
       document.getElementById('islmRegimeBadge').textContent = ({ closed: 'CERRADA', flex: 'FLEXIBLE', fixed: 'FIJO' })[islm.regime];
       document.querySelectorAll('#islmPolicyTable [data-regime]').forEach(el => el.classList.toggle('is-current', el.dataset.regime === islm.regime));
       if (!E0 || !E1 || !E2) {
@@ -1765,7 +1854,7 @@
       syncBenchmarkOptions();
       choose('periodSelect',state.period,val=>{state.period=val;renderExecutiveBanner();renderKpiCards();renderCharts();});
       choose('indicatorSelectChart',state.activeIndicator,val=>{state.activeIndicator=val;renderKpiCards();renderCharts();});
-      document.getElementById('syncApiBtn').addEventListener('click',()=>syncLiveWorldBankData(true));
+      document.getElementById('syncApiBtn').addEventListener('click',()=>{syncLiveWorldBankData(true);loadBcrp();});
       document.getElementById('copyBriefBtn').addEventListener('click',copyExecutiveBrief);
       document.getElementById('exportCsvBtn').addEventListener('click',exportCsv);
       document.getElementById('tableSearchInput').addEventListener('input',e=>{state.tableFilter=e.target.value;renderDataTableAndInspector();});
@@ -1794,7 +1883,7 @@
       document.documentElement.dataset.theme = mode === 'light' ? 'light' : 'dark';
       document.getElementById('themeIcon').setAttribute('href', mode === 'light' ? '#i-moon' : '#i-sun');
       document.querySelectorAll('.reveal').forEach((el,i)=>el.style.setProperty('--reveal-delay', `${Math.min(i*70,420)}ms`));
-      renderAll(); updateScrollProgress(); setupRevealAnimations(); setupCarousel(); setupHeroScrollCue(); setupParallaxCards(); restartCarouselAuto(); syncLiveWorldBankData(false);
+      renderAll(); updateScrollProgress(); setupRevealAnimations(); setupCarousel(); setupHeroScrollCue(); setupParallaxCards(); restartCarouselAuto(); syncLiveWorldBankData(false); loadBcrp();
       window.addEventListener('scroll', updateScrollProgress, {passive:true});
       // Keep the sticky mobile nav right below the topbar, whatever its rendered height.
       const topbar=document.querySelector('.topbar');
