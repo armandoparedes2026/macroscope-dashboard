@@ -1,7 +1,9 @@
-﻿import assert from 'node:assert/strict';
+import assert from 'node:assert/strict';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { fileURLToPath } from 'node:url';
 const phase = process.argv[2] || 'after';
+assert.ok(['before','after'].includes(phase), 'use before or after');
 const root = new URL('../docs/evidence/fase-modularizacion/', import.meta.url);
 await mkdir(new URL(phase+'/', root), {recursive:true});
 const browser = await chromium.launch();
@@ -25,7 +27,7 @@ try {
    for(let y=0;y<await page.evaluate(()=>document.body.scrollHeight);y+=650){await page.evaluate(y=>scrollTo(0,y),y);await page.waitForTimeout(30);}
    await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(300);
    const name=`${width}-${theme}-${tab}.png`;
-   const png=await page.screenshot({fullPage:true,animations:'disabled',path:new URL(`${phase}/${name}`,root).pathname.replace(/^\/([A-Z]:)/,'$1')});
+   const png=await page.screenshot({fullPage:true,animations:'disabled',path:fileURLToPath(new URL(`${phase}/${name}`,root))});
    if(phase==='after') {
     const before=await readFile(new URL(`before/${name}`,root));
     const diff=await page.evaluate(async ({a,b})=>{

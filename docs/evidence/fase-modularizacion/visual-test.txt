@@ -1,0 +1,1 @@
+after: 12 screenshots, offline, file://, 1440/390, dark/light; visual checks passed

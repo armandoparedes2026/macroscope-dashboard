@@ -199,9 +199,9 @@ await check('tema claro persistente y sin desborde horizontal en móvil', async 
 await check('carrusel: sin avance automático con prefers-reduced-motion', async (page) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openOffline(page);
-  assert.equal(await page.evaluate(() => state.carouselTimer), null);
+  assert.equal(await page.evaluate(() => MacroScope.state.carouselTimer), null);
   await page.click('#carouselNext');
-  assert.equal(await page.evaluate(() => state.carouselIndex), 1);
+  assert.equal(await page.evaluate(() => MacroScope.state.carouselIndex), 1);
   assert.equal(await page.locator('#carouselDots .carousel-dot').nth(1).getAttribute('aria-current'), 'true');
 });
 
@@ -219,7 +219,7 @@ for(const [width,height] of [[1440,900],[768,1024],[390,844],[360,740]]) {
     });
     assert.equal(await page.evaluate(()=>document.activeElement.id),'overviewFilters');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
-    await page.screenshot({path:`docs/evidence/fase1/hero-${width}.png`});
+    await page.screenshot({path:`docs/evidence/fase-modularizacion/e2e-hero-${width}.png`});
     for(const tab of ['simulator','data']) {
       await page.locator(`.tab-btn[data-tab="${tab}"]`).locator('visible=true').first().click();
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0,`${tab} sin desborde a ${width}`);
@@ -253,8 +253,8 @@ await check('WDI: paginación, nulos, último año real, caché y actualización
   await page.goto(PAGE_URL);
   await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
   assert.equal(calls,2);
-  assert.deepEqual(await page.evaluate(()=>getLatestYearAndValue('PER','NE.IMP.GNFS.ZS').year),'2023');
-  assert.equal(await page.evaluate(()=>runtimeDB.PER['NE.IMP.GNFS.ZS']['2025']),null);
+  assert.deepEqual(await page.evaluate(()=>MacroScope.getLatestYearAndValue('PER','NE.IMP.GNFS.ZS').year),'2023');
+  assert.equal(await page.evaluate(()=>MacroScope.runtimeDB.PER['NE.IMP.GNFS.ZS']['2025']),null);
   await page.reload();
   await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
   assert.equal(calls,2,'caché vigente evita red');
