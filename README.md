@@ -1,6 +1,6 @@
 # MacroScope — Dashboard macroeconómico
 
-Dashboard ejecutivo interactivo para seguimiento de indicadores macroeconómicos, comparación internacional y simulación financiera exploratoria.
+Dashboard interactivo para seguir indicadores macroeconómicos, compararlos entre países y entender la macroeconomía abierta de corto plazo con un simulador IS–LM–BP / Mundell–Fleming.
 
 ## Abrir el proyecto
 
@@ -13,9 +13,54 @@ Abre [`index.html`](index.html) en un navegador moderno. No requiere un proceso 
 - Gráficas de series históricas y comparaciones internacionales.
 - Carrusel de lecturas gerenciales y visualización adaptable.
 - Referencias cambiarias con Open ER API.
-- Simulación ilustrativa de sensibilidad financiera (ingresos, costos y EBITDA).
+- Simulador **IS–LM–BP / Mundell–Fleming ampliado** con cuatro diagramas enlazados (ver abajo).
 - Tabla histórica con exportación CSV e inspector de las consultas API.
 - Tema claro/oscuro.
+
+## Simulador IS–LM–BP / Mundell–Fleming
+
+La pestaña **Modelo IS–LM y divisas** explica cómo se ajusta una economía a corto plazo, con precios fijos, ante decisiones de política y shocks externos.
+
+**Cuatro diagramas enlazados**, que muestran el mismo equilibrio:
+
+1. **IS–LM–BP** en (Y, i): equilibrio de bienes, dinero y balanza de pagos.
+2. **Mundell–Fleming** en (Y, e): IS* y LM* (o LM–BP con movilidad imperfecta, y ē con tipo de cambio fijo).
+3. **Mercado de dinero** en (M/P, i): demanda L(Y) y oferta Mˢ.
+4. **Cruz keynesiana** en (Y, DA): demanda agregada y recta de 45°.
+
+En cada diagrama, la línea discontinua es la situación inicial (E₀), la línea continua el nuevo equilibrio (E₂) y el punto hueco el impacto antes del ajuste externo (E₁).
+
+**Tipos de economía:**
+
+- **Régimen:** cerrada, abierta con tipo de cambio flexible o abierta con tipo de cambio fijo.
+- **Movilidad de capital:** nula (BP vertical), baja (BP más inclinada que la LM), alta (BP más plana) o perfecta (Mundell–Fleming clásico).
+- **Instrumento monetario:** oferta monetaria (LM clásica) o tasa de interés de política (LM horizontal). Las combinaciones imposibles según el **trilema de Mundell** se bloquean y se explican.
+
+**Qué controla la economía:**
+
+- **Instrumentos (controlables):** G, T, y M o la tasa de política (o ē con tipo de cambio fijo).
+- **Shocks (no controlables):** i*, prima de riesgo ρ, ingreso mundial Y*, términos de intercambio y confianza privada.
+- **Endógenas:** Y, i, e (o M y reservas con tipo de cambio fijo), C, I, NX y flujos de capital.
+- **Parámetros estructurales:** c, t, b, h, m, n y movilidad de capital.
+
+La clasificación se actualiza con el régimen.
+
+**Calibración con datos:**
+
+- La propensión a importar se deriva de las exportaciones (% del PBI, WDI).
+- Las exportaciones netas iniciales igualan el saldo en cuenta corriente observado, financiado con flujos de capital autónomos.
+- La tasa inicial es la meta de inflación del banco central más una tasa real neutral **supuesta** (Perú 1,5 %, Chile 1 %, Colombia 2 %, México 2,5 %, Brasil 5 %, EE. UU. 1 %).
+- La tasa internacional de referencia es del 3 %. El equilibrio inicial se normaliza en Y = 100 y e = 100.
+
+**Resultados en pantalla:** la tabla de resultados (E₀, E₁ y E₂), los multiplicadores efectivos del régimen elegido, una explicación paso a paso del mecanismo de transmisión y la tabla clásica de eficacia de políticas.
+
+El modelo está en [`js/islm-model.js`](js/islm-model.js): son funciones puras, probadas en `tests/islm-model.test.mjs` contra los resultados de libro de texto (por ejemplo, la ineficacia fiscal con flotación y movilidad perfecta, y la monetaria con tipo de cambio fijo).
+
+**Limitaciones:**
+
+- Precios fijos y expectativas estáticas.
+- Economía pequeña, lo que no se cumple bien para EE. UU.
+- No recoge la flotación administrada del BCRP ni el efecto hoja de balance de la dolarización; ambos se mencionan en la interfaz cuando corresponde.
 
 ## Fuentes y limitaciones
 
@@ -31,7 +76,7 @@ Notas metodológicas:
 - **Inflación** (`FP.CPI.TOTL.ZG`): variación del IPC *promedio anual*. No equivale a la variación diciembre–diciembre con la que los bancos centrales evalúan su meta. La lectura "En meta / Sobre meta / Bajo meta" usa la meta de cada banco central: BCRP 2 % ± 1, BCCh 3 % ± 1, BanRep 3 % ± 1, Banxico 3 % ± 1, BCB 3 % ± 1,5 y Fed 2 % (con ± 1 pp solo como banda de referencia). Para América Latina y el Caribe, que no tiene meta, se usan umbrales genéricos.
 - **Desempleo** (`SL.UEM.TOTL.ZS`): estimación *modelada de la OIT* a nivel nacional. No es comparable con la tasa de Lima Metropolitana que publica el INEI.
 
-El simulador trabaja en la **moneda local** del país seleccionado: los costos locales se ajustan por inflación y los costos dolarizados se reexpresan según la variación cambiaria. Sus cálculos son **supuestos orientativos**, no pronósticos econométricos validados ni asesoramiento financiero. Los tipos de cambio de referencia no equivalen a cotizaciones bancarias de compra/venta.
+Los resultados del simulador IS–LM–BP son **didácticos**, no pronósticos econométricos validados ni asesoramiento financiero. Los tipos de cambio de referencia no equivalen a cotizaciones bancarias de compra/venta.
 
 ## Tecnología
 
@@ -42,9 +87,12 @@ HTML, CSS y JavaScript integrados en `index.html`. Chart.js 4.4.1 se carga desde
 ```text
 macroscope-dashboard/
 ├── index.html                  # Dashboard completo (HTML + CSS + JS)
+├── js/
+│   └── islm-model.js           # Modelo IS–LM–BP / Mundell–Fleming (funciones puras)
 ├── package.json                # Scripts de prueba y dependencia de desarrollo (Playwright)
 ├── tests/
 │   ├── smoke.mjs               # Comprobación estática sin dependencias
+│   ├── islm-model.test.mjs     # Pruebas unitarias del modelo (node:test)
 │   └── e2e.mjs                 # Pruebas en Chromium sin interfaz, con red controlada
 ├── .github/workflows/validate.yml
 ├── README.md
@@ -69,12 +117,13 @@ Puedes asignar un worktree a Codex y el otro a Claude Code. Revisa los cambios a
 ```bash
 npm install                                  # instala Playwright
 npx playwright install chromium              # solo la primera vez
-npm test                                     # smoke + e2e
+npm test                                     # smoke + unitarias del modelo + e2e
 node tests/smoke.mjs                         # solo la comprobación estática (sin dependencias)
 ```
 
 - `tests/smoke.mjs` valida que existan los controles principales y que el JavaScript integrado tenga sintaxis válida.
-- `tests/e2e.mjs` abre la página en Chromium sin interfaz, bloqueando la red o respondiendo con datos de prueba. Verifica el modo de respaldo, la procedencia por celda (tabla y CSV), los colores de variación, la clasificación frente a la meta de inflación, la accesibilidad del sidebar, el simulador, el tema persistente, el diseño móvil y el carrusel con `prefers-reduced-motion`.
+- `tests/islm-model.test.mjs` comprueba que el modelo reproduce los resultados clásicos de IS–LM y Mundell–Fleming y que las curvas dibujadas pasan por el equilibrio calculado.
+- `tests/e2e.mjs` abre la página en Chromium sin interfaz, bloqueando la red o respondiendo con datos de prueba. Verifica el modo de respaldo, la procedencia por celda (tabla y CSV), los colores de variación, la clasificación frente a la meta de inflación, la accesibilidad del sidebar, el simulador IS–LM (regímenes, trilema, diagramas y clasificación de variables), el tema persistente, el diseño móvil y el carrusel con `prefers-reduced-motion`.
 
 GitHub Actions ejecuta ambas pruebas en cada push a `main` y en los pull requests. Las pruebas **no** consultan las APIs reales, así que no garantizan su disponibilidad.
 

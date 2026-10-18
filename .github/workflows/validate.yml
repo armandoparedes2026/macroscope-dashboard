@@ -25,5 +25,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Smoke tests
         run: npm run test:smoke
+      - name: IS-LM model unit tests
+        run: npm run test:unit
       - name: End-to-end tests
         run: npm run test:e2e

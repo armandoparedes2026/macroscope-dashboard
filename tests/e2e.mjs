@@ -45,7 +45,7 @@ await check('modo sin conexión: respaldo local y gráficos alternativos', async
 
 await check('botones del sidebar con nombre accesible', async (page) => {
   await openOffline(page);
-  for (const name of ['Panorama ejecutivo', 'Divisas y simulador', 'Datos e inspector API']) {
+  for (const name of ['Panorama ejecutivo', 'Modelo IS–LM y divisas', 'Datos e inspector API']) {
     await page.locator('.sidebar').getByRole('button', { name }).click();
   }
   assert.equal(await page.isHidden('#tab-overview'), true);
@@ -81,17 +81,75 @@ await check('el país no puede compararse consigo mismo', async (page) => {
   assert.equal(await page.locator('#benchmarkSelect option[value="BRA"]').count(), 1);
 });
 
-await check('simulador en moneda local y actualización sin recrear el gráfico', async (page) => {
+const openModel = async (page) => {
   await openOffline(page);
-  await page.locator('.sidebar').getByRole('button', { name: 'Divisas y simulador' }).click();
-  const chartBefore = await page.evaluate(() => { window.__simChart = simChartInstance; return !!simChartInstance; });
-  assert.ok(chartBefore);
-  const before = await page.textContent('#simOutEbitda');
-  assert.match(before, /^−?PEN /);
-  await page.$eval('#simFxShock', (el) => { el.value = '20'; el.dispatchEvent(new Event('input', { bubbles: true })); });
-  const after = await page.textContent('#simOutEbitda');
-  assert.notEqual(after, before, 'una depreciación debe cambiar el EBITDA');
-  assert.equal(await page.evaluate(() => window.__simChart === simChartInstance), true, 'el gráfico debe actualizarse en el sitio');
+  await page.locator('.sidebar').getByRole('button', { name: 'Modelo IS–LM y divisas' }).click();
+  await page.waitForFunction(() => document.querySelectorAll('#islmResults tr').length > 0);
+};
+const cell = (page, variable, col) => page.textContent(`#islmResults tr[data-var="${variable}"] .${col}`);
+
+await check('IS–LM: calibración con datos del país y cuatro diagramas dibujados', async (page) => {
+  await openModel(page);
+  assert.match(await page.textContent('#islmCalibration'), /Perú.*BCRP/);
+  assert.equal(await cell(page, 'Y', 'v2'), '100.0');
+  for (const id of ['islmPanelISLM', 'islmPanelMF', 'islmPanelMoney', 'islmPanelCross']) {
+    const painted = await page.$eval(`#${id}`, (c) => {
+      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+      let n = 0; for (let k = 3; k < d.length; k += 4) if (d[k]) n++;
+      return n;
+    });
+    assert.ok(painted > 1000, `${id} debe estar dibujado`);
+  }
+});
+
+await check('Mundell–Fleming flexible con movilidad perfecta: la política fiscal no mueve Y y aprecia', async (page) => {
+  await openModel(page);
+  await page.selectOption('#islmMobility', 'perfect');
+  await page.click('[data-preset="fiscal"]');
+  assert.equal(await cell(page, 'Y', 'dv'), '0.0');
+  assert.match(await cell(page, 'e', 'dv'), /^−/);
+  assert.match(await page.textContent('#islmNarrative'), /Resultado clásico de Mundell–Fleming/);
+  // Playwright's isDisabled() does not report <option> state, so read the DOM property.
+  assert.equal(await page.$eval('#islmInstrument option[value="rate"]', (o) => o.disabled), true, 'trilema: sin regla de tasa');
+});
+
+await check('tipo de cambio fijo: M endógena, devaluación disponible y política fiscal eficaz', async (page) => {
+  await openModel(page);
+  await page.selectOption('#islmMobility', 'perfect');
+  await page.selectOption('#islmRegime', 'fixed');
+  assert.equal(await page.isDisabled('#islm-Mpct'), true);
+  assert.equal(await page.isDisabled('#islmInstrument'), true);
+  assert.equal(await page.isDisabled('[data-preset="devaluation"]'), false);
+  assert.equal(await page.isDisabled('[data-preset="monetary"]'), true);
+  assert.match(await page.textContent('#islmClasses [data-class="endo"]'), /Oferta monetaria \(M\) y reservas/);
+  assert.match(await page.textContent('#islmClasses [data-class="control"]'), /Tipo de cambio fijado/);
+  await page.click('[data-preset="fiscal"]');
+  const dY = parseFloat((await cell(page, 'Y', 'dv')).replace('+', ''));
+  assert.ok(dY > 3, `ΔY = ${dY} debe ser grande con tipo de cambio fijo`);
+  assert.match(await cell(page, 'M', 'dv'), /^\+/);
+  assert.equal(await page.locator('#islmPolicyTable thead th.is-current').getAttribute('data-regime'), 'fixed');
+});
+
+await check('economía cerrada: sin Mundell–Fleming y con crowding out', async (page) => {
+  await openModel(page);
+  await page.selectOption('#islmRegime', 'closed');
+  assert.equal(await page.isDisabled('[data-preset="fed"]'), true);
+  assert.equal(await page.isDisabled('#islm-istar'), true);
+  assert.equal(await page.locator('#islmResults tr[data-var="e"]').count(), 0);
+  await page.click('[data-preset="fiscal"]');
+  assert.match(await cell(page, 'Y', 'dv'), /^\+/);
+  assert.match(await cell(page, 'I', 'dv'), /^−/);
+  assert.match(await page.textContent('#islmNarrative'), /crowding out/);
+});
+
+await check('regla de tasa: mover la tasa de política cambia Y y M se acomoda', async (page) => {
+  await openModel(page);
+  await page.selectOption('#islmInstrument', 'rate');
+  assert.equal(await page.isDisabled('#islm-ipol'), false);
+  assert.equal(await page.isDisabled('#islm-Mpct'), true);
+  await page.click('[data-preset="monetary"]');
+  assert.match(await cell(page, 'Y', 'dv'), /^\+/);
+  assert.match(await cell(page, 'M', 'dv'), /^\+/);
 });
 
 await check('CSV con columnas de procedencia', async (page) => {

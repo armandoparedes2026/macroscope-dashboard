@@ -5,8 +5,9 @@ const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const requiredIds = [
   'countrySelect', 'benchmarkSelect', 'periodSelect',
   'kpiGrid', 'trendChart', 'regionalChart', 'macroMixChart',
-  'simChart', 'simRevenueInput', 'simMarginInput',
-  'simUsdCostInput', 'simGdpShock', 'simInfShock', 'simFxShock',
+  'islmRegime', 'islmMobility', 'islmInstrument', 'islmPresets',
+  'islmPanelISLM', 'islmPanelMF', 'islmPanelMoney', 'islmPanelCross',
+  'islmResults', 'islmNarrative', 'islmClasses', 'islmPolicyTable',
   'macroTableBody', 'exportCsvBtn', 'insightTrack',
   'carouselPrev', 'carouselNext'
 ];
@@ -24,6 +25,10 @@ if (scripts.length < 2) throw new Error('No se encontraron los scripts principal
 for (const [index, source] of scripts.entries()) {
   new Script(source, { filename: `inline-${index + 1}.js` });
 }
+
+// The IS–LM model ships as a separate classic script: it must exist, be linked and parse.
+if (!html.includes('<script src="js/islm-model.js"></script>')) throw new Error('Falta el script del modelo IS–LM');
+new Script(readFileSync(new URL('../js/islm-model.js', import.meta.url), 'utf8'), { filename: 'islm-model.js' });
 
 for (const fragment of ['api.worldbank.org', 'open.er-api.com', 'name="viewport"', '@media']) {
   if (!html.includes(fragment)) throw new Error(`No se encontró: ${fragment}`);
