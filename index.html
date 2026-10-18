@@ -311,12 +311,17 @@
 <script src="js/config/indicators.js"></script>
 <script src="js/data/fallback-wdi.js"></script>
 <script src="js/config/state.js"></script>
+<script src="js/services/wdi.js"></script>
+<script src="js/services/bcrp-client.js"></script>
+<script src="js/services/fx.js"></script>
 <script src="js/islm-model.js"></script>
 <script>
     // ============================================================================
     // 1. APPLICATION
     // ============================================================================
     const { COUNTRIES, INDICATORS, YEARS, INFLATION_TARGETS, ISLM_COUNTRY, FALLBACK_DB, FALLBACK_FX, FALLBACK_EXTRACTED_AT, runtimeDB, runtimeFX, runtimeSource, cellSource, state } = globalThis.MacroScope;
+
+    const { loadBcrp, wdiFetchedAt, loadWdiSeries, FX_URL, loadFxRates } = globalThis.MacroScope;
 
     // Chart instances
     let trendChartInstance = null;
@@ -352,11 +357,7 @@
     }
 
     function getLatestYearAndValue(countryCode, indicatorCode) {
-      const series = runtimeDB[countryCode]?.[indicatorCode] || {};
-      const available = YEARS.filter(y => Number.isFinite(series[y]));
-      if (!available.length) return {year:'N/D',value:null,prevYear:null,prevValue:null};
-      const year = available.at(-1), prevYear = available.at(-2) || null;
-      return {year,value:series[year],prevYear,prevValue:prevYear?series[prevYear]:null};
+      return globalThis.MacroScope.latestAvailable(runtimeDB[countryCode]?.[indicatorCode] || {}, YEARS);
     }
 
     function formatDelta(value, indicatorCode) {
@@ -588,65 +589,6 @@
     // ============================================================================
     // 3. LIVE WORLD BANK API & FX API FETCHER
     // ============================================================================
-    async function loadBcrp() {
-      const node=document.getElementById('bcrpResults');
-      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
-      try {
-        const origin=location.protocol==='file:'?'http://localhost':location.origin;
-        const response=await fetch(origin+'/api/bcrp?codes=PD04722MM-PN01273PM-PN01207PM-PN00027MM&start=2024-1&end='+new Date().getFullYear()+'-'+(new Date().getMonth()+1),{signal:controller.signal});
-        if(!response.ok)throw Error('BCRP no disponible');
-        const data=await response.json();
-        if(!Array.isArray(data)||data.length!==4||data.some(row=>row.source!=='BCRP'||typeof row.title!=='string'||!Array.isArray(row.observations)))throw Error('Respuesta BCRP inválida');
-        node.replaceChildren();
-        data.forEach(row=>{
-          const latest=row.observations.filter(obs=>Number.isFinite(obs.value)).at(-1);
-          const item=document.createElement('p');
-          item.textContent=row.title+': '+(latest?latest.value.toLocaleString('es-PE')+' '+row.unit+' · Observación: '+latest.period:'N/D')+' · '+row.code+' · Fuente: BCRP · Extracción: '+row.fetchedAt;
-          node.appendChild(item);
-        });
-      }catch{node.textContent='BCRP no disponible. No se pudieron consultar las series oficiales; vuelva a actualizar los datos. En una copia local se requiere el proxy del servidor.';}
-      finally{clearTimeout(timer);}
-    }
-    const wdiFetchedAt = {};
-    const WDI_TTL = 24*60*60*1000;
-    const validWdiRow=(row,indicator)=>row&&COUNTRIES[row.countryiso3code]&&row.indicator?.id===indicator&&/^\d{4}$/.test(row.date)&&(row.value===null||Number.isFinite(row.value));
-    async function fetchWdiPage(url, indicator) {
-      for(let attempt=0;attempt<3;attempt++) {
-        const controller=new AbortController();
-        const timer=setTimeout(()=>controller.abort(),12000);
-        try {
-          const response=await fetch(url,{signal:controller.signal});
-          if(!response.ok) throw Error('WDI HTTP '+response.status);
-          const data=await response.json();
-          if(!Array.isArray(data)||data.length!==2||!data[0]||!Array.isArray(data[1])||
-            !Number.isInteger(Number(data[0].pages))||Number(data[0].pages)<1||Number(data[0].pages)>100||
-            !Number.isInteger(Number(data[0].page))||Number(data[0].page)<1||
-            data[1].some(row=>!validWdiRow(row,indicator))) throw Error('Respuesta WDI malformada');
-          return data;
-        } catch(error) {
-          if(attempt===2) throw error;
-        } finally {clearTimeout(timer);}
-        await new Promise(resolve=>setTimeout(resolve,250*2**attempt));
-      }
-    }
-    async function loadWdiSeries(url,indicator,force) {
-      const key='macroscope_wdi_v2_'+indicator;
-      if(!force) {try {
-        const cached=JSON.parse(localStorage.getItem(key));
-        if(cached&&Date.now()-Date.parse(cached.fetchedAt)<WDI_TTL&&Date.now()>=Date.parse(cached.fetchedAt)&&Array.isArray(cached.rows)&&cached.rows.every(row=>validWdiRow(row,indicator))) return cached;
-      }catch{}}
-      const first=await fetchWdiPage(url+'&page=1',indicator);
-      if(Number(first[0].page)!==1)throw Error('Paginación WDI inválida');
-      const rows=[...first[1]];
-      for(let page=2;page<=Number(first[0].pages);page++) {
-        const next=await fetchWdiPage(url+'&page='+page,indicator);
-        if(Number(next[0].page)!==page||Number(next[0].pages)!==Number(first[0].pages))throw Error('Paginación WDI inválida');
-        rows.push(...next[1]);
-      }
-      const result={rows,fetchedAt:new Date().toISOString()};
-      try {localStorage.setItem(key,JSON.stringify(result));}catch{}
-      return result;
-    }
     async function syncLiveWorldBankData(showNotification = false) {
       const token = ++state.syncToken;
       const syncBtn = document.getElementById('syncApiBtn');
@@ -689,17 +631,10 @@
             });
           }).catch(()=>null);
         });
-        const fxUrl='https://open.er-api.com/v6/latest/USD';
-        endpoints.push(fxUrl);
-        tasks.push(fetch(fxUrl,{signal:controller.signal})
-         .then(r=>r.ok?r.json():null)
-         .then(data=>{
-           if (data?.result==='success' && data?.rates) {
-             Object.keys(runtimeFX).forEach(k=>{if(Number.isFinite(data.rates[k]))runtimeFX[k].rate=data.rates[k];});
-             fxSuccess=true;
-             fxUpdated=data.time_last_update_utc || null;
-           }
-         }).catch(()=>null));
+        endpoints.push(FX_URL);
+        tasks.push(loadFxRates(runtimeFX,controller.signal).then(result=>{
+          fxSuccess=result.success;fxUpdated=result.updated;
+        }));
         await Promise.all(tasks);
       } finally { clearTimeout(timeout); }
       if (token!==state.syncToken) return;

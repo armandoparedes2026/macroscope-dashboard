@@ -1,0 +1,44 @@
+[
+  {
+    "page": 1,
+    "pages": 2,
+    "per_page": 2,
+    "total": 3,
+    "sourceid": "2",
+    "lastupdated": "2026-10-08"
+  },
+  [
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2025",
+      "value": 21.8456559013034,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    },
+    {
+      "indicator": {
+        "id": "NE.IMP.GNFS.ZS",
+        "value": "Imports of goods and services (% of GDP)"
+      },
+      "country": {
+        "id": "PE",
+        "value": "Peru"
+      },
+      "countryiso3code": "PER",
+      "date": "2024",
+      "value": 22.7972140350108,
+      "unit": "",
+      "obs_status": "",
+      "decimal": 1
+    }
+  ]
+]
