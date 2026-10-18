@@ -134,7 +134,7 @@ body::before{display:none!important}
 .islm-layout{grid-template-columns:300px minmax(0,1fr);gap:var(--space-px-18)}
 #tab-simulator{min-width:0}
 #tab-simulator .page-heading{padding-bottom:var(--space-px-28)}
-.islm-banner{border:1px solid var(--amber);border-radius:var(--radius-size-9);padding:var(--space-3) var(--space-4);color:var(--amber);font-size:12px;font-weight:800;background:var(--paper-2)}
+
 .islm-controls{padding:var(--space-px-18);min-width:0}
 .islm-controls>summary{font-weight:800;font-size:12px;color:var(--ink-deep);cursor:pointer;margin-bottom:var(--space-px-14)}
 .islm-controls .card-top{margin-top:var(--space-px-14);flex-wrap:wrap}

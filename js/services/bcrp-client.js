@@ -16,7 +16,7 @@
           const names={PD04722MM:'Tasa de referencia',PN01273PM:'IPC Lima interanual',PN01207PM:'Tipo de cambio interbancario',PN00027MM:'Reservas internacionales netas'};
           const item=document.createElement('article');item.className='bcrp-card';
           const title=document.createElement('h3');title.textContent=names[row.code]||row.title;item.append(title);
-          const value=document.createElement('strong');value.className='bcrp-value';value.textContent=latest?latest.value.toLocaleString('es-PE')+' '+row.unit:'N/D';item.append(value);
+          const value=document.createElement('strong');value.className='bcrp-value';const digits={PD04722MM:2,PN01273PM:2,PN01207PM:3,PN00027MM:0}[row.code]??2;value.textContent=latest?latest.value.toLocaleString('es-PE',{minimumFractionDigits:digits,maximumFractionDigits:digits})+' '+row.unit:'N/D';item.append(value);
           const period=document.createElement('p');period.textContent='Observación: '+(latest?(latest.date?new Date(latest.date+'T12:00:00').toLocaleDateString('es-PE',{month:'long',year:'numeric'}):latest.period):'sin dato');item.append(period);
           const source=document.createElement('p');source.className='data-note';source.textContent=row.code+' · Fuente: BCRP · Extracción: '+M.localDate(row.fetchedAt);item.append(source);
           if(row.code==='PN01273PM'){const note=document.createElement('p');note.className='data-note';note.textContent='BCRP: IPC del mes frente al mismo mes del año anterior. WDI: IPC promedio anual; no equivalentes.';item.append(note);}

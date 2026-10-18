@@ -133,7 +133,6 @@ label:has(input[type=checkbox]){min-height:44px}
 #tab-simulator{gap:var(--space-3)}
 #tab-simulator .page-heading{padding:var(--space-4) var(--space-5)}
 #tab-simulator .page-heading h1{font-size:28px;margin:var(--space-2) 0}
-#tab-simulator .islm-banner{margin:0;padding:var(--space-2) var(--space-4)}
 .islm-learning{padding:var(--space-3) var(--space-4)}
 .islm-learning .islm-toolbar{margin:0}
 .islm-learning #islmLevelText{margin:var(--space-1) 0}
