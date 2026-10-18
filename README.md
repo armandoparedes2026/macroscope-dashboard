@@ -63,3 +63,26 @@ La comprobación automatizada valida que existan los controles principales y que
 ## Estado del repositorio
 
 El `macroscope-dashboard.zip` subido inicialmente se conserva como copia histórica. Para desarrollar y revisar el proyecto utiliza **`index.html` de la raíz** y los archivos versionados de Git, no el ZIP.
+
+## Despliegue de producción en Vercel (CS_CORP)
+
+El proyecto Vercel **`macroscope-dashboard`** ya está creado sin conexión Git directa, para mantener las cuentas GitHub independientes.
+
+- **Sitio:** https://macroscope-dashboard-cs-corp.vercel.app
+- **Equipo Vercel:** `cs-corp`
+- **ID de equipo:** `team_2SUUXoaYVzUfyptfKrG51Of9`
+- **ID de proyecto:** `prj_ynewA8npY6iYShQpYA6vYe13wZzg`
+- **Rama de producción:** `main`
+
+### Activación de GitHub Actions
+
+Queda **un único secreto** por configurar, sin compartirlo por chat ni añadirlo a archivos del repositorio:
+
+1. Accede a https://vercel.com/account/tokens y crea un token de Vercel con acceso a **CS_CORP**.
+2. En https://github.com/armandoparedes2026/macroscope-dashboard/settings/secrets/actions elige **New repository secret**.
+3. Nombre exacto: `VERCEL_TOKEN`. Pega el token en **Secret** y guarda.
+4. Abre https://github.com/armandoparedes2026/macroscope-dashboard/actions/workflows/vercel-deploy.yml y pulsa **Run workflow** sobre `main`. Cuando esa ejecución termine satisfactoriamente, los siguientes `push` a `main` desencadenarán automáticamente despliegues de producción.
+
+La automatización usa `.github/workflows/vercel-deploy.yml` y el `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` públicos. **No guardes un token de acceso en `index.html`, `README.md`, YAML, commits ni archivos `.env` versionados.**
+
+> El primer despliegue se realizó directamente en Vercel. Los siguientes despliegues automáticos requieren el secreto configurado y una ejecución satisfactoria del workflow. El sitio puede exigir autenticación según las protecciones de Vercel.
