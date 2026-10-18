@@ -6,6 +6,23 @@ await import('../js/services/wdi.js');
 const { normalizeWdiValue, parseWdiPage, normalizeWdiPages, latestAvailable, loadWdiSeries }=globalThis.MacroScope;
 const fixture=name=>JSON.parse(readFileSync(new URL(`fixtures/wdi-${name}.json`,import.meta.url),'utf8'));
 const code='NE.IMP.GNFS.ZS';
+test('respaldo generado: cobertura, metadatos, obs_status y ausencias WDI preservadas',async()=>{
+ await import('../js/config/indicators.js');
+ await import('../js/data/fallback-wdi.js');
+ const {COUNTRIES,INDICATORS,FALLBACK_DB:db,FALLBACK_METADATA:meta,FALLBACK_OBS_STATUS:status}=globalThis.MacroScope;
+ assert.equal(meta.source,'WDI');assert.ok(Number.isFinite(Date.parse(meta.extractedAt)));
+ assert.equal(Object.keys(db).length,19);
+ for(const country of Object.keys(COUNTRIES))for(const indicator of Object.keys(INDICATORS)){
+   assert.equal(Object.keys(db[country][indicator]).length,12);
+   assert.deepEqual(Object.keys(status[country][indicator]),Object.keys(db[country][indicator]));
+   assert.match(meta.indicators[indicator].apiUrl,/api.worldbank.org/);
+   assert.ok(meta.indicators[indicator].definition.sourceNote);
+   assert.ok(meta.indicators[indicator].lastupdated.length);
+ }
+ assert.ok(Object.values(db.LCN['BN.CAB.XOKA.GD.ZS']).every(v=>v===null));
+ for(const year of ['2014','2015','2016','2017'])assert.equal(db.ARG['FP.CPI.TOTL.ZG'][year],null);
+ assert.equal(db.USA['FP.CPI.TOTL.ZG']['2025'],null);
+});
 test('WDI: dos páginas reales normalizadas y orden de observaciones conservado',()=>{
  const pages=[fixture('page-1'),fixture('page-2')];
  const rows=normalizeWdiPages(pages,code);

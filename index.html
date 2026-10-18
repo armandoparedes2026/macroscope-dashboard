@@ -26,6 +26,7 @@
 <script defer src="js/data/fallback-wdi.js"></script>
 <script defer src="js/config/state.js"></script>
 <script defer src="js/services/wdi.js"></script>
+<script defer src="js/services/compare.js"></script>
 <script defer src="js/services/bcrp-client.js"></script>
 <script defer src="js/services/fx.js"></script>
 <script defer src="js/ui/format.js"></script>
@@ -112,6 +113,23 @@
       <div class="section-top"><div><h2 class="section-title">Indicadores esenciales</h2><p class="section-sub">Selecciona una tarjeta para explorar su evolución y compararla con otras economías.</p></div><span id="activeIndicatorBadge" class="text-chip">Crecimiento del PBI</span></div>
       <div class="kpi-grid" id="kpiGrid" aria-label="Tarjetas de indicadores"></div>
      </div>
+     <article class="surface chart-card comparison-panel" id="comparisonPanel" aria-labelledby="compareTitle">
+      <div class="card-top"><div><h2 id="compareTitle">Comparador de economías</h2><p id="compareSubtitle"></p></div><span class="text-chip">Hasta 4 economías</span></div>
+      <div class="compare-controls" id="compareCountries"></div>
+      <div class="compare-controls">
+       <label class="compare-indicator">Indicador<select id="compareIndicator" class="field-select"></select></label>
+       <label>Desde<select id="compareStart" class="field-select"></select></label><label>Hasta<select id="compareEnd" class="field-select"></select></label>
+       <label>Transformación<select id="compareMode" class="field-select"><option value="raw">Valores observados</option><option value="base">Índice año base = 100 (niveles)</option><option value="cumulative">Crecimiento acumulado encadenado</option><option value="convergence">Convergencia PPA / EE. UU.</option></select></label>
+       <label>Año base<select id="compareBase" class="field-select"></select></label>
+      </div>
+      <label class="compare-check"><input type="checkbox" id="compareCommon"> Solo años comunes (intersección)</label>
+      <p class="data-note" id="compareMissing" role="status" aria-live="polite"></p>
+      <div class="compare-legend" id="compareLegend" aria-label="Leyenda de economías"></div>
+      <div class="chart-wrap tall"><canvas id="compareChart" role="img" aria-label="Trayectorias de hasta cuatro economías; valores y ausencias en la tabla siguiente"></canvas></div>
+      <details open><summary>Observaciones del periodo · sin dato indica ausencia</summary><div class="compare-table-wrap"><table class="data-table compare-table"><caption id="compareTableCaption">Valores del indicador y transformación elegidos; todos los años solicitados</caption><thead id="compareTableHead"></thead><tbody id="compareTableBody"></tbody></table></div></details>
+      <p class="data-note" id="compareInstitution"></p>
+      <div class="compare-limitations"><strong>Limitaciones de la comparación</strong><p>US$ corrientes incluyen precios y tipos de cambio; PPA constante compara poder adquisitivo a precios de 2021. Los niveles y las tasas (%) se muestran por separado. WDI puede revisar cifras. Los agregados regionales como LCN no representan una economía nacional y su cuenta corriente no está disponible. Las metodologías nacionales de desempleo e IPC pueden diferir; el desempleo WDI es modelado OIT y el IPC es promedio anual. Los huecos se conservan: nunca se interpolan ni se convierten a cero.</p><p>Índice base = valor / base × 100, solo para niveles. Acumulado = (Π(1 + g/100) − 1) × 100 desde el primer año seleccionado: un hueco invalida la cadena posterior. Convergencia = PBI por habitante PPA constante / EE. UU. del mismo año × 100.</p><a href="docs/fuentes-wdi.md">Fuentes, cobertura y métodos WDI</a></div>
+     </article>
      <div class="charts-grid">
       <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="trendChartTitle">Evolución histórica</h3><p id="trendChartSubtitle">Comparación temporal de indicadores</p></div><select id="indicatorSelectChart" class="field-select" aria-label="Indicador para el gráfico principal"><option value="NY.GDP.MKTP.KD.ZG">Crecimiento del PBI</option><option value="FP.CPI.TOTL.ZG">Inflación IPC</option><option value="SL.UEM.TOTL.ZS">Desempleo</option><option value="NY.GDP.PCAP.CD">PBI per cápita</option><option value="NE.EXP.GNFS.ZS">Exportaciones</option><option value="BN.CAB.XOKA.GD.ZS">Cuenta corriente</option><option value="NE.RSB.GNFS.ZS">Balanza de bienes y servicios</option><option value="NE.IMP.GNFS.ZS">Importaciones</option></select></div><div class="chart-wrap tall"><canvas id="trendChart" role="img" aria-label="Evolución histórica del indicador seleccionado comparada con la economía de referencia"></canvas></div></article>
       <article class="surface chart-card reveal"><div class="card-top"><div><h3 id="regionalChartTitle">Comparación entre economías</h3><p id="regionalChartSubtitle">Mismo año para todos los países</p></div></div><div class="chart-wrap tall"><canvas id="regionalChart" role="img" aria-label="Ranking de economías por el indicador activo"></canvas></div></article>

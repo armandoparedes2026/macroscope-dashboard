@@ -1,9 +1,10 @@
 // End-to-end checks on the real page in headless Chromium, with outbound network fully controlled:
 // every external request is either blocked (offline/fallback mode) or answered with a fixture.
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
+await mkdir('test-results', {recursive:true});
 const PAGE_URL = new URL('../index.html', import.meta.url).href;
 const browser = await chromium.launch();
 let failures = 0;
@@ -32,14 +33,14 @@ async function openOffline(page) {
 }
 
 const deltaClass = (page, title) =>
-  page.locator('.kpi-card', { hasText: title }).locator('.kpi-delta').getAttribute('class');
+  page.getByRole('button', {name:`Explorar ${title==='Inflación'?'Inflación (IPC)':title}:`}).locator('.kpi-delta').getAttribute('class');
 
 console.log('MacroScope e2e');
 
 await check('modo sin conexión: respaldo local y gráficos alternativos', async (page) => {
   await openOffline(page);
   assert.equal(await page.evaluate(() => window.Chart.name), 'ChartFallback');
-  assert.equal(await page.locator('.kpi-card').count(), 8);
+  assert.equal(await page.locator('.kpi-card').count(), 9);
   assert.ok(await page.locator('#macroTableBody td.cell-fallback').count() > 0, 'las celdas de respaldo deben marcarse');
 });
 
@@ -55,11 +56,11 @@ await check('botones del sidebar con nombre accesible', async (page) => {
 await check('color de la variación según si subir es bueno o malo', async (page) => {
   await openOffline(page);
   await page.selectOption('#countrySelect', 'USA');
-  // USA unemployment 3.6 → 4.0 (rises: bad) and GDP per capita rises (good).
+  // Current WDI: USA unemployment rises and GDP per capita rises.
   assert.match(await deltaClass(page, 'Tasa de Desempleo'), /negative/);
   assert.match(await deltaClass(page, 'PBI per Cápita'), /positive/);
   await page.selectOption('#countrySelect', 'PER');
-  // Peru inflation 6.5 → 2.4 (falls: good).
+  // Current WDI: Peru annual-average inflation falls.
   assert.match(await deltaClass(page, 'Inflación'), /positive/);
 });
 
@@ -67,9 +68,9 @@ await check('inflación clasificada frente a la meta del banco central', async (
   await openOffline(page);
   const pulse = page.locator('.pulse-card', { hasText: 'Inflación anual' });
   assert.match(await pulse.textContent(), /Meta BCRP: 2% ± 1 pp/);
-  assert.match(await pulse.textContent(), /En meta/); // Peru 2024: 2.4%
+  assert.match(await pulse.textContent(), /En meta/);
   await page.selectOption('#countrySelect', 'COL');
-  assert.match(await pulse.textContent(), /Presión/); // Colombia 2024: 6.6% vs 3% ± 1
+  assert.match(await pulse.textContent(), /Sobre meta/); // WDI 2025: 5.1% vs 3% ± 1.
 });
 
 await check('el país no puede compararse consigo mismo', async (page) => {
@@ -219,7 +220,7 @@ for(const [width,height] of [[1440,900],[768,1024],[390,844],[360,740]]) {
     });
     assert.equal(await page.evaluate(()=>document.activeElement.id),'overviewFilters');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
-    await page.screenshot({path:`docs/evidence/fase-modularizacion/e2e-hero-${width}.png`});
+    await page.screenshot({path:`test-results/e2e-hero-${width}.png`});
     for(const tab of ['simulator','data']) {
       await page.locator(`.tab-btn[data-tab="${tab}"]`).locator('visible=true').first().click();
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0,`${tab} sin desborde a ${width}`);
@@ -275,7 +276,7 @@ await check('WDI: respuesta malformada reintenta dos veces y conserva respaldo',
   });
   await page.goto(PAGE_URL);
   await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
-  assert.equal(calls,24);
+  assert.equal(calls,27);
   assert.equal(await page.textContent('#apiStatusText'),'Respaldo local — no actualizado');
 });
 
@@ -291,6 +292,51 @@ for(const mode of ['success','failure','malformed']) {
     assert.match(await page.textContent('#bcrpResults'),mode==='success'?/PD04722MM.*Fuente: BCRP/:/BCRP no disponible/);
   });
 }
+
+for(const width of [1440,768,390,360]) {
+  await check(`comparador: cuatro economías, IPC ausente y años comunes a ${width}px`,async page=>{
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await openOffline(page);
+    for(const [i,code]of ['ARG','BOL','USA','CHN'].entries())await page.selectOption(`#compareCountry${i}`,code);
+    assert.deepEqual(await page.evaluate(()=>MacroScope.comparison.countries),['ARG','BOL','USA','CHN']);
+    await page.selectOption('#compareIndicator','FP.CPI.TOTL.ZG');
+    await page.selectOption('#compareStart','2014');
+    await page.selectOption('#compareEnd','2025');
+    for(const year of ['2014','2015','2016','2017'])assert.equal(await page.locator('#compareTableBody tr').filter({has:page.locator('th',{hasText:year})}).locator('td').first().textContent(),'sin dato');
+    assert.match(await page.textContent('#compareMissing'),/Argentina: sin dato en 2014, 2015, 2016, 2017/);
+    assert.equal(await page.locator('#compareMode option[value="base"]').evaluate(option=>option.disabled),true);
+    assert.equal(await page.locator('#compareTableHead th').count(),5);
+    await page.check('#compareCommon');
+    assert.match(await page.textContent('#compareMissing'),/Años comunes: 7\/12/);
+    assert.equal(await page.locator('#compareTableBody tr').count(),12,'el aviso y tabla conservan ausencias excluidas del gráfico');
+    await page.locator('#comparisonPanel').scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
+    await page.locator('#comparisonPanel').screenshot({path:`test-results/compare-${width}.png`,style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}'});
+    await page.selectOption('#compareIndicator','NY.GDP.PCAP.PP.KD');
+    await page.selectOption('#compareMode','base');
+    const firstRow=await page.locator('#compareTableBody tr').first().locator('td').allTextContents();
+    assert.deepEqual(firstRow,['100','100','100','100']);
+    await page.selectOption('#compareMode','convergence');
+    assert.equal(await page.locator('#compareTableBody tr').first().locator('td').nth(2).textContent(),'100');
+    await page.selectOption('#compareIndicator','NY.GDP.MKTP.KD.ZG');
+    assert.equal(await page.inputValue('#compareMode'),'raw','cambiar indicador restablece una transformación compatible');
+    await page.selectOption('#compareMode','cumulative');
+    assert.match(await page.textContent('#compareSubtitle'),/acumulado/);
+    await page.selectOption('#compareCountry3','');
+    assert.equal(await page.locator('#compareTableHead th').count(),4);
+  });
+}
+await check('economías nuevas y agregado: referencias explícitas y sin calibración LCN',async page=>{
+  await openOffline(page);
+  assert.equal(await page.locator('#countrySelect option[value="LCN"]').count(),0);
+  assert.equal(await page.locator('#benchmarkSelect option[value="LCN"]').count(),1);
+  for(const code of ['ECU','DEU','ESP','ARG']) {
+    await page.selectOption('#countrySelect',code);
+    assert.match(await page.textContent('#pulseStrip'),/Sin meta de inflación de referencia/);
+    assert.match(await page.textContent('#islmCalibration'),/supuesto ilustrativo/);
+  }
+});
 
 await browser.close();
 if (failures) {
