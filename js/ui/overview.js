@@ -301,12 +301,12 @@
         card.className='kpi-card'+(state.activeIndicator===code?' active-kpi':'');
         card.setAttribute('aria-pressed',String(state.activeIndicator===code));
         card.setAttribute('aria-label',`Explorar ${meta.title}: ${formatValue(latest.value,code)} en ${latest.year}`);
-        card.innerHTML=`<span class="kpi-top"><span class="kpi-col"><span class="kpi-title">${meta.title}</span><span class="kpi-number">${formatValue(latest.value,code)}</span><span class="kpi-year">Último dato: ${latest.year} · ${meta.unit} · Extracción: ${M.localDate(wdiFetchedAt[code]||FALLBACK_EXTRACTED_AT[code])}${cellSource(state.country,code,latest.year)==='fallback'&&latest.year!=='N/D'?' · Respaldo local — no actualizado':''}</span></span><span class="status-pill neutral">${pill}</span></span><span class="kpi-bottom"><span class="kpi-col"><span class="kpi-delta ${deltaCls}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</span><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></span>${sparkSvg(code)}</span>`;
+        card.innerHTML=`<span class="kpi-top"><span class="kpi-col"><span class="kpi-title">${meta.title}</span><span class="kpi-number">${formatValue(latest.value,code)}</span><span class="kpi-year">Último dato: ${latest.year} · ${meta.unit} · Extracción: ${M.localDate((cellSource(state.country,code,latest.year)==='wdi'?wdiFetchedAt[code]:FALLBACK_EXTRACTED_AT[code]))}${cellSource(state.country,code,latest.year)==='fallback'&&latest.year!=='N/D'?' · Respaldo local — no actualizado':''}</span></span><span class="status-pill neutral">${pill}</span></span><span class="kpi-bottom"><span class="kpi-col"><span class="kpi-delta ${deltaCls}">${prevDelta===null?'Variación N/D':formatDelta(prevDelta,code)}</span><span class="kpi-benchmark">${latest.prevYear ? 'vs. '+latest.prevYear : 'Año previo N/D'} · ${COUNTRIES[state.benchmark].flag} ${equalYear?formatValue(benchmark.value,code):'corte diferente'}</span></span>${sparkSvg(code)}</span>`;
         card.addEventListener('click',()=>{state.activeIndicator=code;document.getElementById('indicatorSelectChart').value=code;renderKpiCards();renderCharts();});
         const wrapper=document.createElement('article');wrapper.className='kpi-entry';wrapper.appendChild(card);
         if(code==='FP.CPI.TOTL.ZG'){const note=document.createElement('p');note.className='data-note';note.textContent='WDI: variación del IPC promedio anual. BCRP interanual: mes frente al mismo mes del año anterior; no equivalentes.';wrapper.append(note);}
         const source=document.createElement('p');source.className='data-note';source.textContent='Fuente: Banco Mundial · WDI · '+code;wrapper.append(source);
-        wrapper.append(M.citationButton({provider:'wdi',code,country:COUNTRIES[state.country].name,extracted:wdiFetchedAt[code]||FALLBACK_EXTRACTED_AT[code]}));
+        wrapper.append(M.citationButton({provider:'wdi',code,country:COUNTRIES[state.country].name,extracted:(cellSource(state.country,code,latest.year)==='wdi'?wdiFetchedAt[code]:FALLBACK_EXTRACTED_AT[code])}));
         node.appendChild(wrapper);
       });
     }
@@ -381,7 +381,7 @@
       }
     }
 
-    function fallbackCopy(text) {
+    function fallbackCopy(text, message='Resumen copiado al portapapeles') {
       const ta = document.createElement('textarea');
       ta.value = text;
       ta.style.position = 'fixed';
@@ -389,8 +389,8 @@
       document.body.appendChild(ta);
       ta.select();
       try {
-        document.execCommand('copy');
-        showToast('Resumen ejecutivo copiado al portapapeles');
+        const copied=document.execCommand('copy');
+        showToast(copied?message:'No se pudo copiar automáticamente',copied);
       } catch (e) {
         showToast('No se pudo copiar automáticamente', false);
       }

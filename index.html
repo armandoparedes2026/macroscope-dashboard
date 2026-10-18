@@ -100,7 +100,7 @@
       <div class="filter-group"><label class="control-label" for="periodSelect">PERIODO DE ANÁLISIS</label><select class="field-select" id="periodSelect"><option value="5">Últimos 5 años disponibles</option><option value="10" selected>Últimos 10 años disponibles</option><option value="all">Toda la serie (2014 en adelante)</option></select></div>
       <button type="button" id="syncApiBtn" class="control-action primary"><svg id="syncIcon" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg><span>Actualizar datos</span></button>
      </div>
-     <article class="surface" style="padding:20px;margin-bottom:20px" aria-labelledby="bcrpTitle">
+     <article class="surface" style="padding:var(--space-5);margin-bottom:var(--space-5)" aria-labelledby="bcrpTitle">
        <h2 id="bcrpTitle">Perú en profundidad (BCRP)</h2>
        <p>Series mensuales oficiales · Banco Central de Reserva del Perú</p>
        <div id="bcrpResults" aria-live="polite">Consultando BCRP…</div>
@@ -111,8 +111,8 @@
        <div class="executive-actions"><button type="button" class="ghost-light" id="copyBriefBtn"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-copy"/></svg>Copiar resumen</button></div>
       </div>
       <div class="hero-side">
-        <div class="surface premium-ring" style="padding:18px 18px 16px">
-          <div class="section-top" style="margin-bottom:8px"><div><h2 class="section-title" style="font-size:15px">Estado del tablero</h2><p class="section-sub">Lecturas compactas del entorno macro.</p></div><span class="text-chip" id="heroStatusChip">Observación activa</span></div>
+        <div class="surface premium-ring" style="padding:var(--space-px-18) var(--space-px-18) var(--space-4)">
+          <div class="section-top" style="margin-bottom:var(--space-2)"><div><h2 class="section-title" style="font-size:15px">Estado del tablero</h2><p class="section-sub">Lecturas compactas del entorno macro.</p></div><span class="text-chip" id="heroStatusChip">Observación activa</span></div>
           <div class="selector-summary" id="heroSummaryMini"></div>
         </div>
         <div class="pulse-strip" id="pulseStrip"></div>
@@ -167,7 +167,7 @@
      </div>
      <div class="sim-layout islm-layout">
       <details open class="surface sim-block islm-controls reveal" aria-label="Configuración del modelo"><summary>Parámetros · configurar y experimentar</summary>
-       <div class="card-top"><div><h3>A · Configuración</h3></div><button type="button" id="islmResetBtn" class="control-action" style="height:32px;padding:0 10px;font-size:10px">Restablecer</button></div>
+       <div class="card-top"><div><h3>A · Configuración</h3></div><button type="button" id="islmResetBtn" class="control-action" style="height:32px;padding:0 var(--space-px-10);font-size:10px">Restablecer</button></div>
        <label class="islm-select"><span class="control-label">País · contexto observado</span><select id="islmCountry" class="field-select"></select></label>
        <div class="islm-selects">
         <label class="islm-select"><span class="control-label">Régimen</span><select class="field-select" id="islmRegime"><option value="closed">Cerrada · IS–LM</option><option value="flex" selected>Flexible · economía abierta</option><option value="fixed">Fijo · economía abierta</option></select></label>
@@ -175,7 +175,7 @@
         <label class="islm-select"><span class="control-label">Instrumento monetario</span><select class="field-select" id="islmInstrument"><option value="money">Oferta monetaria (M)</option><option value="rate">Tasa de política (i)</option></select></label>
        </div>
        <p class="islm-note" id="islmTrilemma" role="status"></p>
-       <div class="sim-section-heading" style="margin-top:18px">B · Experimentación</div><p class="data-note">Aplica un cambio rápido o ajusta los controles.</p>
+       <div class="sim-section-heading" style="margin-top:var(--space-px-18)">B · Experimentación</div><p class="data-note">Aplica un cambio rápido o ajusta los controles.</p>
        <div class="islm-presets" id="islmPresets"></div>
        <div id="islmPolicyInputs"></div>
        <details class="islm-details"><summary>Shocks externos y confianza</summary><div id="islmExternalInputs"></div></details>

@@ -93,7 +93,7 @@
       learning.executed = false;
       const s = learning.scenario;
       document.getElementById('islmProblem').textContent = `${s.title} ${s.problem}`;
-      document.getElementById('islmPredictions').innerHTML = s.predict.map(key => `<label>${key}<select class="field-select" data-predict="${key}" aria-label="Predicción ${key}"><option value="">Predice…</option><option value="1">↑ Sube</option><option value="-1">↓ Baja</option><option value="0">Sin cambio</option></select></label>`).join('');
+      document.getElementById('islmPredictions').innerHTML = s.predict.map(key => `<label>${({Y:"Y · Producto",i:"i · Tasa de interés",e:"e · Tipo de cambio",NX:"NX · Exportaciones netas"})[key]||key}<select class="field-select" data-predict="${key}" aria-label="Predicción ${key}"><option value="">Predice…</option><option value="1">↑ Sube</option><option value="-1">↓ Baja</option><option value="0">Sin cambio</option></select></label>`).join('');
       document.getElementById('islmGrade').textContent = 'Predice cada variable antes de ejecutar.';
       document.getElementById('islmTheory').textContent = '';
       document.getElementById('islmRegimeCompare').innerHTML = '';

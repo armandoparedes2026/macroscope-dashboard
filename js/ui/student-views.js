@@ -9,7 +9,7 @@
     document.querySelectorAll('[data-route]').forEach(el => {
       if(el.dataset.route === view) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current');
     });
-    document.querySelector('.nav-menu').open = false;
+    document.querySelector('.nav-menu').open = innerWidth>1120;
     const target=document.querySelector(`[data-view="${view}"]`);
     target.focus({preventScroll:true});
     window.scrollTo({top:0,behavior:'instant'});
@@ -21,7 +21,7 @@
   const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   async function copyText(text) {
     try { await navigator.clipboard.writeText(text); M.showToast('Cita copiada'); }
-    catch { M.fallbackCopy(text); }
+    catch { M.fallbackCopy(text,'Cita copiada'); }
   }
   function renderSourceDirectory(params) {
     const catalog=M.SOURCES_CATALOG;
@@ -71,6 +71,6 @@
   function citationButton(options) {
     const button=document.createElement('button');button.type='button';button.className='control-action citation-button';button.textContent='Cómo citar';button.setAttribute('aria-label','Cómo citar '+options.code);button.addEventListener('click',()=>copyText(dataCitation(options)));return button;
   }
-  function setupStudentViews() { setupSourceDirectory(); renderGlossary(); document.getElementById('glossarySearch').addEventListener('input',renderGlossary); window.addEventListener('hashchange',route); route(); }
+  function setupStudentViews() { setupSourceDirectory(); window.addEventListener('resize',()=>{document.querySelector('.nav-menu').open=innerWidth>1120;}); renderGlossary(); document.getElementById('glossarySearch').addEventListener('input',renderGlossary); window.addEventListener('hashchange',route); route(); }
   Object.assign(M,{setupStudentViews,route,renderSourceDirectory,copyText,escapeHTML,showGlossaryTerm,localDate,dataCitation,citationButton});
 })();

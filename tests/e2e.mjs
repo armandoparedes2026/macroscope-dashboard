@@ -1,22 +1,26 @@
 // End-to-end checks on the real page in headless Chromium, with outbound network fully controlled:
 // every external request is either blocked (offline/fallback mode) or answered with a fixture.
 import assert from 'node:assert/strict';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
 await mkdir('test-results', {recursive:true});
 const PAGE_URL = new URL('../index.html', import.meta.url).href;
 const browser = await chromium.launch();
 let failures = 0;
+let checks = 0;
 
 async function check(name, fn) {
+  if(process.env.E2E_FILTER&&!name.includes(process.env.E2E_FILTER))return;
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console',message=>{if(message.type()==='error'&&!/Failed to load resource|net::|Access to fetch/.test(message.text()))errors.push(message.text());});
   try {
     await fn(page, context);
     assert.deepEqual(errors, [], 'errores de JavaScript en la página');
+    checks++;
     console.log(`  ✓ ${name}`);
   } catch (err) {
     failures++;
@@ -30,6 +34,8 @@ async function openOffline(page) {
   await page.route(/^https?:/, (route) => route.abort());
   await page.goto(PAGE_URL);
   await page.waitForFunction(() => document.getElementById('apiStatusText').textContent === 'Respaldo local — no actualizado');
+  await page.evaluate(()=>{location.hash='panorama';});
+  await page.waitForFunction(()=>!document.querySelector('#tab-overview').hidden);
 }
 
 const deltaClass = (page, title) =>
@@ -44,13 +50,14 @@ await check('modo sin conexión: respaldo local y gráficos alternativos', async
   assert.ok(await page.locator('#macroTableBody td.cell-fallback').count() > 0, 'las celdas de respaldo deben marcarse');
 });
 
-await check('botones del sidebar con nombre accesible', async (page) => {
+await check('cinco destinos visibles y navegación accesible', async page => {
   await openOffline(page);
-  for (const name of ['Panorama económico', 'Modelo IS–LM y divisas', 'Datos e inspector API']) {
-    await page.locator('.sidebar').getByRole('button', { name }).click();
+  for(const route of ['inicio','laboratorio','panorama','fuentes','ayuda']) {
+    await page.click(`[data-route="${route}"]`);
+    await page.waitForFunction(route=>!document.querySelector(`[data-view="${route}"]`).hidden,route);
+    assert.equal(await page.isVisible(`[data-view="${route}"]`),true);
   }
-  assert.equal(await page.isHidden('#tab-overview'), true);
-  assert.equal(await page.isVisible('#tab-data'), true);
+  assert.equal(await page.isHidden('#tab-overview'),true);
 });
 
 await check('color de la variación según si subir es bueno o malo', async (page) => {
@@ -84,7 +91,8 @@ await check('el país no puede compararse consigo mismo', async (page) => {
 
 const openModel = async (page) => {
   await openOffline(page);
-  await page.locator('.sidebar').getByRole('button', { name: 'Modelo IS–LM y divisas' }).click();
+  await page.evaluate(()=>{location.hash='laboratorio';});
+  await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
   await page.waitForFunction(() => document.querySelectorAll('#islmResults tr').length > 0);
 };
 const cell = (page, variable, col) => page.textContent(`#islmResults tr[data-var="${variable}"] .${col}`);
@@ -155,7 +163,7 @@ await check('regla de tasa: mover la tasa de política cambia Y y M se acomoda',
 
 await check('CSV con columnas de procedencia', async (page) => {
   await openOffline(page);
-  await page.locator('.sidebar').getByRole('button', { name: 'Datos e inspector API' }).click();
+  await page.evaluate(()=>{location.hash='panorama';});
   const [download] = await Promise.all([page.waitForEvent('download'), page.click('#exportCsvBtn')]);
   const csv = (await readFile(await download.path(), 'utf8')).replace(/^﻿/, '');
   const [header, firstRow] = csv.split('\r\n');
@@ -174,7 +182,7 @@ await check('procedencia: los datos del API se distinguen del respaldo', async (
     }
     return route.abort();
   });
-  await page.goto(PAGE_URL);
+  await page.goto(PAGE_URL+'#panorama');
   await page.waitForFunction(() => document.getElementById('apiStatusText').textContent === 'Conexión parcial · WDI');
   const row2024 = page.locator('#macroTableBody tr', { hasText: '2024' }).first();
   const cells = row2024.locator('td');
@@ -182,48 +190,33 @@ await check('procedencia: los datos del API se distinguen del respaldo', async (
   assert.match(await cells.nth(2).getAttribute('class'), /cell-fallback/, 'IPC 2024 sigue en respaldo');
 });
 
-await check('tema claro persistente y sin desborde horizontal en móvil', async (page) => {
+await check('tema persistente y única barra superior móvil', async page => {
   await openOffline(page);
-  await page.click('#themeBtn');
-  await page.reload();
-  assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), 'light');
-  await page.setViewportSize({ width: 390, height: 844 });
-  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), 0);
-  // ResizeObserver updates --topbar-h asynchronously after the viewport change, so wait for it to settle.
-  await page.waitForFunction(
-    () => parseFloat(getComputedStyle(document.querySelector('.mobile-nav')).top) === document.querySelector('.topbar').offsetHeight,
-    null,
-    { timeout: 3000 },
-  ).catch(() => assert.fail('la navegación móvil debe quedar justo debajo de la barra superior'));
+  await page.evaluate(()=>MacroScope.setTheme('dark'));
+  await page.click('#themeBtn');await page.reload();
+  assert.equal(await page.evaluate(()=>document.documentElement.dataset.theme),'light');
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
+  assert.ok(await page.locator('.topbar').evaluate(el=>el.getBoundingClientRect().height<=56));
+  assert.equal(await page.locator('.mobile-nav').count(),0);
 });
-
-await check('carrusel: sin avance automático con prefers-reduced-motion', async (page) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await openOffline(page);
-  assert.equal(await page.evaluate(() => MacroScope.state.carouselTimer), null);
-  await page.click('#carouselNext');
-  assert.equal(await page.evaluate(() => MacroScope.state.carouselIndex), 1);
-  assert.equal(await page.locator('#carouselDots .carousel-dot').nth(1).getAttribute('aria-current'), 'true');
+await check('lecturas fijas: sin temporizador ni pausa por foco, incluso con movimiento reducido',async page=>{
+  await page.emulateMedia({reducedMotion:'reduce'});await openOffline(page);
+  assert.equal(await page.locator('#insightGrid article').count(),3);
+  assert.equal(await page.locator('#carouselNext,#carouselPrev,#insightCarousel').count(),0);
+  assert.equal(await page.evaluate(()=>MacroScope.state.carouselTimer),undefined);
+  assert.equal(await page.evaluate(()=>MacroScope.setupCarousel),undefined);
+  await page.locator('#copyBriefBtn').focus();
+  assert.ok(await page.locator('#insightGrid article').evaluateAll(nodes=>nodes.every(el=>getComputedStyle(el).opacity==='1')));
 });
-
-
-for(const [width,height] of [[1440,900],[768,1024],[390,844],[360,740]]) {
-  await check(`hero cue: destino visible y foco a ${width}px`, async page=>{
-    await page.setViewportSize({width,height});
-    await page.emulateMedia({reducedMotion:'reduce'});
-    await openOffline(page);
-    await page.click('#heroScrollCue');
-    await page.waitForFunction(()=>{
-      const target=document.querySelector('#overviewFilters').getBoundingClientRect();
-      const bottom=Math.max(...[...document.querySelectorAll('.topbar,.mobile-nav')].filter(el=>getComputedStyle(el).position==='sticky'&&el.getBoundingClientRect().height>0).map(el=>el.getBoundingClientRect().bottom));
-      return target.top>=bottom&&target.top<innerHeight;
-    });
-    assert.equal(await page.evaluate(()=>document.activeElement.id),'overviewFilters');
-    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
-    await page.screenshot({path:`test-results/e2e-hero-${width}.png`});
-    for(const tab of ['simulator','data']) {
-      await page.locator(`.tab-btn[data-tab="${tab}"]`).locator('visible=true').first().click();
-      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0,`${tab} sin desborde a ${width}`);
+for(const [width,height]of [[1440,900],[768,1024],[390,844],[360,740]]) {
+  await check(`destinos de navegación y foco a ${width}px`,async page=>{
+    await page.setViewportSize({width,height});await openOffline(page);
+    for(const view of ['inicio','laboratorio','panorama','fuentes','ayuda']){
+      await page.evaluate(view=>{location.hash=view;},view);
+      await page.waitForFunction(view=>!document.querySelector(`[data-view="${view}"]`).hidden,view);
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
+      assert.equal(await page.evaluate(()=>document.activeElement.dataset.view),view);
     }
   });
 }
@@ -251,7 +244,7 @@ await check('WDI: paginación, nulos, último año real, caché y actualización
     }
     return route.abort();
   });
-  await page.goto(PAGE_URL);
+  await page.goto(PAGE_URL+'#panorama');
   await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
   assert.equal(calls,2);
   assert.deepEqual(await page.evaluate(()=>MacroScope.getLatestYearAndValue('PER','NE.IMP.GNFS.ZS').year),'2023');
@@ -274,7 +267,7 @@ await check('WDI: respuesta malformada reintenta dos veces y conserva respaldo',
     if(route.request().url().includes('api.worldbank.org')) {calls++;return route.fulfill({contentType:'application/json',body:JSON.stringify([{page:1,pages:1},[{date:'2025',value:'inválido'}]])});}
     return route.abort();
   });
-  await page.goto(PAGE_URL);
+  await page.goto(PAGE_URL+'#panorama');
   await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
   assert.equal(calls,27);
   assert.equal(await page.textContent('#apiStatusText'),'Respaldo local — no actualizado');
@@ -290,6 +283,11 @@ for(const mode of ['success','failure','malformed']) {
     await page.goto(PAGE_URL);
     await page.waitForFunction(()=>!document.querySelector('#bcrpResults').textContent.includes('Consultando'));
     assert.match(await page.textContent('#bcrpResults'),mode==='success'?/PD04722MM.*Fuente: BCRP/:/BCRP no disponible/);
+    if(mode==='success'){
+      assert.deepEqual(await page.locator('.bcrp-card h3').allTextContents(),['Tasa de referencia','IPC Lima interanual','Tipo de cambio interbancario','Reservas internacionales netas']);
+      assert.match(await page.locator('.bcrp-card').nth(1).textContent(),/PN01273PM.*IPC del mes frente al mismo mes/);
+      assert.doesNotMatch(await page.textContent('#bcrpResults'),/\d{4}-\d{2}-\d{2}T/);
+    }
   });
 }
 
@@ -412,7 +410,8 @@ for (const width of [1440,768,390,360]) {
   await check(`laboratorio responsive ${width}: panel, diagramas y F15 operables`, async page => {
     await page.setViewportSize({width,height:1000});
     await openOffline(page);
-    await page.locator(`${width<=760?'.mobile-nav':'.sidebar'} [data-tab="simulator"]`).click();
+    await page.evaluate(()=>{location.hash='laboratorio';});
+    await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
     const panel=page.locator('.islm-controls');
     if (!(await panel.getAttribute('open')) && await panel.evaluate(el=>!el.open)) await panel.locator(':scope>summary').click();
     await page.selectOption('#islmRegime','fixed');
@@ -440,9 +439,148 @@ for (const width of [1440,768,390,360]) {
   });
 }
 
+
+// Student redesign: every view, seven widths, both themes, file:// and controlled offline data.
+await mkdir('test-results/rediseno',{recursive:true});
+const acceptance=[];
+const contrast=(a,b)=>{
+  const linear=hex=>hex.match(/[a-f\d]{2}/gi).slice(0,3).map(v=>{const n=parseInt(v,16)/255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;}).reduce((sum,n,i)=>sum+n*[.2126,.7152,.0722][i],0);
+  const x=linear(a),y=linear(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+};
+for(const width of [360,390,768,1024,1280,1440,1920])for(const theme of ['light','dark']){
+  await check(`A1–A13 matriz ${width}px ${theme}`,async page=>{
+    const matrixErrors=[];page.on('pageerror',error=>matrixErrors.push(error.message));
+    const height=width===390?844:900;
+    await page.setViewportSize({width,height});await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});
+    await openOffline(page);await page.evaluate(theme=>MacroScope.setTheme(theme),theme);
+    for(const view of ['inicio','laboratorio','panorama','fuentes','ayuda']){
+      await page.evaluate(view=>{location.hash=view;},view);
+      await page.waitForFunction(view=>!document.querySelector(`[data-view="${view}"]`).hidden,view);
+      const metrics=await page.evaluate(({view,width})=>{
+        const root=document.documentElement,bar=document.querySelector('.topbar').getBoundingClientRect();
+        const active=document.querySelector(`[data-view="${view}"]`);
+        const exposed=el=>{
+          if(el.closest('[hidden]'))return false;
+          for(let parent=el.parentElement;parent;parent=parent.parentElement)if(parent.matches('details:not([open])')&&!parent.querySelector(':scope>summary')?.contains(el))return false;
+          return true;
+        };
+        const visible=el=>{
+          if(!exposed(el))return false;
+          const r=el.getBoundingClientRect(),style=getComputedStyle(el);
+          return r.width>0&&r.height>0&&style.visibility!=='hidden';
+        };
+        const controls=[...document.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),summary')].filter(el=>exposed(el)&&(visible(el)||el.closest('.topbar')&&el.getBoundingClientRect().width));
+        const overlaps=[];
+        for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){
+          const a=controls[i],b=controls[j];if(a.contains(b)||b.contains(a))continue;
+          const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();
+          if(Math.min(x.right,y.right)-Math.max(x.left,y.left)>1&&Math.min(x.bottom,y.bottom)-Math.max(x.top,y.top)>1)overlaps.push([a.id||a.textContent.slice(0,24),b.id||b.textContent.slice(0,24)]);
+        }
+        const renderedControls=[...document.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),summary')].filter(el=>exposed(el)&&el.getBoundingClientRect().width>0&&getComputedStyle(el).visibility!=='hidden');
+        const small=width<=1024?renderedControls.filter(el=>{
+          const target=el.matches('input[type=checkbox]')?el.closest('label')||el:el;
+          const r=target.getBoundingClientRect();return r.width<43.5||r.height<43.5;
+        }).map(el=>[el.tagName,el.id||el.textContent.slice(0,35),el.getBoundingClientRect().width,el.getBoundingClientRect().height]):[];
+        const clipped=[...active.querySelectorAll('h1,h2,h3,.status-pill,.text-chip,.api-indicator,.source-card,.path-card')].filter(el=>{
+          const style=getComputedStyle(el);return el.getBoundingClientRect().width>0&&['hidden','clip'].includes(style.overflowX)&&el.scrollWidth>el.clientWidth+1;
+        }).map(el=>el.id||el.className);
+        const vars=getComputedStyle(root),colors=Object.fromEntries(['--bg','--surface','--surface-2','--text','--text-muted','--primary','--accent','--border','--focus','--on-primary',...Array.from({length:6},(_,i)=>'--series-'+(i+1))].map(key=>[key,vars.getPropertyValue(key).trim()]));
+        const focusable=[...active.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),summary')].filter(el=>exposed(el)&&el.getBoundingClientRect().width>0);
+        // Programmatic traversal verifies every exposed control; keyboard traversal follows below.
+        let focusOK=true;
+        for(const el of focusable){el.focus({preventScroll:true});if(document.activeElement!==el){focusOK=false;break;}}
+        const homePaths=[...document.querySelectorAll('.path-card')].map(el=>el.getBoundingClientRect().bottom);
+        return {overflow:root.scrollWidth-root.clientWidth,overlaps,small,clipped,barHeight:bar.height,anchor:active.getBoundingClientRect().top,barBottom:bar.bottom,colors,focusOK,homePaths,chart:document.querySelector('#islmPanelISLM').getBoundingClientRect().top,controls:document.querySelector('.islm-controls').getBoundingClientRect().top};
+      },{view,width});
+      const row={width,theme,view,criteria:{}};
+      const verify=(key,value,detail)=>{row.criteria[key]=value;assert.ok(value,`${key} ${view} ${width} ${theme}: ${JSON.stringify(detail)}`);};
+      verify('A1',metrics.overflow<=0,metrics.overflow);
+      verify('A2',metrics.overlaps.length===0,metrics.overlaps);
+      verify('A3',metrics.small.length===0,metrics.small);
+      verify('A4',metrics.clipped.length===0,metrics.clipped);
+      verify('A5',metrics.anchor>=metrics.barBottom-1&&metrics.barHeight<=(width<=760?56:64),metrics);
+      const c=metrics.colors;
+      const ratios=[];
+      for(const bg of ['--bg','--surface','--surface-2'])for(const text of ['--text','--text-muted','--primary','--accent'])ratios.push([text,bg,contrast(c[text],c[bg]),4.5]);
+      for(const bg of ['--bg','--surface','--surface-2'])for(const ui of ['--border','--focus'])ratios.push([ui,bg,contrast(c[ui],c[bg]),3]);
+      for(let i=1;i<=6;i++)ratios.push(['--series-'+i,'--surface',contrast(c['--series-'+i],c['--surface']),3]);
+      ratios.push(['--on-primary','--primary',contrast(c['--on-primary'],c['--primary']),4.5]);
+      verify('A6',ratios.every(([, ,ratio,min])=>ratio>=min),ratios.filter(([, ,ratio,min])=>ratio<min));
+      await page.locator(`[data-view="${view}"]`).focus();await page.keyboard.press('Tab');
+      const ring=await page.evaluate(()=>{const el=document.activeElement,style=getComputedStyle(el);return el.matches(':focus-visible')&&parseFloat(style.outlineWidth)>=3&&style.outlineStyle==='solid';});
+      verify('A7',metrics.focusOK&&ring,{focusOK:metrics.focusOK,ring});
+      verify('A8',view!=='inicio'||![390,1440].includes(width)||metrics.homePaths.every(bottom=>bottom<=height),metrics.homePaths);
+      verify('A9',view!=='laboratorio'||width!==1440||(metrics.chart<900&&metrics.controls<900),{chart:metrics.chart,controls:metrics.controls});
+      verify('A10',await page.isVisible(`[data-view="${view}"]`),view);
+      verify('A11',await page.evaluate(()=>!('carouselTimer' in MacroScope.state)&&!MacroScope.setupCarousel&&!document.querySelector('#insightCarousel')),'lecturas fijas sin estado ni temporizador');
+      // check() additionally asserts zero uncaught page errors, including all asynchronous requests.
+      verify('A12',matrixErrors.length===0,matrixErrors);
+      verify('A13',page.url().startsWith('file:'),page.url());
+      acceptance.push(row);
+      await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+      await page.screenshot({path:`test-results/rediseno/${view}-${width}-${theme}.png`});
+    }
+  });
+}
+await check('rutas: Atrás y hash desconocido; menú móvil siempre etiquetado',async page=>{
+  await openOffline(page);await page.evaluate(()=>{location.hash='fuentes';});await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
+  await page.evaluate(()=>{location.hash='ayuda';});await page.waitForFunction(()=>!document.querySelector('#ayuda').hidden);
+  await page.goBack();await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
+  await page.evaluate(()=>{location.hash='desconocido';});await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+  await page.setViewportSize({width:360,height:900});await page.click('.nav-menu>summary');
+  assert.deepEqual(await page.locator('.primary-nav a').allTextContents(),['Inicio','Aprender','Explorar datos','Buscar fuentes','Ayuda']);
+  await page.click('[data-route="fuentes"]');await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
+  assert.equal(await page.locator('.nav-menu').getAttribute('open'),null);
+});
+await check('fuentes: filtros compartidos, avisos, cita y glosario enlazado',async page=>{
+  await openOffline(page);await page.evaluate(()=>{location.hash='fuentes?course=econometria&scope=peru&access=microdatos&q=hogares';});
+  await page.waitForFunction(()=>document.querySelector('#sourceQuery').value==='hogares');
+  assert.equal(await page.locator('#sourceResults article').count(),1);
+  assert.match(await page.textContent('#sourceResults'),/ENAHO/);
+  await page.reload();assert.equal(await page.inputValue('#sourceQuery'),'hogares');
+  await page.click('#sourceFilters button[type=reset]');await page.waitForFunction(()=>document.querySelectorAll('#sourceResults article').length>20);
+  assert.ok(await page.locator('.source-warning').count()>0);
+  assert.match(await page.textContent('#sourceResults'),/verificación del navegador/);
+  assert.ok(await page.locator('#sourceResults a[target=_blank][rel=noopener]').count()>20);
+  const citation=await page.evaluate(()=>MacroScope.dataCitation({provider:'wdi',code:'FP.CPI.TOTL.ZG',country:'Perú',extracted:'2026-10-18'}));
+  assert.match(citation,/Banco Mundial\. \(s\. f\.\).*World Development Indicators.*FP.CPI.TOTL.ZG.*18 de octubre de 2026/);
+  await page.evaluate(()=>{location.hash='laboratorio';});await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
+  await page.getByRole('button',{name:'Definición de IS',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#help-term-IS').open);
+  assert.match(page.url(),/#ayuda\?term=IS/);
+  await page.fill('#glossarySearch','trilema');assert.match(await page.textContent('#helpGlossary'),/Trilema/);
+});
+
+await check('Chart.js: colores resueltos, codificación redundante y reconstrucción al cambiar tema',async page=>{
+  await page.route(/^https?:/,route=>route.abort());
+  // Test the existing Chart.js integration contract without adding a dependency or relying on a live CDN.
+  // Inject before deferred scripts; the real page continues to enforce the original CDN SRI.
+  await page.addInitScript(()=>{window.chartCalls=[];window.Chart=class Chart {constructor(canvas,config){this.config=config;window.chartCalls.push({id:canvas.id,config});}destroy(){}};});
+  await page.goto(PAGE_URL+'#panorama');await page.waitForFunction(()=>!document.querySelector('#syncApiBtn').disabled);
+  const first=await page.evaluate(()=>{MacroScope.setTheme('light');return window.chartCalls.at(-1).config.data.datasets[0].backgroundColor;});
+  const before=await page.evaluate(()=>window.chartCalls.length);
+  await page.evaluate(()=>MacroScope.setTheme('dark'));
+  const after=await page.evaluate(()=>window.chartCalls.length);
+  assert.ok(after>before);
+  const last=await page.evaluate(()=>window.chartCalls.at(-1).config.data.datasets[0].backgroundColor);
+  assert.notDeepEqual(first,last);
+  assert.ok(await page.evaluate(()=>window.chartCalls.filter(call=>call.id==='compareChart').at(-1).config.data.datasets.every(ds=>/^#/.test(ds.borderColor)&&Array.isArray(ds.borderDash)&&ds.pointStyle)));
+});
+await check('preferencia del sistema con almacenamiento restringido y copia de cita real',async page=>{
+  await page.emulateMedia({colorScheme:'dark'});
+  await page.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('storage restricted');};Storage.prototype.setItem=()=>{throw Error('storage restricted');};Object.defineProperty(navigator,'clipboard',{value:{writeText:async text=>{window.copiedCitation=text;}}});});
+  await openOffline(page);
+  assert.equal(await page.evaluate(()=>document.documentElement.dataset.theme),'dark');
+  await page.click('#themeBtn');assert.equal(await page.evaluate(()=>document.documentElement.dataset.theme),'light');
+  await page.evaluate(()=>{location.hash='fuentes?scope=peru';});await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
+  await page.locator('[data-cite-source]').first().click();
+  assert.match(await page.evaluate(()=>window.copiedCitation),/Banco Central de Reserva del Perú.*BCRPData.*Recuperado el/);
+});
+await writeFile('test-results/rediseno/aceptacion.json',JSON.stringify(acceptance,null,2));
+
 await browser.close();
 if (failures) {
   console.error(`\n${failures} comprobación(es) fallida(s)`);
   process.exit(1);
 }
-console.log('\nMacroScope e2e OK');
+console.log(`\nMacroScope e2e OK: ${checks} comprobaciones`);
