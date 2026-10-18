@@ -338,7 +338,7 @@ await check('economías nuevas y agregado: referencias explícitas y sin calibra
   }
 });
 
-await mkdir('docs/evidence/fase3', {recursive:true});
+await mkdir('test-results/fase3', {recursive:true});
 const settleLab = page => page.waitForFunction(() => [...document.querySelectorAll('.islm-panel canvas')].every(c => c.dataset.animating === 'false'));
 const verifyDrawnEquilibria = async page => {
   await settleLab(page);
@@ -380,7 +380,7 @@ await check('laboratorio: predecir, ejecutar, calificar, niveles y comparación 
   assert.equal(await page.locator('#islmRegimeCompare section').count(),2);
   assert.match(await page.textContent('#islmRegimeCompare'),/Régimen flexible.*Régimen fijo/s);
   await verifyDrawnEquilibria(page);
-  await page.locator('#islmGuided').screenshot({path:'docs/evidence/fase3/escenario-guiado-completo.png',style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}'});
+  await page.locator('#islmGuided').screenshot({path:'test-results/fase3/escenario-guiado-completo.png',style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}'});
   await page.click('#islmWhy');
   assert.equal(await page.isVisible('#islmHelp'),true);
   await page.keyboard.press('Escape');
@@ -429,14 +429,14 @@ for (const width of [1440,768,390,360]) {
     const badge=await page.$eval('#apiStatusBadge',el=>({full:el.scrollWidth<=el.clientWidth,rect:el.getBoundingClientRect().right}));
     if(width<=390) {assert.ok(badge.full);assert.ok(badge.rect<=width);}
     if(width<1120) {
-      await panel.screenshot({path:`docs/evidence/fase3/parametros-${width}.png`,style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}.reveal{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'});
+      await panel.screenshot({path:`test-results/fase3/parametros-${width}.png`,style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}.reveal{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'});
       await panel.locator(':scope>summary').click();
     }
     await settleLab(page);
-    await page.locator('#tab-simulator').screenshot({path:`docs/evidence/fase3/laboratorio-${width}.png`,style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}.reveal{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'});
+    await page.locator('#tab-simulator').screenshot({path:`test-results/fase3/laboratorio-${width}.png`,style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}.reveal{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'});
     await page.locator('.islm-panel').first().scrollIntoViewIfNeeded();
     await page.waitForFunction(() => { const s=getComputedStyle(document.querySelector('.islm-main>.chart-card'));return s.opacity==='1' && ['none','blur(0px)'].includes(s.filter); });
-    await page.screenshot({path:`docs/evidence/fase3/laboratorio-viewport-${width}.png`});
+    await page.screenshot({path:`test-results/fase3/laboratorio-viewport-${width}.png`});
   });
 }
 
