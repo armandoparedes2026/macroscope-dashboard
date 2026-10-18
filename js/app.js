@@ -17,10 +17,8 @@
   const renderKpiCards = (...args) => M.renderKpiCards(...args);
   const setTheme = (...args) => M.setTheme(...args);
   const setupIslm = (...args) => M.setupIslm(...args);
-  const setupRevealAnimations = (...args) => M.setupRevealAnimations(...args);
   const syncBenchmarkOptions = (...args) => M.syncBenchmarkOptions(...args);
   const syncLiveWorldBankData = (...args) => M.syncLiveWorldBankData(...args);
-  const updateScrollProgress = (...args) => M.updateScrollProgress(...args);
   M.LAB_CONTENT = globalThis.LAB_CONTENT;
   delete globalThis.ISLM;
   delete globalThis.LAB_CONTENT;
@@ -50,9 +48,7 @@
       const mode=document.documentElement.dataset.theme;
       document.documentElement.dataset.theme = mode === 'light' ? 'light' : 'dark';
       document.getElementById('themeIcon').setAttribute('href', mode === 'light' ? '#i-moon' : '#i-sun');
-      document.querySelectorAll('.reveal').forEach((el,i)=>el.style.setProperty('--reveal-delay', `${Math.min(i*70,420)}ms`));
-      renderAll(); updateScrollProgress(); setupRevealAnimations(); syncLiveWorldBankData(false); loadBcrp();
-      window.addEventListener('scroll', updateScrollProgress, {passive:true});
+      renderAll(); syncLiveWorldBankData(false); loadBcrp();
       // Keep the sticky mobile nav right below the topbar, whatever its rendered height.
       const topbar=document.querySelector('.topbar');
       if(topbar && typeof ResizeObserver!=='undefined'){

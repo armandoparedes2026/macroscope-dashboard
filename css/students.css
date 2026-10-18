@@ -22,3 +22,5 @@
 #tab-simulator{gap:var(--space-3)}#tab-simulator .page-heading{padding:var(--space-4) var(--space-5)}#tab-simulator .page-heading h1{font-size:28px;margin:var(--space-2) 0}#tab-simulator .islm-banner{margin:0;padding:var(--space-2) var(--space-4)}.islm-learning{padding:var(--space-3) var(--space-4)}.islm-learning .islm-toolbar{margin:0}.islm-learning #islmLevelText{margin:var(--space-1) 0}.islm-toolbar .control-action,.islm-toolbar .field-select,.islm-glossary-button,.islm-preset{min-height:44px}.islm-panel,.islm-main>.surface{background:var(--surface)}
 @media(max-width:1024px){.insight-grid{grid-template-columns:1fr}.bcrp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.bcrp-grid{grid-template-columns:1fr}.kpi-title{max-width:none}.kpi-top{display:flex}.kpi-number{font-size:26px}}
+
+.kpi-card,.pulse-card,.fx-card,.summary-mini{transform:none!important}.data-table td.cell-fallback{opacity:1}.islm-field.is-disabled{opacity:1}.islm-preset:disabled{opacity:1;color:var(--text-muted)}

@@ -185,19 +185,6 @@
     function renderInsightCards(){
       document.getElementById('insightGrid').innerHTML=buildInsightSlides().map(slide=>`<article class="surface insight-card"><div class="eyebrow">${slide.overline}</div><h3>${slide.title}</h3><p>${slide.text}</p><div class="insight-meta">${slide.chips.map(chip=>`<span class="meta-chip">${chip}</span>`).join('')}</div></article>`).join('');
     }
-    function updateScrollProgress(){
-      const el=document.documentElement;
-      const scrollable=Math.max(1, el.scrollHeight - el.clientHeight);
-      const pct=Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100));
-      const bar=document.getElementById('scrollProgressBar');
-      if(bar) bar.style.width=`${pct}%`;
-    }
-    function setupRevealAnimations(){
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.querySelectorAll('.reveal').forEach(el=>el.classList.add('is-visible'));return;}
-      const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target);}})},{threshold:.16});
-      document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-    }
-
     // ============================================================================
     // 3. LIVE WORLD BANK API & FX API FETCHER
     // ============================================================================
@@ -422,5 +409,5 @@
     }
 
 
-  Object.assign(M, { buildInsightSlides, copyExecutiveBrief, exportCsv, fallbackCopy, getFilteredYears, getLatestYearAndValue, renderDataTableAndInspector, renderDecisionMatrix, renderExecutiveBanner, renderFxGrid, renderHeroPanels, renderInsightCards, renderKpiCards, setTheme, setupRevealAnimations, showToast, sparkSvg, syncBenchmarkOptions, syncLiveWorldBankData, updateRangeStyles, updateScrollProgress });
+  Object.assign(M, { buildInsightSlides, copyExecutiveBrief, exportCsv, fallbackCopy, getFilteredYears, getLatestYearAndValue, renderDataTableAndInspector, renderDecisionMatrix, renderExecutiveBanner, renderFxGrid, renderHeroPanels, renderInsightCards, renderKpiCards, setTheme, showToast, sparkSvg, syncBenchmarkOptions, syncLiveWorldBankData, updateRangeStyles });
 })();
