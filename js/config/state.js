@@ -21,7 +21,7 @@
       tableFilter: '',
       lastEndpoints: [],
       sampleRawJson: null,
-      liveMacroSuccess: 0, liveFxSuccess: false, fxUpdated: null, syncToken: 0, carouselIndex: 0, carouselTimer: null
+      liveMacroSuccess: 0, liveFxSuccess: false, fxUpdated: null, syncToken: 0
     };
 
     // Load saved preferences safely

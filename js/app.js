@@ -6,22 +6,17 @@
   const copyExecutiveBrief = (...args) => M.copyExecutiveBrief(...args);
   const exportCsv = (...args) => M.exportCsv(...args);
   const loadBcrp = (...args) => M.loadBcrp(...args);
-  const moveCarousel = (...args) => M.moveCarousel(...args);
   const renderCharts = (...args) => M.renderCharts(...args);
   const renderDataTableAndInspector = (...args) => M.renderDataTableAndInspector(...args);
   const renderDecisionMatrix = (...args) => M.renderDecisionMatrix(...args);
   const renderExecutiveBanner = (...args) => M.renderExecutiveBanner(...args);
   const renderFxGrid = (...args) => M.renderFxGrid(...args);
   const renderHeroPanels = (...args) => M.renderHeroPanels(...args);
-  const renderInsightCarousel = (...args) => M.renderInsightCarousel(...args);
+  const renderInsightCards = (...args) => M.renderInsightCards(...args);
   const renderIslm = (...args) => M.renderIslm(...args);
   const renderKpiCards = (...args) => M.renderKpiCards(...args);
-  const restartCarouselAuto = (...args) => M.restartCarouselAuto(...args);
   const setTheme = (...args) => M.setTheme(...args);
-  const setupCarousel = (...args) => M.setupCarousel(...args);
-  const setupHeroScrollCue = (...args) => M.setupHeroScrollCue(...args);
   const setupIslm = (...args) => M.setupIslm(...args);
-  const setupParallaxCards = (...args) => M.setupParallaxCards(...args);
   const setupRevealAnimations = (...args) => M.setupRevealAnimations(...args);
   const syncBenchmarkOptions = (...args) => M.syncBenchmarkOptions(...args);
   const syncLiveWorldBankData = (...args) => M.syncLiveWorldBankData(...args);
@@ -30,7 +25,7 @@
   delete globalThis.ISLM;
   delete globalThis.LAB_CONTENT;
     function renderAll() {
-      renderExecutiveBanner();renderHeroPanels();renderInsightCarousel(false);renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();renderIslm();renderDataTableAndInspector();
+      renderExecutiveBanner();renderHeroPanels();renderInsightCards();renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();renderIslm();renderDataTableAndInspector();
     }
 
     window.addEventListener('DOMContentLoaded',()=>{
@@ -52,13 +47,11 @@
       setupIslm();
       M.setupStudentViews();
       document.getElementById('themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
-      document.getElementById('carouselPrev')?.addEventListener('click',()=>{moveCarousel(-1);restartCarouselAuto();});
-      document.getElementById('carouselNext')?.addEventListener('click',()=>{moveCarousel(1);restartCarouselAuto();});
       const mode=document.documentElement.dataset.theme;
       document.documentElement.dataset.theme = mode === 'light' ? 'light' : 'dark';
       document.getElementById('themeIcon').setAttribute('href', mode === 'light' ? '#i-moon' : '#i-sun');
       document.querySelectorAll('.reveal').forEach((el,i)=>el.style.setProperty('--reveal-delay', `${Math.min(i*70,420)}ms`));
-      renderAll(); updateScrollProgress(); setupRevealAnimations(); setupCarousel(); setupHeroScrollCue(); setupParallaxCards(); restartCarouselAuto(); syncLiveWorldBankData(false); loadBcrp();
+      renderAll(); updateScrollProgress(); setupRevealAnimations(); syncLiveWorldBankData(false); loadBcrp();
       window.addEventListener('scroll', updateScrollProgress, {passive:true});
       // Keep the sticky mobile nav right below the topbar, whatever its rendered height.
       const topbar=document.querySelector('.topbar');

@@ -59,6 +59,18 @@
     document.getElementById('glossarySearch').value='';renderGlossary();
     const term=document.getElementById('help-term-'+key);term.open=true;term.querySelector('summary').focus({preventScroll:true});term.scrollIntoView({block:'start',behavior:'instant'});
   }
+  function localDate(value) {
+    if(!value)return 'no registrada';
+    const date=new Date(/^\d{4}-\d{2}-\d{2}$/.test(value)?value+'T12:00:00':value);
+    return Number.isNaN(date.getTime())?'no registrada':date.toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'});
+  }
+  function dataCitation({provider,code,country='Perú',extracted}) {
+    const date=localDate(extracted||new Date().toISOString());
+    return provider==='bcrp'?`Banco Central de Reserva del Perú. (s. f.). BCRPData [Base de datos]. Serie: ${code}. País: ${country}. Recuperado el ${date}, de https://estadisticas.bcrp.gob.pe/estadisticas/series/${code}`:`Banco Mundial. (s. f.). World Development Indicators [Base de datos]. Indicador: ${code}. País: ${country}. Recuperado el ${date}, de https://data.worldbank.org/indicator/${code}`;
+  }
+  function citationButton(options) {
+    const button=document.createElement('button');button.type='button';button.className='control-action citation-button';button.textContent='Cómo citar';button.setAttribute('aria-label','Cómo citar '+options.code);button.addEventListener('click',()=>copyText(dataCitation(options)));return button;
+  }
   function setupStudentViews() { setupSourceDirectory(); renderGlossary(); document.getElementById('glossarySearch').addEventListener('input',renderGlossary); window.addEventListener('hashchange',route); route(); }
-  Object.assign(M,{setupStudentViews,route,renderSourceDirectory,copyText,escapeHTML,showGlossaryTerm});
+  Object.assign(M,{setupStudentViews,route,renderSourceDirectory,copyText,escapeHTML,showGlossaryTerm,localDate,dataCitation,citationButton});
 })();
