@@ -4,14 +4,78 @@
   const { COUNTRIES, INDICATORS, YEARS, FALLBACK_EXTRACTED_AT, runtimeDB, runtimeFX, runtimeSource, cellSource, state, wdiFetchedAt, FX_URL } = M;
   // Resolve cross-view callbacks when invoked, after every deferred script has loaded.
   const determineTone = (...args) => M.determineTone(...args);
-  const formatDelta = (...args) => M.formatDelta(...args);
-  const formatValue = (...args) => M.formatValue(...args);
+  const formatDelta = (value,code) => code==='NY.GDP.PCAP.PP.KD' && Number.isFinite(value) ? `${value>0?'+':''}${value.toLocaleString('es-PE',{maximumFractionDigits:0})} dólares internacionales` : M.formatDelta(value,code);
+  const formatValue = (value,code) => Number.isFinite(value) ? M.formatValue(value,code) : 'sin dato';
   const inflationTargetText = (...args) => M.inflationTargetText(...args);
   const loadFxRates = (...args) => M.loadFxRates(...args);
   const loadWdiSeries = (...args) => M.loadWdiSeries(...args);
   const renderAll = (...args) => M.renderAll(...args);
   const renderCharts = (...args) => M.renderCharts(...args);
   const renderIslm = (...args) => M.renderIslm(...args);
+  const comparison = { countries: ['PER','ARG','USA','CHN'], indicator: 'NY.GDP.MKTP.KD.ZG', start: '2014', end: '2025', mode: 'raw', common: false, base: '2014' };
+  function countryOptions(includeAggregate = true) {
+    return ['América Latina','Economías internacionales'].map(group => `<optgroup label="${group}">${Object.entries(COUNTRIES).filter(([,c])=>c.group===group&&(includeAggregate||!c.aggregate)).map(([code,c])=>`<option value="${code}">${c.flag} ${c.name}</option>`).join('')}</optgroup>`).join('');
+  }
+  function renderComparison() {
+    const root=document.getElementById('comparisonPanel');
+    if(!root)return;
+    const meta=INDICATORS[comparison.indicator];
+    const level=M.LEVEL_INDICATORS.includes(comparison.indicator);
+    const modeSelect=document.getElementById('compareMode');
+    for(const option of modeSelect.options) option.disabled=(option.value==='base'&&!level)||(option.value==='cumulative'&&comparison.indicator!=='NY.GDP.MKTP.KD.ZG')||(option.value==='convergence'&&comparison.indicator!=='NY.GDP.PCAP.PP.KD');
+    if(modeSelect.selectedOptions[0]?.disabled)comparison.mode='raw';
+    modeSelect.value=comparison.mode;
+    document.getElementById('compareBase').disabled=comparison.mode!=='base';
+    const years=YEARS.filter(y=>y>=comparison.start&&y<=comparison.end);
+    const transformed=comparison.countries.map(country=>{
+      const raw=Object.fromEntries(years.map(y=>[y,runtimeDB[country]?.[comparison.indicator]?.[y]??null]));
+      if(comparison.mode==='base')return M.normalizeBase({...raw,[comparison.base]:runtimeDB[country]?.[comparison.indicator]?.[comparison.base]??null},comparison.base,comparison.indicator);
+      if(comparison.mode==='cumulative')return M.cumulativeGrowth(raw,years);
+      if(comparison.mode==='convergence')return M.relativeToUSA(raw,runtimeDB.USA?.['NY.GDP.PCAP.PP.KD']||{});
+      return raw;
+    });
+    const shared=M.commonYears(transformed,years);
+    const chartYears=comparison.common?shared:years;
+    const missing=comparison.countries.map((c,i)=>({country:c,years:years.filter(y=>!Number.isFinite(transformed[i][y]))})).filter(item=>item.years.length);
+    document.getElementById('compareMissing').textContent=(years.length?'':'Periodo inválido: el inicio debe ser anterior o igual al fin. ')+(missing.length?missing.map(item=>`${COUNTRIES[item.country].name}: sin dato en ${item.years.join(', ')}`).join(' · '):'Sin observaciones ausentes en el periodo.')+(comparison.common?` · Años comunes: ${shared.length}/${years.length}. La tabla conserva todos los años solicitados.`:'');
+    const units={raw:meta.unit,base:`Índice ${comparison.base} = 100`,cumulative:'Crecimiento acumulado (%)',convergence:'PPA constante relativa a EE. UU. (EE. UU. = 100%)'};
+    document.getElementById('compareSubtitle').textContent=`${meta.title} · ${units[comparison.mode]} · ${comparison.start}–${comparison.end}`;
+    const colors=['#438ce6','#20aaa8','#e7a454','#d680bd'];
+    document.getElementById('compareLegend').innerHTML=comparison.countries.map((c,i)=>`<span><i style="background:${colors[i]}"></i>${COUNTRIES[c].flag} ${COUNTRIES[c].name}</span>`).join('');
+    const number=value=>Number.isFinite(value)?value.toLocaleString('es-PE',{maximumFractionDigits:comparison.mode==='raw'?meta.decimals:2}):'sin dato';
+    document.getElementById('compareTableHead').innerHTML=`<tr><th scope="col">Año</th>${comparison.countries.map(c=>`<th scope="col">${COUNTRIES[c].name}</th>`).join('')}</tr>`;
+    document.getElementById('compareTableBody').innerHTML=years.map(y=>`<tr><th scope="row">${y}</th>${comparison.countries.map((c,i)=>`<td>${number(transformed[i][y])}</td>`).join('')}</tr>`).join('');
+    const added=comparison.countries.filter(c=>!['PER','CHL','COL','MEX','BRA','USA','LCN'].includes(c));
+    document.getElementById('compareInstitution').textContent=added.length ? `${added.map(c=>COUNTRIES[c].name).join(', ')}: Sin meta de referencia. En el simulador, tasa real neutral de 1,5% e inflación de referencia de 3% son supuestos genéricos ilustrativos (tasa nominal inicial de 4,5%). ${added.filter(c=>['ECU','DEU','ESP'].includes(c)).map(c=>M.ISLM_COUNTRY[c].note).join(' ')}` : '';
+    M.drawComparisonChart(chartYears,comparison.countries.map((c,i)=>({label:COUNTRIES[c].name,data:chartYears.map(y=>transformed[i][y]),borderColor:colors[i],spanGaps:false,fill:false,pointRadius:2,borderWidth:2})),units[comparison.mode]);
+  }
+  window.addEventListener('DOMContentLoaded',()=>{
+    for(const [id,includeAggregate]of [['countrySelect',false],['benchmarkSelect',true]])document.getElementById(id).innerHTML=countryOptions(includeAggregate);
+    document.querySelector('#macroTableBody').closest('table').tHead.innerHTML=`<tr><th>Año</th>${Object.values(INDICATORS).map(meta=>`<th>${meta.title}<br>(${meta.unit})</th>`).join('')}</tr>`;
+    const trendSelect=document.getElementById('indicatorSelectChart');
+    for(const [code,meta]of Object.entries(INDICATORS))if(![...trendSelect.options].some(option=>option.value===code))trendSelect.add(new Option(meta.title,code));
+    if(COUNTRIES[state.country]?.aggregate)state.country='PER';
+    const years=YEARS.filter(y=>y<=String(new Date().getFullYear()-1));
+    comparison.end=years.at(-1);
+    document.getElementById('compareCountries').innerHTML=Array.from({length:4},(_,i)=>`<label>Economía ${i+1}<select class="field-select" id="compareCountry${i}" aria-label="Economía ${i+1}">${i?'<option value="">Sin economía adicional</option>':''}${countryOptions()}</select></label>`).join('');
+    for(let i=0;i<4;i++){
+      const select=document.getElementById(`compareCountry${i}`);select.value=comparison.countries[i];
+      select.addEventListener('change',()=>{
+        comparison.countries=Array.from({length:4},(_,j)=>document.getElementById(`compareCountry${j}`).value).filter(Boolean);
+        comparison.countries=[...new Set(comparison.countries)];
+        const seen=new Set();for(let j=0;j<4;j++){const el=document.getElementById(`compareCountry${j}`);if(el.value&&seen.has(el.value))el.value='';else seen.add(el.value);}
+        renderComparison();
+      });
+    }
+    document.getElementById('compareIndicator').innerHTML=Object.entries(INDICATORS).map(([c,m])=>`<option value="${c}">${m.title} (${m.unit})</option>`).join('');
+    for(const [id,key]of [['compareIndicator','indicator'],['compareStart','start'],['compareEnd','end'],['compareMode','mode'],['compareBase','base']]){
+      const select=document.getElementById(id);
+      if(['start','end','base'].includes(key))select.innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join('');
+      select.value=comparison[key];select.addEventListener('change',()=>{comparison[key]=select.value;renderComparison();});
+    }
+    document.getElementById('compareCommon').addEventListener('change',e=>{comparison.common=e.target.checked;renderComparison();});
+  });
+  Object.assign(M,{comparison,renderComparison});
     let toastTimer;
     function showToast(msg, isSuccess = true) {
       const el = document.getElementById('toastContainer');

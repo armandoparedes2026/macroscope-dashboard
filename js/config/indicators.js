@@ -65,6 +65,7 @@
     };
 
     Object.assign(INDICATORS, {
+      'NY.GDP.PCAP.PP.KD': {code:'NY.GDP.PCAP.PP.KD',title:'PBI per cápita PPA constante',unit:'dólares internacionales constantes de 2021',decimals:0,prefix:'',suffix:'',goodDirection:'high',description:'PBI por habitante ajustado por paridad de poder adquisitivo, precios constantes de 2021.'},
       'NE.RSB.GNFS.ZS': {code:'NE.RSB.GNFS.ZS',title:'Balanza de bienes y servicios',unit:'% PBI',decimals:2,prefix:'',suffix:'%',goodDirection:'high'},
       'NE.IMP.GNFS.ZS': {code:'NE.IMP.GNFS.ZS',title:'Importaciones de bienes y servicios',unit:'% PBI',decimals:2,prefix:'',suffix:'%',goodDirection:'high'}
     });
@@ -91,5 +92,13 @@
       USA: { neutralReal: 1.0, note: 'EE. UU. es una economía grande: su política monetaria mueve la tasa internacional i*, por lo que el supuesto de economía pequeña de Mundell–Fleming no se cumple bien.' }
     };
 
+  ['ARG','BOL','ECU','URY','PRY','CRI','CHN','JPN','DEU','ESP','CAN','KOR'].forEach(code=>{
+    ISLM_COUNTRY[code]={note:'Sin meta de referencia. Tasa real neutral de 1,5% e inflación de referencia de 3%: supuestos genéricos ilustrativos, no estimaciones nacionales (tasa nominal inicial de 4,5%).'};
+  });
+  Object.assign(ISLM_COUNTRY, {
+    ECU: {note: 'Ecuador está dolarizado desde 2000: régimen fijo extremo sin política monetaria propia. Tasa neutral: supuesto genérico ilustrativo de 1,5%, no estimación nacional.'},
+    DEU: {note: 'Alemania pertenece a la zona euro: política monetaria del Eurosistema, sin política monetaria nacional autónoma. Tasa neutral: supuesto genérico ilustrativo de 1,5%.'},
+    ESP: {note: 'España pertenece a la zona euro: política monetaria del Eurosistema, sin política monetaria nacional autónoma. Tasa neutral: supuesto genérico ilustrativo de 1,5%.'}
+  });
   Object.assign(M, { INDICATORS, YEARS, INFLATION_TARGETS, ISLM_COUNTRY });
 })();

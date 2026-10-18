@@ -7,7 +7,7 @@ const html = readFileSync(new URL('index.html',root),'utf8');
 const requiredIds = ['countrySelect','benchmarkSelect','periodSelect','kpiGrid','trendChart','regionalChart','macroMixChart','islmRegime','islmMobility','islmInstrument','islmPresets','islmPanelISLM','islmPanelMF','islmPanelMoney','islmPanelCross','islmResults','islmNarrative','islmClasses','islmPolicyTable','macroTableBody','exportCsvBtn','insightTrack','carouselPrev','carouselNext'];
 for(const id of requiredIds) if(!html.includes(`id="${id}"`)) throw Error(`Falta #${id}`);
 for(const [i,match] of [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].entries())new Script(match[1],{filename:`inline-${i}.js`});
-function walk(dir){return readdirSync(dir).filter(n=>!['node_modules','.git'].includes(n)).flatMap(n=>{const p=new URL(n,dir);return statSync(p).isDirectory()?walk(new URL(n+'/',dir)):[p];});}
+function walk(dir){return readdirSync(dir).filter(n=>!['node_modules','.git','test-results'].includes(n)).flatMap(n=>{const p=new URL(n,dir);return statSync(p).isDirectory()?walk(new URL(n+'/',dir)):[p];});}
 const files=walk(root);
 const scripts=files.filter(p=>p.pathname.endsWith('.js'));
 for(const path of scripts){if(path.href.startsWith(new URL('js/',root).href))new Script(readFileSync(path,'utf8'),{filename:fileURLToPath(path)});const r=spawnSync(process.execPath,['--check',fileURLToPath(path)],{encoding:'utf8'});if(r.status!==0)throw Error(r.stderr);}

@@ -24,7 +24,7 @@
       const key='macroscope_wdi_v2_'+indicator;
       if(!force) {try {
         const cached=JSON.parse(localStorage.getItem(key));
-        if(cached&&Date.now()-Date.parse(cached.fetchedAt)<WDI_TTL&&Date.now()>=Date.parse(cached.fetchedAt)&&Array.isArray(cached.rows)&&cached.rows.every(row=>validWdiRow(row,indicator))) return cached;
+        if(cached&&cached.apiUrl===url&&Date.now()-Date.parse(cached.fetchedAt)<WDI_TTL&&Date.now()>=Date.parse(cached.fetchedAt)&&Array.isArray(cached.rows)&&cached.rows.every(row=>validWdiRow(row,indicator))) return cached;
       }catch{}}
       const first=await fetchWdiPage(url+'&page=1',indicator);
       parseWdiPage(first,indicator,1);
@@ -35,7 +35,7 @@
         pages.push(next);
       }
       const rows=normalizeWdiPages(pages,indicator);
-      const result={rows,fetchedAt:new Date().toISOString()};
+      const result={rows,fetchedAt:new Date().toISOString(),apiUrl:url};
       try {localStorage.setItem(key,JSON.stringify(result));}catch{}
       return result;
     }

@@ -6,3 +6,5 @@ tests/
 .gitignore
 *.log
 node_modules/
+
+test-results/

@@ -143,6 +143,14 @@
   let trendChartInstance = null;
   let regionalChartInstance = null;
   let macroMixChartInstance = null;
+  let comparisonChartInstance = null;
+  function drawComparisonChart(years,datasets,unit) {
+    if(typeof Chart==='undefined')return;
+    comparisonChartInstance?.destroy();
+    const palette=chartTheme();
+    comparisonChartInstance=new Chart(document.getElementById('compareChart'),{type:'line',data:{labels:years,datasets},options:{responsive:true,maintainAspectRatio:false,animation:window.matchMedia('(prefers-reduced-motion: reduce)').matches?false:{duration:250},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y===null?'sin dato':ctx.parsed.y.toLocaleString('es-PE')} · ${unit}`}}},scales:{x:{ticks:{color:palette.tick,maxRotation:0},grid:{color:palette.grid}},y:{title:{display:true,text:unit,color:palette.ink},ticks:{color:palette.tick},grid:{color:palette.grid}}}}});
+  }
+  M.drawComparisonChart=drawComparisonChart;
   // Resolve cross-view callbacks when invoked, after every deferred script has loaded.
   const fmtNum = (...args) => M.fmtNum(...args);
   const formatValue = (...args) => M.formatValue(...args);
@@ -153,6 +161,7 @@
       return {tick:vars.getPropertyValue('--chart-tick').trim()||'#8a98ae',grid:vars.getPropertyValue('--grid').trim()||'rgba(116,131,153,.12)',ink:vars.getPropertyValue('--ink').trim()||'#1a2940',paper:vars.getPropertyValue('--paper').trim()||'#ffffff'};
     }
     function renderCharts() {
+      M.renderComparison?.();
       const years=getFilteredYears();
       const meta=INDICATORS[state.activeIndicator];
       const c=COUNTRIES[state.country],b=COUNTRIES[state.benchmark];
