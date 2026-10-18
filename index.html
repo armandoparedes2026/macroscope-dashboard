@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/islm.css">
+<link rel="stylesheet" href="css/students.css">
 <script defer src="js/islm-model.js"></script>
 <script defer src="js/lab-content.js"></script>
 <script defer src="js/config/countries.js"></script>
@@ -35,6 +36,7 @@
 <script defer src="js/ui/charts.js"></script>
 <script defer src="js/ui/overview.js"></script>
 <script defer src="js/ui/islm-lab.js"></script>
+<script defer src="js/ui/student-views.js"></script>
 <script defer src="js/app.js"></script>
 </head>
 <body>
@@ -57,31 +59,20 @@
  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22c-6-3-8-7-8-12V5l8-3 8 3v5c0 5-2 9-8 12Z"/><path d="m9 12 2 2 4-4"/></symbol>
 </svg>
 <div class="app-shell">
- <aside class="sidebar" aria-label="Navegación principal">
-  <div class="brand">
-    <span class="brand-logo" role="img" aria-label="MacroScope"><svg fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.5 9 11l4 4 7-9"/><path d="M14.5 6H20v5.5"/><path d="M3 21h18"/></svg></span>
-  </div>
-  <nav class="side-nav" aria-label="Secciones del dashboard">
-   <button class="tab-btn is-active" type="button" data-tab="overview" aria-current="page" title="Panorama económico"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-grid"/></svg><span class="nav-text">Panorama económico</span></button>
-   <button class="tab-btn" type="button" data-tab="simulator" title="Modelo IS–LM y divisas"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-wallet"/></svg><span class="nav-text">Modelo IS–LM y divisas</span></button>
-   <button class="tab-btn" type="button" data-tab="data" title="Datos e inspector API"><svg fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="#i-database"/></svg><span class="nav-text">Datos e inspector API</span></button>
-  </nav>
- </aside>
  <div class="workspace">
   <header class="topbar">
-    <div class="top-left"><div class="crumb">LABORATORIO DE ECONOMÍA APLICADA <span class="crumb-line"></span> TEORÍA, MODELOS Y DATOS</div><div class="top-title" id="topTitle">Panorama macroeconómico</div></div>
+    <a class="brand-name" href="#inicio">MacroScope</a>
+    <details class="nav-menu"><summary>Men?</summary><nav class="primary-nav" aria-label="Navegaci?n principal"><a href="#inicio" data-route="inicio">Inicio</a><a href="#laboratorio" data-route="laboratorio">Aprender</a><a href="#panorama" data-route="panorama">Explorar datos</a><a href="#fuentes" data-route="fuentes">Buscar fuentes</a><a href="#ayuda" data-route="ayuda">Ayuda</a></nav></details>
     <div class="top-right">
       <div class="api-indicator" id="apiStatusBadge" title="Estado de la última conexión"><span class="status-dot" id="apiStatusDot"></span><span id="apiStatusText">Consultando fuentes...</span></div>
       <button class="icon-button" id="themeBtn" type="button" title="Cambiar entre modo claro y oscuro" aria-label="Cambiar tema"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use id="themeIcon" href="#i-moon"/></svg></button>
     </div>
   </header>
-  <nav class="mobile-nav" aria-label="Navegación móvil">
-   <button type="button" class="tab-btn is-active" data-tab="overview" aria-current="page"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-grid"/></svg>Panorama</button>
-   <button type="button" class="tab-btn" data-tab="simulator"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-wallet"/></svg>IS–LM</button>
-   <button type="button" class="tab-btn" data-tab="data"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Datos y API</button>
-  </nav>
   <main class="content">
-   <section class="view" id="tab-overview" aria-label="Panorama económico">
+   <section class="view" id="inicio" data-view="inicio" tabindex="-1"><h1>MacroScope</h1><p>Aprende con modelos y explora datos econ?micos.</p></section>
+   <section class="view" id="fuentes" data-view="fuentes" hidden tabindex="-1"><h1>Buscar fuentes</h1></section>
+   <section class="view" id="ayuda" data-view="ayuda" hidden tabindex="-1"><h1>Ayuda</h1></section>
+   <section class="view" id="tab-overview" data-view="panorama" hidden tabindex="-1" aria-label="Panorama económico">
      <div class="page-heading"><div><div class="eyebrow">LABORATORIO INTERACTIVO DE ECONOMÍA APLICADA</div><h1>Teoría, modelos y datos para entender la economía.</h1><p>Una lectura clara de la economía, sus tendencias y su posición frente a los mercados de referencia.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-calendar"/></svg><span id="headingPeriod">Serie anual · 2014–2024</span></div><button class="hero-scroll-cue" id="heroScrollCue" type="button" aria-label="Desplazarse hacia el contenido principal"><span class="cue-dot"></span><span>Explorar análisis</span></button></div>
      <div class="filter-bar" id="overviewFilters" aria-label="Filtros globales">
       <div class="filter-group main-country"><label class="control-label" for="countrySelect">ECONOMÍA PRINCIPAL</label><select class="field-select" id="countrySelect"><option value="PER">🇵🇪 Perú</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="USA">🇺🇸 Estados Unidos</option></select></div>
@@ -140,8 +131,17 @@
       <article class="surface chart-card reveal"><div class="card-top"><div><h3>Crecimiento e inflación</h3><p>Dos variables esenciales para interpretar el ciclo económico.</p></div></div><div class="chart-wrap"><canvas id="macroMixChart" role="img" aria-label="Comparación entre crecimiento anual e inflación"></canvas></div></article>
       <article class="surface decisions-card reveal"><div class="card-top" style="margin-bottom:0"><div><h3>Lecturas para la gestión</h3><p>Implicancias posibles según el entorno macroeconómico.</p></div><span class="status-pill neutral">ANÁLISIS</span></div><div id="decisionCardsContainer" class="decisions-list"></div><div class="advisory"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-info"/></svg><span>Interpretaciones orientativas basadas en reglas simples. No constituyen asesoría financiera ni sustituyen el análisis sectorial o empresarial.</span></div></article>
      </div>
+   <section class="data-inspector" id="tab-data" aria-label="Matriz de datos e inspector API">
+    <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD Y EXPLORACIÓN</div><h1>Datos claros. Fuentes visibles.</h1><p>Explora la serie anual, exporta observaciones y consulta los endpoints solicitados a las fuentes públicas.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Banco Mundial · WDI</div></div>
+    <article class="surface soft-panel"><div class="card-top" style="flex-wrap:wrap"><div><h3>Histórico de indicadores</h3><p id="tableCountrySubtitle">Datos anuales de la economía seleccionada, por indicador y año.</p></div><div class="data-actions"><label class="search-box"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-search"/></svg><input id="tableSearchInput" type="search" placeholder="Filtrar por año" aria-label="Filtrar filas por año"></label><button class="control-action primary" id="exportCsvBtn" type="button"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-download"/></svg>Exportar CSV</button></div></div>
+      <div class="data-table-wrap"><table class="data-table"><thead><tr><th>Año</th><th>Crecimiento PBI<br>(% anual)</th><th>Inflación IPC<br>(% anual)</th><th>Desempleo<br>(%)</th><th>PBI per cápita<br>(US$ corrientes)</th><th>Exportaciones<br>(% del PBI)</th><th>Cuenta corriente<br>(% del PBI)</th><th>NX bienes y servicios<br>(% del PBI)</th><th>Importaciones<br>(% del PBI)</th></tr></thead><tbody id="macroTableBody"></tbody></table></div>
+      <div class="data-note" id="tableProvenanceNote">N/D indica un registro no disponible. Las celdas en cursiva con <span style="color:var(--amber)">*</span> proceden del respaldo local incorporado (no confirmadas por la API en esta sesión); el resto fue devuelto por el API del Banco Mundial. El proveedor puede revisar las cifras posteriormente.</div>
+      <div class="data-note"><strong>Notas metodológicas.</strong> Inflación (FP.CPI.TOTL.ZG): variación del IPC <em>promedio anual</em>; no equivale a la variación diciembre–diciembre que usan los bancos centrales (p. ej., el BCRP) para evaluar su meta. Desempleo (SL.UEM.TOTL.ZS): estimación <em>modelada de la OIT</em> a nivel nacional; no es comparable con la tasa de Lima Metropolitana publicada por el INEI.</div>
+    </article>
+    <article class="surface soft-panel"><div class="card-top"><div><h3>Inspector de consultas y respuestas</h3><p>EndPoints REST consultados y muestra de la respuesta JSON recibida.</p></div><span class="inspector-status" id="inspectorLatencyBadge">API REST v2</span></div><div class="inspector-grid"><div class="code-block"><div class="code-label">Solicitudes recientes</div><ul id="endpointList"></ul></div><div class="code-block"><div class="code-label">Ejemplo de respuesta</div><pre id="rawJsonPreview">Sincronizando...</pre></div></div><p class="data-note">Proveedor principal: <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" class="source-link">World Bank Open Data</a>. Fuente de divisas: <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer" class="source-link">ExchangeRate-API</a>. Estos datos no constituyen una cotización oficial del banco central.</p></article>
    </section>
-   <section class="view" id="tab-simulator" hidden aria-label="Modelo IS-LM-BP y Mundell-Fleming">
+   </section>
+   <section class="view" id="tab-simulator" data-view="laboratorio" tabindex="-1" hidden aria-label="Modelo IS-LM-BP y Mundell-Fleming">
      <div class="page-heading"><div><div class="eyebrow">MACROECONOMÍA ABIERTA · CORTO PLAZO</div><h1>IS–LM–BP y Mundell–Fleming.</h1><p>Elige el tipo de economía, mueve instrumentos de política o shocks externos y observa cómo se desplazan las curvas en cuatro mercados enlazados: qué controla la economía, qué le viene dado y cómo se transmite cada decisión.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-chart"/></svg>Modelo didáctico · supuestos explícitos</div></div>
      <div class="islm-banner">Simulación teórica — no es evidencia empírica</div>
      <div class="islm-learning surface soft-panel">
@@ -197,15 +197,7 @@
      <article class="surface soft-panel reveal"><div class="card-top"><div><h3>Tipos de cambio de referencia</h3><p>Un dólar estadounidense (USD) expresado en monedas seleccionadas.</p></div><span id="fxStatusBadge" class="text-chip">Fuente referencial · respaldo local</span></div><div id="fxGrid" class="fx-grid"></div><div class="data-note">Las cotizaciones pueden ser indicativas y no equivalen a tasas de compra/venta bancarias. Verifica fecha y condiciones antes de operar.</div></article>
      <div class="sim-disclaimer"><svg fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-info"/></svg><span id="islmDisclaimer">Modelo didáctico de corto plazo con precios fijos (P = 1) y expectativas estáticas: la prima ρ incluye riesgo país y depreciación esperada. El equilibrio inicial se ancla en datos observados del WDI (importaciones, balanza de bienes y servicios y cuenta corriente) y en supuestos explícitos (meta de inflación más una tasa real neutral ilustrativa, tasa internacional de referencia, elasticidad-ingreso de las importaciones igual a 1 y parámetros de comportamiento didácticos); no es una estimación econométrica ni un modelo de pronóstico ni describe con exactitud la política de ningún banco central.</span></div>
    </section>
-   <section class="view" id="tab-data" hidden aria-label="Matriz de datos e inspector API">
-    <div class="page-heading"><div><div class="eyebrow">TRAZABILIDAD Y EXPLORACIÓN</div><h1>Datos claros. Fuentes visibles.</h1><p>Explora la serie anual, exporta observaciones y consulta los endpoints solicitados a las fuentes públicas.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-database"/></svg>Banco Mundial · WDI</div></div>
-    <article class="surface soft-panel"><div class="card-top" style="flex-wrap:wrap"><div><h3>Histórico de indicadores</h3><p id="tableCountrySubtitle">Datos anuales de la economía seleccionada, por indicador y año.</p></div><div class="data-actions"><label class="search-box"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-search"/></svg><input id="tableSearchInput" type="search" placeholder="Filtrar por año" aria-label="Filtrar filas por año"></label><button class="control-action primary" id="exportCsvBtn" type="button"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-download"/></svg>Exportar CSV</button></div></div>
-      <div class="data-table-wrap"><table class="data-table"><thead><tr><th>Año</th><th>Crecimiento PBI<br>(% anual)</th><th>Inflación IPC<br>(% anual)</th><th>Desempleo<br>(%)</th><th>PBI per cápita<br>(US$ corrientes)</th><th>Exportaciones<br>(% del PBI)</th><th>Cuenta corriente<br>(% del PBI)</th><th>NX bienes y servicios<br>(% del PBI)</th><th>Importaciones<br>(% del PBI)</th></tr></thead><tbody id="macroTableBody"></tbody></table></div>
-      <div class="data-note" id="tableProvenanceNote">N/D indica un registro no disponible. Las celdas en cursiva con <span style="color:var(--amber)">*</span> proceden del respaldo local incorporado (no confirmadas por la API en esta sesión); el resto fue devuelto por el API del Banco Mundial. El proveedor puede revisar las cifras posteriormente.</div>
-      <div class="data-note"><strong>Notas metodológicas.</strong> Inflación (FP.CPI.TOTL.ZG): variación del IPC <em>promedio anual</em>; no equivale a la variación diciembre–diciembre que usan los bancos centrales (p. ej., el BCRP) para evaluar su meta. Desempleo (SL.UEM.TOTL.ZS): estimación <em>modelada de la OIT</em> a nivel nacional; no es comparable con la tasa de Lima Metropolitana publicada por el INEI.</div>
-    </article>
-    <article class="surface soft-panel"><div class="card-top"><div><h3>Inspector de consultas y respuestas</h3><p>EndPoints REST consultados y muestra de la respuesta JSON recibida.</p></div><span class="inspector-status" id="inspectorLatencyBadge">API REST v2</span></div><div class="inspector-grid"><div class="code-block"><div class="code-label">Solicitudes recientes</div><ul id="endpointList"></ul></div><div class="code-block"><div class="code-label">Ejemplo de respuesta</div><pre id="rawJsonPreview">Sincronizando...</pre></div></div><p class="data-note">Proveedor principal: <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" class="source-link">World Bank Open Data</a>. Fuente de divisas: <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer" class="source-link">ExchangeRate-API</a>. Estos datos no constituyen una cotización oficial del banco central.</p></article>
-   </section>
+
   </main>
   <footer class="footer"><span>© 2026 MacroScope · Laboratorio Interactivo de Economía Aplicada</span><span>Datos macroeconómicos anuales · <span id="lastUpdatedLabel">Consulta pendiente</span></span></footer>
  </div>

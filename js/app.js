@@ -50,23 +50,7 @@
       document.getElementById('exportCsvBtn').addEventListener('click',exportCsv);
       document.getElementById('tableSearchInput').addEventListener('input',e=>{state.tableFilter=e.target.value;renderDataTableAndInspector();});
       setupIslm();
-      function selectTab(target){
-        if(!['overview','simulator','data'].includes(target))return;
-        state.activeTab=target;
-        restartCarouselAuto();
-        document.querySelectorAll('.tab-btn').forEach(b=>{
-          const current=b.dataset.tab===target;
-          b.classList.toggle('is-active',current);
-          if(current)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
-        });
-        ['overview','simulator','data'].forEach(key=>{document.getElementById(`tab-${key}`).hidden=key!==target;});
-        const activeView=document.getElementById(`tab-${target}`); if(activeView){activeView.style.animation='none'; requestAnimationFrame(()=>{activeView.style.animation='tabFade .52s cubic-bezier(.22,1,.36,1)';});}
-        document.getElementById('topTitle').textContent=({overview:'Panorama macroeconómico',simulator:'Modelo IS–LM–BP y Mundell–Fleming',data:'Datos e inspector API'})[target];
-        if(target==='overview')renderCharts();
-        if(target==='simulator')renderIslm();
-        window.scrollTo({top:0,behavior:'smooth'});
-      }
-      document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>selectTab(btn.dataset.tab)));
+      M.setupStudentViews();
       document.getElementById('themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
       document.getElementById('carouselPrev')?.addEventListener('click',()=>{moveCarousel(-1);restartCarouselAuto();});
       document.getElementById('carouselNext')?.addEventListener('click',()=>{moveCarousel(1);restartCarouselAuto();});
