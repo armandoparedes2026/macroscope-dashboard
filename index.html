@@ -62,14 +62,23 @@
  <div class="workspace">
   <header class="topbar">
     <a class="brand-name" href="#inicio">MacroScope</a>
-    <details class="nav-menu"><summary>Men?</summary><nav class="primary-nav" aria-label="Navegaci?n principal"><a href="#inicio" data-route="inicio">Inicio</a><a href="#laboratorio" data-route="laboratorio">Aprender</a><a href="#panorama" data-route="panorama">Explorar datos</a><a href="#fuentes" data-route="fuentes">Buscar fuentes</a><a href="#ayuda" data-route="ayuda">Ayuda</a></nav></details>
+    <details class="nav-menu"><summary>Menú</summary><nav class="primary-nav" aria-label="Navegación principal"><a href="#inicio" data-route="inicio">Inicio</a><a href="#laboratorio" data-route="laboratorio">Aprender</a><a href="#panorama" data-route="panorama">Explorar datos</a><a href="#fuentes" data-route="fuentes">Buscar fuentes</a><a href="#ayuda" data-route="ayuda">Ayuda</a></nav></details>
     <div class="top-right">
       <div class="api-indicator" id="apiStatusBadge" title="Estado de la última conexión"><span class="status-dot" id="apiStatusDot"></span><span id="apiStatusText">Consultando fuentes...</span></div>
       <button class="icon-button" id="themeBtn" type="button" title="Cambiar entre modo claro y oscuro" aria-label="Cambiar tema"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use id="themeIcon" href="#i-moon"/></svg></button>
     </div>
   </header>
   <main class="content">
-   <section class="view" id="inicio" data-view="inicio" tabindex="-1"><h1>MacroScope</h1><p>Aprende con modelos y explora datos econ?micos.</p></section>
+   <section class="view home-view" id="inicio" data-view="inicio" tabindex="-1" aria-labelledby="homeTitle">
+     <header class="home-intro"><div class="eyebrow">ECONOMÍA · TEORÍA Y EVIDENCIA</div><h1 id="homeTitle">Entiende la economía.<br><em>Conecta modelos y datos.</em></h1><p>MacroScope es un laboratorio para estudiantes de economía: experimenta con modelos, compara indicadores oficiales y encuentra fuentes para tus trabajos.</p></header>
+     <div class="path-grid" aria-label="Elige tu camino">
+       <a class="path-card" href="#laboratorio"><span class="eyebrow">01 · APRENDER</span><h2>Aprender</h2><p>Predice un resultado y experimenta con el modelo IS–LM–BP.</p><span class="path-action">Abrir laboratorio →</span></a>
+       <a class="path-card" href="#panorama"><span class="eyebrow">02 · EXPLORAR DATOS</span><h2>Explorar datos</h2><p>Compara economías y consulta indicadores con su procedencia.</p><span class="path-action">Explorar panorama →</span></a>
+       <a class="path-card" href="#fuentes"><span class="eyebrow">03 · BUSCAR FUENTES</span><h2>Buscar fuentes</h2><p>Encuentra bases oficiales para tu curso y copia sus citas.</p><span class="path-action">Buscar una fuente →</span></a>
+     </div>
+     <aside class="help-band"><div><h2>Una guía para empezar</h2><p>Cómo usar la plataforma, glosario, preguntas frecuentes y citación.</p></div><a class="control-action" href="#ayuda">Abrir ayuda</a></aside>
+     <aside class="teacher-note"><strong>Docentes — Preliminar</strong><p>Esta versión prioriza el aprendizaje autónomo de estudiantes de pregrado.</p></aside>
+   </section>
    <section class="view" id="fuentes" data-view="fuentes" hidden tabindex="-1"><h1>Buscar fuentes</h1></section>
    <section class="view" id="ayuda" data-view="ayuda" hidden tabindex="-1"><h1>Ayuda</h1></section>
    <section class="view" id="tab-overview" data-view="panorama" hidden tabindex="-1" aria-label="Panorama económico">
