@@ -1,0 +1,8 @@
+# Keep only runtime assets in the published site
+macroscope-dashboard.zip
+README.md
+tests/
+.github/
+.gitignore
+*.log
+node_modules/
