@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/islm.css">
 <link rel="stylesheet" href="css/students.css">
+<link rel="stylesheet" href="css/landing.css">
 <script defer src="js/islm-model.js"></script>
 <script defer src="js/lab-content.js"></script>
 <script defer src="js/config/countries.js"></script>
@@ -37,6 +38,7 @@
 <script defer src="js/ui/overview.js"></script>
 <script defer src="js/ui/islm-lab.js"></script>
 <script defer src="js/ui/student-views.js"></script>
+<script defer src="js/ui/landing.js"></script>
 <script defer src="js/app.js"></script>
 </head>
 <body>
@@ -60,24 +62,82 @@
 <div class="app-shell">
  <div class="workspace">
   <header class="topbar">
-    <a class="brand-name" href="#inicio">MacroScope</a>
+    <a class="brand-name" href="#inicio" aria-label="Macroscope · Inicio"><svg class="brand-symbol" viewBox="0 0 50 42" aria-hidden="true"><path d="m9 22 13-13 18 15-17 11-14-13" stroke="currentColor" stroke-width="3" fill="none" opacity=".46"/><circle cx="9" cy="22" r="6" fill="currentColor"/><circle cx="22" cy="9" r="7" fill="currentColor"/><circle cx="40" cy="24" r="6" fill="#73a7f6"/><circle cx="23" cy="35" r="7" fill="#2f6fd3"/></svg><span class="brand-lockup"><strong>Macroscope</strong><small>Laboratorio Interactivo de Economía Aplicada</small></span></a>
     <details class="nav-menu"><summary>Menú</summary><nav class="primary-nav" aria-label="Navegación principal"><a href="#inicio" data-route="inicio">Inicio</a><a href="#laboratorio" data-route="laboratorio">Aprender</a><a href="#panorama" data-route="panorama">Explorar datos</a><a href="#fuentes" data-route="fuentes">Buscar fuentes</a><a href="#ayuda" data-route="ayuda">Ayuda</a></nav></details>
-    <div class="top-right">
+    <div class="top-right"><a class="nav-premium-cta" href="#panorama">Explorar plataforma <span aria-hidden="true">→</span></a>
       <div class="api-indicator" id="apiStatusBadge" title="Estado de la última conexión"><span class="status-dot" id="apiStatusDot"></span><span id="apiStatusText">Consultando fuentes...</span></div>
       <button class="icon-button" id="themeBtn" type="button" title="Cambiar entre modo claro y oscuro" aria-label="Cambiar tema"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use id="themeIcon" href="#i-moon"/></svg></button>
     </div>
   </header>
   <main class="content">
    <section class="view home-view" id="inicio" data-view="inicio" tabindex="-1" aria-labelledby="homeTitle">
-     <header class="home-intro"><div class="eyebrow">ECONOMÍA · TEORÍA Y EVIDENCIA</div><h1 id="homeTitle">Entiende la economía.<br><em>Conecta modelos y datos.</em></h1><p>MacroScope es un laboratorio para estudiantes de economía: experimenta con modelos, compara indicadores oficiales y encuentra fuentes para tus trabajos.</p></header>
-     <div class="path-grid" aria-label="Elige tu camino">
-       <a class="path-card" href="#laboratorio"><span class="eyebrow">01 · APRENDER</span><h2>Aprender</h2><p>Predice un resultado y experimenta con el modelo IS–LM–BP.</p><span class="path-action">Abrir laboratorio →</span></a>
-       <a class="path-card" href="#panorama"><span class="eyebrow">02 · EXPLORAR DATOS</span><h2>Explorar datos</h2><p>Compara economías y consulta indicadores con su procedencia.</p><span class="path-action">Explorar panorama →</span></a>
-       <a class="path-card" href="#fuentes"><span class="eyebrow">03 · BUSCAR FUENTES</span><h2>Buscar fuentes</h2><p>Encuentra bases oficiales para tu curso y copia sus citas.</p><span class="path-action">Buscar una fuente →</span></a>
-     </div>
-     <aside class="help-band"><div><h2>Una guía para empezar</h2><p>Cómo usar la plataforma, glosario, preguntas frecuentes y citación.</p></div><a class="control-action" href="#ayuda">Abrir ayuda</a></aside>
-     <aside class="teacher-note"><strong>Docentes — Preliminar</strong><p>Esta versión prioriza el aprendizaje autónomo de estudiantes de pregrado.</p></aside>
-   </section>
+ <div class="landing-premium">
+  <div class="landing-ambient landing-ambient-left" aria-hidden="true"></div><div class="landing-ambient landing-ambient-right" aria-hidden="true"></div>
+  <header class="landing-intro">
+   <div class="landing-kicker"><span class="landing-kicker-dot"></span> LABORATORIO INTERACTIVO DE ECONOMÍA APLICADA</div>
+   <h1 id="homeTitle">Explora la economía,<span> comprende los datos, simula decisiones</span></h1>
+   <p>Macroscope es una plataforma de análisis y aprendizaje en economía aplicada que combina información, herramientas analíticas, visualizaciones, comparaciones y simulaciones en un solo lugar.</p>
+  </header>
+  <div class="orbit-stage" aria-label="Módulos de Macroscope">
+   <div class="orbit-stage-haze" aria-hidden="true"></div><div class="orbit-platform" aria-hidden="true"><div class="orbit-platform-core"></div></div>
+   <div class="orbit-track" id="homeCarousel" aria-roledescription="carrusel" aria-label="Explora las áreas de la plataforma">
+<article class="orbit-card" data-home-slide="0" aria-label="Aprendizaje guiado">
+ <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-5 9 5-9 5-9-5Z"/><path d="M6 11v5c3.7 3.2 8.3 3.2 12 0v-5M21 10v6"/></svg></span>
+ <span class="orbit-card-number">01 / 07</span><h2>Aprendizaje guiado</h2><p>Conceptos, ejercicios y rutas para aprender economía.</p>
+ <svg class="orbit-illustration" viewBox="0 0 260 128" aria-hidden="true"><defs><linearGradient id="orbBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80b7ff"/><stop offset="1" stop-color="#e2efff"/></linearGradient><linearGradient id="orbFade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9dc7ff"/><stop offset="1" stop-color="#e7f2ff" stop-opacity="0"/></linearGradient></defs><path class="illus-soft" d="M12 98c40-19 61-27 111-7 44-17 82-17 125-3v20c-47-11-81-7-124 6-42-18-77-18-112 2Z"/><path d="M12 98c40-19 61-27 111-7 44-17 82-17 125-3M123 91v23" fill="none" stroke="#78aafa" stroke-width="2"/></svg>
+ <a class="orbit-card-open" href="#laboratorio" aria-label="Abrir Aprendizaje guiado">Explorar módulo <span aria-hidden="true">↗</span></a>
+ </div></article>
+<article class="orbit-card" data-home-slide="1" aria-label="Análisis histórico">
+ <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg></span>
+ <span class="orbit-card-number">02 / 07</span><h2>Análisis histórico</h2><p>Explora series de tiempo y comprende su evolución.</p>
+ <svg class="orbit-illustration" viewBox="0 0 260 128" aria-hidden="true"><defs><linearGradient id="orbBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80b7ff"/><stop offset="1" stop-color="#e2efff"/></linearGradient><linearGradient id="orbFade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9dc7ff"/><stop offset="1" stop-color="#e7f2ff" stop-opacity="0"/></linearGradient></defs><path d="M7 99 47 86 77 96 113 65 150 76 178 37 216 44 246 20" fill="none" stroke="#4589f6" stroke-width="3" stroke-linecap="round"/><path d="M7 99 47 86 77 96 113 65 150 76 178 37 216 44 246 20v101H7Z" fill="url(#orbFade)" opacity=".52"/><circle cx="246" cy="20" r="4" fill="#377ff0"/></svg>
+ <a class="orbit-card-open" href="#panorama" aria-label="Abrir Análisis histórico">Explorar módulo <span aria-hidden="true">↗</span></a>
+ </div></article>
+<article class="orbit-card" data-home-slide="2" aria-label="Indicadores macroeconómicos">
+ <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19v-5M10 19V8M15 19v-9M20 19V4"/></svg></span>
+ <span class="orbit-card-number">03 / 07</span><h2>Indicadores macroeconómicos</h2><p>Accede y analiza los indicadores económicos clave.</p>
+ <svg class="orbit-illustration" viewBox="0 0 260 128" aria-hidden="true"><defs><linearGradient id="orbBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80b7ff"/><stop offset="1" stop-color="#e2efff"/></linearGradient><linearGradient id="orbFade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9dc7ff"/><stop offset="1" stop-color="#e7f2ff" stop-opacity="0"/></linearGradient></defs><path d="M11 102h238" stroke="#93b8ef"/><rect x="24" y="76" width="27" height="27" rx="5" fill="url(#orbBar)"/><rect x="66" y="56" width="27" height="47" rx="5" fill="url(#orbBar)"/><rect x="108" y="63" width="27" height="40" rx="5" fill="url(#orbBar)"/><rect x="150" y="30" width="27" height="73" rx="5" fill="url(#orbBar)"/><rect x="192" y="11" width="27" height="92" rx="5" fill="url(#orbBar)"/></svg>
+ <a class="orbit-card-open" href="#panorama" aria-label="Abrir Indicadores macroeconómicos">Explorar módulo <span aria-hidden="true">↗</span></a>
+ </div></article>
+<article class="orbit-card" data-home-slide="3" aria-label="Exploración macroeconómica">
+ <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="4" height="9" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16" y="8" width="4" height="12" rx="1"/></svg></span>
+ <span class="orbit-card-number">04 / 07</span><h2>Exploración macroeconómica</h2><p>Analiza indicadores, relaciones y dinámicas de la economía.</p>
+ <svg class="orbit-illustration" viewBox="0 0 260 128" aria-hidden="true"><defs><linearGradient id="orbBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80b7ff"/><stop offset="1" stop-color="#e2efff"/></linearGradient><linearGradient id="orbFade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9dc7ff"/><stop offset="1" stop-color="#e7f2ff" stop-opacity="0"/></linearGradient></defs><rect x="10" y="82" width="36" height="34" rx="4" fill="url(#orbBar)"/><rect x="62" y="67" width="36" height="49" rx="4" fill="url(#orbBar)"/><rect x="114" y="35" width="36" height="81" rx="4" fill="url(#orbBar)"/><rect x="166" y="57" width="36" height="59" rx="4" fill="url(#orbBar)"/><rect x="218" y="13" width="30" height="103" rx="4" fill="url(#orbBar)"/><path d="M25 78 80 58 132 28 183 50 232 7" fill="none" stroke="#4085fa" stroke-width="2.5"/><g fill="#4085fa"><circle cx="25" cy="78" r="4"/><circle cx="80" cy="58" r="4"/><circle cx="132" cy="28" r="4"/><circle cx="183" cy="50" r="4"/><circle cx="232" cy="7" r="4"/></g></svg>
+ <a class="orbit-card-open" href="#panorama" aria-label="Abrir Exploración macroeconómica">Explorar módulo <span aria-hidden="true">↗</span></a>
+ </div></article>
+<article class="orbit-card" data-home-slide="4" aria-label="Comparación de economías">
+ <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c6 5 6 13 0 18M12 3c-6 5-6 13 0 18"/></svg></span>
+ <span class="orbit-card-number">05 / 07</span><h2>Comparación de economías</h2><p>Contrasta países, regiones y periodos con datos oficiales.</p>
+ <svg class="orbit-illustration" viewBox="0 0 260 128" aria-hidden="true"><defs><linearGradient id="orbBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80b7ff"/><stop offset="1" stop-color="#e2efff"/></linearGradient><linearGradient id="orbFade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9dc7ff"/><stop offset="1" stop-color="#e7f2ff" stop-opacity="0"/></linearGradient></defs><ellipse cx="128" cy="64" rx="107" ry="53" fill="#b9d6ff" opacity=".27"/><ellipse cx="128" cy="64" rx="52" ry="53" fill="none" stroke="#8db9fb"/><path d="M22 64h212M128 11v106M30 39h196M30 90h196" stroke="#8db9fb" fill="none"/><g fill="#3c83f5"><circle cx="74" cy="47" r="5"/><circle cx="143" cy="76" r="5"/><circle cx="185" cy="35" r="5"/><circle cx="116" cy="26" r="4"/></g></svg>
+ <a class="orbit-card-open" href="#panorama?focus=compare" aria-label="Abrir Comparación de economías">Explorar módulo <span aria-hidden="true">↗</span></a>
+ </div></article>
+<article class="orbit-card" data-home-slide="5" aria-label="Simulación de escenarios">
+ <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg></span>
+ <span class="orbit-card-number">06 / 07</span><h2>Simulación de escenarios</h2><p>Experimenta con políticas y shocks en un laboratorio.</p>
+ <svg class="orbit-illustration" viewBox="0 0 260 128" aria-hidden="true"><defs><linearGradient id="orbBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80b7ff"/><stop offset="1" stop-color="#e2efff"/></linearGradient><linearGradient id="orbFade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9dc7ff"/><stop offset="1" stop-color="#e7f2ff" stop-opacity="0"/></linearGradient></defs><path d="M8 110h244M128 11v110" stroke="#9bbdf3" stroke-dasharray="4 5"/><path d="M8 107Q72 16 124 67T249 33" fill="none" stroke="#4d90fd" stroke-width="3"/><path d="M8 35Q86 101 140 60T249 106" fill="none" stroke="#a7cafd" stroke-width="3"/><circle cx="130" cy="62" r="6" fill="#387df5" stroke="white" stroke-width="3"/></svg>
+ <a class="orbit-card-open" href="#laboratorio" aria-label="Abrir Simulación de escenarios">Explorar módulo <span aria-hidden="true">↗</span></a>
+ </div></article>
+<article class="orbit-card" data-home-slide="6" aria-label="Modelos y tendencias">
+ <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="18" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="20" cy="17" r="2"/><path d="m6 16 5-9m3 0 5 8M7 18h11"/></svg></span>
+ <span class="orbit-card-number">07 / 07</span><h2>Modelos y tendencias</h2><p>Conecta los modelos económicos con sus resultados.</p>
+ <svg class="orbit-illustration" viewBox="0 0 260 128" aria-hidden="true"><defs><linearGradient id="orbBar" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#80b7ff"/><stop offset="1" stop-color="#e2efff"/></linearGradient><linearGradient id="orbFade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9dc7ff"/><stop offset="1" stop-color="#e7f2ff" stop-opacity="0"/></linearGradient></defs><path d="M0 94Q36 6 75 61T147 56T260 72v48H0Z" fill="#cbe1ff"/><path d="M0 101Q38 50 81 77T159 58T260 85" fill="none" stroke="#4187f6" stroke-width="2.5"/><path d="M0 114Q70 37 130 89T260 60" fill="none" stroke="#9dbff5" stroke-width="2.5"/></svg>
+ <a class="orbit-card-open" href="#laboratorio" aria-label="Abrir Modelos y tendencias">Explorar módulo <span aria-hidden="true">↗</span></a>
+ </div></article>
+   </div>
+   <button class="orbit-arrow orbit-prev" id="homePrev" type="button" aria-label="Módulo anterior"><span aria-hidden="true">‹</span></button>
+   <button class="orbit-arrow orbit-next" id="homeNext" type="button" aria-label="Módulo siguiente"><span aria-hidden="true">›</span></button>
+  </div>
+  <div class="orbit-footer"><div class="orbit-pagination" role="group" aria-label="Seleccionar módulo"><button class="orbit-dot" type="button" data-home-dot="0" aria-label="Mostrar Aprendizaje guiado" aria-pressed="false"><span></span></button><button class="orbit-dot" type="button" data-home-dot="1" aria-label="Mostrar Análisis histórico" aria-pressed="false"><span></span></button><button class="orbit-dot" type="button" data-home-dot="2" aria-label="Mostrar Indicadores macroeconómicos" aria-pressed="false"><span></span></button><button class="orbit-dot" type="button" data-home-dot="3" aria-label="Mostrar Exploración macroeconómica" aria-pressed="true"><span></span></button><button class="orbit-dot" type="button" data-home-dot="4" aria-label="Mostrar Comparación de economías" aria-pressed="false"><span></span></button><button class="orbit-dot" type="button" data-home-dot="5" aria-label="Mostrar Simulación de escenarios" aria-pressed="false"><span></span></button><button class="orbit-dot" type="button" data-home-dot="6" aria-label="Mostrar Modelos y tendencias" aria-pressed="false"><span></span></button></div><p class="orbit-hint" id="orbitHint">Desliza o usa las flechas para explorar los módulos</p></div>
+  <div class="landing-actions"><a class="landing-cta" href="#panorama">Explorar plataforma <span aria-hidden="true">→</span></a><a class="landing-secondary" href="#ayuda"><span class="landing-play" aria-hidden="true">▶</span> Cómo funciona</a></div>
+  <div class="landing-trust" aria-label="Beneficios de Macroscope">
+   <div class="trust-item"><span class="trust-icon" aria-hidden="true">▤</span><span>Datos confiables<br>y con trazabilidad</span></div>
+   <div class="trust-item"><span class="trust-icon" aria-hidden="true">▥</span><span>Herramientas analíticas<br>avanzadas</span></div>
+   <div class="trust-item"><span class="trust-icon" aria-hidden="true">▱</span><span>Un enfoque práctico<br>y aplicado</span></div>
+   <div class="trust-item"><span class="trust-icon" aria-hidden="true">♙</span><span>Para estudiantes y<br>profesionales</span></div>
+  </div>
+  <div class="landing-bottom"><p>Aprende con modelos económicos, explora evidencia y consulta fuentes verificables.</p><a href="#fuentes">Consultar fuentes económicas <span aria-hidden="true">↗</span></a></div>
+ </div>
+</section>
    <section class="view" id="fuentes" data-view="fuentes" hidden tabindex="-1"><header class="view-heading"><div class="eyebrow">DIRECTORIO ACADÉMICO</div><h1>Buscar fuentes</h1><p>Elige una base para tu curso y comprueba su metodología antes de usarla.</p><a class="control-action" href="#ayuda">Cómo citar una fuente</a></header>
      <form id="sourceFilters" class="source-filters" role="search"><label>Curso<select id="sourceCourse" class="field-select"></select></label><label>Alcance<select id="sourceScope" class="field-select"></select></label><label>Acceso<select id="sourceAccess" class="field-select"></select></label><label>Buscar<input id="sourceQuery" type="search" placeholder="Tema, fuente u organismo"></label><button type="reset" class="control-action">Limpiar filtros</button></form>
      <p id="sourceCount" role="status" aria-live="polite"></p><div class="source-grid" id="sourceResults"></div><p id="sourceChecked" class="data-note"></p></section>
