@@ -11,6 +11,7 @@
     const total = slides.length;
     let current = 3;
     let pointerStart = null;
+    let suppressSwipeClick = false;
     const xPositions = [0, 1.2, 2.07, 2.72];
     const scales = [1, .91, .8, .72];
     const yPositions = [0, 28, 44, 57];
@@ -47,6 +48,7 @@
     document.getElementById('homeNext')?.addEventListener('click', () => select(current + 1));
     dots.forEach((dot, index) => dot.addEventListener('click', () => select(index)));
     slides.forEach((slide, index) => slide.addEventListener('click', event => {
+      if (suppressSwipeClick) { event.preventDefault(); return; }
       if (event.target.closest('a')) return;
       if (index !== current) select(index);
       else {
@@ -75,9 +77,14 @@
       const dx = event.clientX - pointerStart.x;
       const dy = event.clientY - pointerStart.y;
       pointerStart = null;
-      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) select(current + (dx < 0 ? 1 : -1));
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        suppressSwipeClick = true;
+        select(current + (dx < 0 ? 1 : -1));
+        setTimeout(() => { suppressSwipeClick = false; }, 300);
+      }
     });
     stage.addEventListener('pointercancel', () => { pointerStart = null; });
+    stage.addEventListener('click', event => { if (suppressSwipeClick) { event.preventDefault(); event.stopPropagation(); } }, true);
     render(false);
     if (hint) hint.setAttribute('aria-live', 'polite');
   }
