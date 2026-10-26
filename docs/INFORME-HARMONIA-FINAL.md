@@ -5,7 +5,12 @@
 - **Commit base inicial**: `7db6f4721c74eb3c96d31cf47e89f9d722a2462c`
 - **Commit de implementación y auditoría (Fase F)**: `b2ff681cbe7dfcf14ed55faedbebde942d61c1dd`
 - **Pull Request**: [#9 — `feat(harmonia): construcción integral y armonización de las siete experiencias de Macroscope`](https://github.com/armandoparedes2026/macroscope-dashboard/pull/9) (**Estado: `MERGED`**, `2026-10-26T06:14:46Z`)
-- **Commit de fusión en `main` (Fase G)**: `44fb8310db60aa2bc86bff3baea7c0fa8fa6d997`
+- **Commits de fusión y sincronización en `main` (Fase G)**: `44fb8310db60aa2bc86bff3baea7c0fa8fa6d997` y `ae73928a6e7b59df783d0afcd62330ae0356bbe2`
+- **Proyecto y equipo en Vercel**: `macroscope-dashboard` (`prj_ynewA8npY6iYShQpYA6vYe13wZzg`) · Equipo `CS_CORP` (`team_2SUUXoaYVzUfyptfKrG51Of9`)
+- **Dominios públicos de producción en Vercel (`READY`)**: [`https://macroscope-dashboard.vercel.app`](https://macroscope-dashboard.vercel.app) y [`https://macroscope-dashboard-cs-corp.vercel.app`](https://macroscope-dashboard-cs-corp.vercel.app)
+- **URLs inmutables de revisión (`target: production`, no existe un target `preview` separado)**:
+  - Despliegue `dpl_AqL7BoDVMzTJj3qJNsitVdkvAX5i` (`READY`, commit `ae73928a6e7b59df783d0afcd62330ae0356bbe2`, `gitDirty: 1`): [`https://macroscope-dashboard-jj9h9ddef-cs-corp.vercel.app`](https://macroscope-dashboard-jj9h9ddef-cs-corp.vercel.app)
+  - Despliegue `dpl_9VAZYAnYK1xQdrSBFUEj15mp1MMk` (`READY`, commit `44fb8310db60aa2bc86bff3baea7c0fa8fa6d997`): [`https://macroscope-dashboard-jmef8vdsk-cs-corp.vercel.app`](https://macroscope-dashboard-jmef8vdsk-cs-corp.vercel.app)
 - **Trabajador de implementación**: `ARGON` (`gemini-4-argon`)
 
 ---
@@ -129,12 +134,48 @@ Las siete imágenes de referencia ubicadas en `docs/ux/referencias/` se conserva
  22 files changed, 5269 insertions(+), 403 deletions(-)
 ```
 
-### 6.3 Evidencia Exacta sobre Despliegue en Vercel (Preview / Producción)
-- **Integración GitHub Deployments**: La consulta `gh api repos/armandoparedes2026/macroscope-dashboard/deployments` y `gh api repos/armandoparedes2026/macroscope-dashboard/commits/b2ff681cbe7dfcf14ed55faedbebde942d61c1dd/statuses` devuelve `[]` (el repositorio remoto `armandoparedes2026/macroscope-dashboard` no tiene vinculada la GitHub App automática de Vercel ni existe directorio `.vercel/project.json` en el checkout local ni en `D:/ORCA/macroscope-dashboard`).
-- **CLI de Vercel local (`npx.cmd vercel whoami`)**: Al verificar credenciales locales de Vercel CLI (`65.2.0`), el entorno devuelve el siguiente bloqueo de autenticación:
-  ```text
-  Vercel CLI 65.2.0 (Node.js 24.21.0)
-  Error: The specified token is not valid. Use `vercel login` to generate a new token.
-  ```
-- **Acción tomada**: Conforme a las instrucciones operativas (*"If credentials/external permissions block publication, document exact evidence and complete all independent work"*), se completaron íntegramente el push al remoto, la creación del PR #9, la ejecución y aprobación del workflow de GitHub Actions (`Validate MacroScope` `SUCCESS`) y la fusión limpia en `main` (`44fb8310db60aa2bc86bff3baea7c0fa8fa6d997`), dejando documentada la evidencia exacta del token expirado de Vercel CLI.
+### 6.3 Evidencia Verificada de Despliegue en Vercel y Validación Remota (`2026-10-26`)
+
+#### 6.3.1 Metadatos de Proyecto y Despliegue (Conector Vercel)
+Aunque la consulta `gh api repos/armandoparedes2026/macroscope-dashboard/deployments` devuelve `[]` y el token local de `npx.cmd vercel whoami` (`Vercel CLI 65.2.0`) se encuentra expirado en la máquina local, **el proyecto sí está conectado y desplegado automáticamente en Vercel** bajo los siguientes identificadores verificados por el conector de coordinación:
+- **Proyecto Vercel**: `macroscope-dashboard` (`prj_ynewA8npY6iYShQpYA6vYe13wZzg`)
+- **Equipo Vercel**: `CS_CORP` (`team_2SUUXoaYVzUfyptfKrG51Of9`)
+- **Dominios públicos de producción (`target: production`)**:
+  - [`https://macroscope-dashboard.vercel.app`](https://macroscope-dashboard.vercel.app) (`HTTP 200 OK`)
+  - [`https://macroscope-dashboard-cs-corp.vercel.app`](https://macroscope-dashboard-cs-corp.vercel.app) (`HTTP 200 OK`)
+- **URLs inmutables de despliegue (`target: production`)** *(Nota: estas URLs inmutables corresponden a despliegues de `target: production` y se emplean como enlaces inmutables de revisión; no existe un `target: preview` separado para estos despliegues)*:
+  - **Último despliegue (`latestDeployment`)**: `dpl_AqL7BoDVMzTJj3qJNsitVdkvAX5i` · Estado **`READY`** · `target: production` · `githubCommitSha: ae73928a6e7b59df783d0afcd62330ae0356bbe2` (`gitDirty: 1`) · URL inmutable: [`https://macroscope-dashboard-jj9h9ddef-cs-corp.vercel.app`](https://macroscope-dashboard-jj9h9ddef-cs-corp.vercel.app) (`HTTP 200 OK`)
+  - **Despliegue de fusión del PR #9**: `dpl_9VAZYAnYK1xQdrSBFUEj15mp1MMk` · Estado **`READY`** · `target: production` · `githubCommitSha: 44fb8310db60aa2bc86bff3baea7c0fa8fa6d997` · URL inmutable: [`https://macroscope-dashboard-jmef8vdsk-cs-corp.vercel.app`](https://macroscope-dashboard-jmef8vdsk-cs-corp.vercel.app) (`HTTP 200 OK`)
+
+#### 6.3.2 Comparación Criptográfica (SHA-256) de Assets Desplegados vs. Revisión Local
+Se verificó por HTTP contra `https://macroscope-dashboard.vercel.app` que todos los archivos HTML, CSS y JS nuevos y modificados coinciden byte a byte (normalizando saltos de línea LF) con la revisión implementada:
+- `index.html`: `HTTP 200` · `match=true` (`sha256: 994051fa7b4ceba2...`)
+- `css/tokens.css`: `HTTP 200` · `match=true` (`sha256: c9a5062a90711aff...`)
+- `css/experiences.css`: `HTTP 200` · `match=true` (`sha256: 93fd0f28f8d2cdc1...`)
+- `js/services/models-engine.js`: `HTTP 200` · `match=true` (`sha256: c82c1988f46a798e...`)
+- `js/ui/experiences.js`: `HTTP 200` · `match=true`
+- `js/ui/islm-lab.js`: `HTTP 200` · `match=true` (`sha256: bf4c09317af3c768...`)
+- `js/ui/student-views.js`: `HTTP 200` · `match=true` (`sha256: 4cb2bd6e42fe4f4a...`)
+- `js/app.js`: `HTTP 200` · `match=true` (`sha256: f019c7c5a9e527ea...`)
+
+#### 6.3.3 Verificación en Vivo del Endpoint Serverless `/api/bcrp` en Producción
+Se comprobó el funcionamiento real de la función serverless `api/bcrp.js` desplegada en `https://macroscope-dashboard.vercel.app/api/bcrp`:
+1. **Series mensuales oficiales (`PD04722MM-PN01273PM-PN01207PM-PN00027MM`)**:
+   - `GET https://macroscope-dashboard.vercel.app/api/bcrp?codes=PD04722MM-PN01273PM-PN01207PM-PN00027MM&start=2024-1&end=2025-12` → **`HTTP 200 OK`** (`6,861 bytes`, JSON normalizado con las 4 series oficiales del BCRP en tiempo real).
+2. **Serie trimestral de PBI real (`PN02507AQ`)**:
+   - `GET https://macroscope-dashboard.vercel.app/api/bcrp?codes=PN02507AQ&start=2024-1&end=2025-4` → **`HTTP 200 OK`** (`728 bytes`, JSON normalizado con `"period":"T1.24","date":"2024-01-01","value":1.48969668620424`, etc.).
+3. **Validación de parámetros y allowlist**:
+   - Solicitudes con separadores no permitidos o formato de periodo inválido devuelven **`HTTP 400`** con mensaje estructurado (`{"error":"Códigos no permitidos"}` / `{"error":"Periodo inválido; use AAAA-M"}`).
+
+#### 6.3.4 Verificación Remota en Navegador Real (Playwright contra Producción e Inmutable)
+Se ejecutó Playwright (`chromium`) directamente contra `https://macroscope-dashboard.vercel.app` y la URL inmutable `https://macroscope-dashboard-jj9h9ddef-cs-corp.vercel.app`:
+- **Recorrido de las 7 experiencias + secciones transversales en escritorio (`1440×900`) y móvil (`360×780`)**:
+  - `#inicio` (*"Explora la economía, comprende los datos, simula decisiones"*), `#aprendizaje` (*"Aprendizaje guiado"*), `#historico` (*"Análisis histórico"*), `#indicadores` (*"Indicadores macroeconómicos"*), `#exploracion` (*"Panorama macroeconómico"*), `#comparacion` (*"Comparación de economías"*), `#simulacion` (*"IS–LM–BP y Mundell–Fleming."*), `#modelos` (*"Modelos y tendencias"*), `#observatorio` (*"Observatorio del Perú"*), `#fuentes` (*"Buscar fuentes"*) y `#ayuda` (*"Ayuda"*).
+  - **Errores de ejecución**: `pageErrors: []` (`0`), `consoleErrors: []` (`0`).
+  - **Interacción en vivo**: Selección de modelo `asad` (*"Oferta y Demanda Agregada (OA–DA)"*) en `#modelos` y guardado de escenario en `#simulacion` (`#simSaveCurrentBtn` → `[data-load-sim]` creado y operable). Durante la prueba en `360px` tras guardar un escenario, se detectó y corrigió en `js/ui/experiences.js` un ajuste de `white-space: normal; flex-wrap: wrap` en el chip de escenario guardado para asegurar `0px` de desbordamiento horizontal en móvil incluso con chips de escenarios almacenados.
+- **Limitaciones reales vigentes**:
+  1. **Módulo 03 (`#indicadores`)**: Contiene 13 series oficiales verificadas (10 WDI + 3/4 BCRP en snapshot y `PN02507AQ` activa en producción vía `/api/bcrp`) y **2 fichas DEMO explícitamente etiquetadas** (`DEMO.FISCAL.RESULT` y `DEMO.FIN.CREDIT`).
+  2. **Módulo 07 (`#modelos`)**: Cuenta con **3 modelos con motor matemático activo** (`islm`, `asad`, `micro-sd`) y **2 modelos en modo esquema conceptual interactivo** (`phillips` y `solow`), identificados explícitamente en la interfaz.
+  3. **Modo sin conexión (`file://` o sin red)**: La serie trimestral `PN02507AQ` depende del proxy `/api/bcrp` (activo y verificado con `HTTP 200` en el despliegue de Vercel); en ejecución local sin conexión no emplea datos inventados y se muestra como `Sin dato local`.
+
 
