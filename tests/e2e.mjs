@@ -76,7 +76,7 @@ await check('inicio orbital: siete módulos, flechas, teclado, enlaces y accesib
   assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Aprendizaje guiado');
   assert.equal(await page.locator('.orbit-card-open:visible').count(),1);
   await page.locator('.orbit-card-open:visible').click();
-  await page.waitForFunction(()=>!document.querySelector('[data-view="laboratorio"]').hidden);
+  await page.waitForFunction(()=>!document.querySelector('[data-view="aprendizaje"]').hidden);
 });
 
 await check('comparación de economías abre pantalla independiente desde Inicio',async page=>{
@@ -975,7 +975,7 @@ await check('panorama premium: caída parcial de BCRP conserva indicadores váli
 });
 await check('panorama referencia: módulo de la tarjeta 03, filtros y tarjetas expandibles',async page=>{
  await openOffline(page);
- assert.equal(await page.locator('[data-home-slide="2"] .orbit-card-open').getAttribute('data-destination'),'#panorama');
+ assert.equal(await page.locator('[data-home-slide="3"] .orbit-card-open').getAttribute('data-destination'),'#exploracion');
  assert.equal(await page.locator('#panoramaKpis [data-panorama-card]').count(),6);
  assert.equal(await page.locator('#panoramaFilterShell').count(),1);
  assert.equal(await page.locator('#panoramaFrequencySelect').count(),1);
@@ -1061,6 +1061,136 @@ await check('panorama referencia: los pies de las tres minigráficas permanecen 
  assert.ok(overflow.every(value=>value<=-5),`pies fuera de sus tarjetas: ${overflow.join(', ')}`);
 });
 await writeFile('test-results/rediseno/aceptacion.json',JSON.stringify(acceptance,null,2));
+
+await mkdir('test-results/experiencias',{recursive:true});
+
+await check('siete experiencias desde la portada orbital y compatibilidad con rutas heredadas',async page=>{
+  await openOffline(page);
+  const expectedSlides=[
+    [0,'Aprendizaje guiado','#aprendizaje','aprendizaje'],
+    [1,'Análisis histórico','#historico','historico'],
+    [2,'Indicadores macroeconómicos','#indicadores','indicadores'],
+    [3,'Exploración macroeconómica','#exploracion','exploracion'],
+    [4,'Comparación de economías','#comparacion','comparacion'],
+    [5,'Simulación de escenarios','#simulacion','simulacion'],
+    [6,'Modelos y tendencias','#modelos','modelos']
+  ];
+  for(const [idx,title,hash,view] of expectedSlides){
+    await page.evaluate(()=>{location.hash='inicio';});
+    await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+    await page.click(`[data-home-dot="${idx}"]`);
+    assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),title);
+    assert.equal(await page.locator('.orbit-card.is-active .orbit-card-open').getAttribute('href'),hash);
+    await page.locator('.orbit-card.is-active .orbit-card-open').focus();
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(v=>{const el=document.querySelector(`[data-view="${v}"]`);return Boolean(el&&!el.hidden);},view);
+    assert.equal(await page.isVisible(`[data-view="${view}"]`),true);
+  }
+  await page.evaluate(()=>{location.hash='panorama';});
+  await page.waitForFunction(()=>!document.querySelector('#tab-overview').hidden);
+  assert.equal(await page.getAttribute('#tab-overview','data-view'),'panorama');
+  await page.evaluate(()=>{location.hash='laboratorio';});
+  await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
+  assert.equal(await page.getAttribute('#tab-simulator','data-view'),'laboratorio');
+});
+
+await check('módulo 01 aprendizaje guiado: rutas, simulación, predicción calificada y persistencia',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='aprendizaje';});
+  await page.waitForFunction(()=>!document.querySelector('#aprendizaje').hidden);
+  assert.match(await page.textContent('#apTitle'),/Aprendizaje guiado/);
+  assert.ok(await page.locator('.ap-lesson-btn').count()>=5);
+  await page.click('[data-ap-level="advanced"]');
+  assert.equal(await page.getAttribute('[data-ap-level="advanced"]','aria-pressed'),'true');
+  await page.click('[data-ap-option="opt-correct"]');
+  await page.click('#apCheckAnswerBtn');
+  assert.equal(await page.isVisible('#apFeedbackBox'),true);
+  assert.match(await page.textContent('#apFeedbackBox'),/Respuesta correcta/);
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('macroscope_learning_progress_v1')||'{}'));
+  assert.ok(Array.isArray(saved.completedIds)&&saved.completedIds.length>=1);
+});
+
+await check('módulo 02 análisis histórico: series, subperiodos, transformaciones y exportación CSV',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='historico';});
+  await page.waitForFunction(()=>!document.querySelector('#historico').hidden);
+  assert.match(await page.textContent('#hiTitle'),/Análisis histórico/);
+  assert.equal(await page.locator('.hi-kpi-card').count(),4);
+  assert.ok(await page.locator('#hiDataTable tbody tr').count()>=8);
+  await page.selectOption('#hiIndicatorSelect','NY.GDP.PCAP.PP.KD');
+  await page.click('[data-hi-mode="base100"]');
+  assert.equal(await page.getAttribute('[data-hi-mode="base100"]','aria-pressed'),'true');
+  const [download]=await Promise.all([page.waitForEvent('download'),page.click('#hiExportBtn')]);
+  const csv=(await readFile(await download.path(),'utf8')).replace(/^\uFEFF/,'');
+  assert.match(csv,/"pais_iso3","indicador_codigo","periodo","valor_observado"/);
+});
+
+await check('módulo 03 indicadores macroeconómicos: catálogo categorizado, ficha analítica y separación demo/oficial',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='indicadores';});
+  await page.waitForFunction(()=>!document.querySelector('#indicadores').hidden);
+  assert.match(await page.textContent('#indTitle'),/Indicadores macroeconómicos/);
+  assert.ok(await page.locator('[data-ind-card]').count()>=16);
+  await page.click('[data-ind-cat="fiscal"]');
+  assert.equal(await page.getAttribute('[data-ind-cat="fiscal"]','aria-selected'),'true');
+  assert.match(await page.textContent('#indDetailSheet'),/Demostrativo · No oficial/);
+  await page.click('[data-ind-cat="prices"]');
+  assert.match(await page.textContent('#indDetailSheet'),/Serie Oficial Verificada/);
+});
+
+await check('módulo 06 y 07 simulación y modelos: guardado de escenarios y biblioteca con 5 modelos',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='simulacion';});
+  await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
+  await page.click('#simSaveCurrentBtn');
+  assert.ok(await page.locator('[data-load-sim]').count()>=1);
+
+  await page.evaluate(()=>{location.hash='modelos';});
+  await page.waitForFunction(()=>!document.querySelector('#modelos').hidden);
+  assert.match(await page.textContent('#modTitle'),/Modelos y tendencias/);
+  assert.equal(await page.locator('[data-mod-select]').count(),5);
+  for(const modId of ['islm','asad','micro-sd','phillips','solow']){
+    await page.click(`[data-mod-select="${modId}"]`);
+    assert.equal(await page.getAttribute(`[data-mod-select="${modId}"]`,'aria-selected'),'true');
+    assert.equal(await page.locator('#modSvgContainer svg').count(),1);
+  }
+});
+
+await check('observatorio del Perú y ficha de la fuente: series nacionales BCRP y colecciones académicas',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='observatorio';});
+  await page.waitForFunction(()=>!document.querySelector('#observatorio').hidden);
+  assert.match(await page.textContent('#obsTitle'),/Observatorio del Perú/);
+  assert.equal(await page.locator('.obs-kpi-card').count(),6);
+  assert.equal(await page.locator('#observatorio canvas').count(),4);
+
+  await page.evaluate(()=>{location.hash='fuentes';});
+  await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
+  assert.equal(await page.locator('#sourceDetailSheet').count(),1);
+  assert.match(await page.textContent('#sourceDetailSheet'),/FICHA DE LA FUENTE/);
+  await page.locator('[data-select-source="wdi"]').click();
+  assert.match(await page.textContent('#sourceSheetTitle'),/World Development Indicators/);
+});
+
+await check('capturas multi-resolución y claro/oscuro de las siete experiencias y observatorio',async page=>{
+  await openOffline(page);
+  const viewsToCapture=['inicio','aprendizaje','historico','indicadores','exploracion','comparacion','simulacion','modelos','observatorio','fuentes'];
+  for(const [label,width,height] of [['desktop',1440,900],['tablet',768,1024],['mobile',390,844]]){
+    await page.setViewportSize({width,height});
+    for(const theme of ['light','dark']){
+      await page.evaluate(t=>MacroScope.setTheme(t),theme);
+      for(const v of viewsToCapture){
+        await page.evaluate(route=>{location.hash=route;},v);
+        await page.waitForFunction(route=>{const el=document.querySelector(`[data-view="${route}"]`);return Boolean(el&&!el.hidden);},v);
+        const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+        assert.ok(overflow<=2,`Sin desbordamiento horizontal en ${v} (${label} ${theme}): ${overflow}px`);
+        if(label==='desktop'||(v==='inicio'||v==='aprendizaje'||v==='historico'||v==='indicadores'||v==='modelos'||v==='observatorio')){
+          await page.screenshot({path:`test-results/experiencias/${v}-${label}-${theme}.png`});
+        }
+      }
+    }
+  }
+});
 
 await browser.close();
 if (failures) {

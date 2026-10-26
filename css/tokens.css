@@ -1,9 +1,9 @@
 /**
- * MacroScope — Sistema de Tokens Visuales Propuesto (Variante A Recomendada)
- * "Cuaderno Índigo & Cobre Solar"
+ * MacroScope — Sistema de Tokens Visuales Unificado ("Hielo, Cobalto & Marino Profundo")
  *
- * Familia cromática: Azul, Verde, Dorado, Naranja, Crema, Amarillo.
- * Modos Claro y Oscuro de primera clase (no invertidos), verificados con WCAG 2.1 AA:
+ * Identidad visual: Blanco frío, Azul hielo, Azul cobalto, Azul marino profundo,
+ * superficies translúcidas con glassmorphism controlado.
+ * Modos Claro y Oscuro verificados con WCAG 2.1 AA:
  * - Texto (--text, --text-muted): >= 4.5:1 sobre --bg, --surface y --surface-2.
  * - Componentes UI (--border, --focus) y Series (--series-1..6): >= 3.0:1 sobre --bg y --surface.
  * - Tokens semánticos (--primary, --accent, --success, --warning, --danger): >= 4.5:1 sobre --bg y --surface.
@@ -13,39 +13,48 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  /* Superficies cálidas tipo cuaderno académico (Crema / Marfil / Trigo) */
-  --bg: #FAF5EA;
-  --surface: #FFFDF8;
-  --surface-2: #EFE7D6;
+  /* Superficies blanco frío y azul hielo */
+  --bg: #F2F7FF;
+  --surface: #FFFFFF;
+  --surface-2: #E6F0FC;
 
-  /* Tipografía principal y secundaria (Azul tinta y pizarra) */
-  --text: #142338;
-  --text-muted: #4A5B70;
+  /* Tipografía principal y secundaria (Azul marino profundo y pizarra cobalto) */
+  --text: #0B1F44;
+  --text-muted: #3A5175;
 
-  /* Bordes y divisores (Bronce piedra >= 3.0:1 para controles; sutil para divisores decorativos) */
-  --border: #7D7362;
-  --border-subtle: #D8CEB8;
+  /* Bordes y divisores (Acero hielo >= 3.0:1 para controles; sutil para divisores decorativos) */
+  --border: #55729B;
+  --border-subtle: #CFE0F7;
 
-  /* Semántica e interacción (Azul, Naranja, Verde, Dorado, Carmesí, Amarillo) */
-  --primary: #184A8C;
-  --primary-soft: rgba(24, 74, 140, 0.10);
-  --accent: #A13F0A;
-  --accent-soft: rgba(184, 74, 14, 0.11);
-  --success: #136843;
-  --success-soft: rgba(19, 104, 67, 0.10);
-  --warning: #8A5A00;
-  --warning-soft: rgba(138, 90, 0, 0.12);
-  --danger: #B42B2B;
-  --danger-soft: rgba(180, 43, 43, 0.10);
-  --focus: #8F5B00;
+  /* Semántica e interacción (Azul cobalto, Cerúleo, Esmeralda, Ámbar, Coral) */
+  --primary: #1453C6;
+  --primary-soft: rgba(20, 83, 198, 0.10);
+  --accent: #0D588A;
+  --accent-soft: rgba(13, 88, 138, 0.11);
+  --success: #0F6D48;
+  --success-soft: rgba(15, 109, 72, 0.10);
+  --warning: #8A5800;
+  --warning-soft: rgba(138, 88, 0, 0.12);
+  --danger: #B42B3A;
+  --danger-soft: rgba(180, 43, 58, 0.10);
+  --focus: #1453C6;
 
-  /* Paleta de 6 series para gráficos (distinguible en deuteranopía y protanopía, DeltaE_OK >= 12.3) */
-  --series-1: #0D2B54; /* Azul marino profundo — Sólido · círculo ● */
-  --series-2: #9E2A00; /* Naranja terracota intenso — Guion largo · cuadrado ■ */
-  --series-3: #007C72; /* Verde esmeralda turquesa — Punteado denso · rombo ◆ */
-  --series-4: #B38200; /* Amarillo dorado trigo — Guion-punto · triángulo ▲ */
-  --series-5: #2166C4; /* Azul cobalto vivo — Sólido grueso · anillo ○ */
-  --series-6: #3D220A; /* Bronce café oscuro — Guion corto · cruz ✕ */
+  /* Paleta de 6 series para gráficos (contraste >= 3.0:1 sobre --surface) */
+  --series-1: #0D3B8C; /* Azul marino cobalto */
+  --series-2: #1964E6; /* Azul cobalto vivo */
+  --series-3: #007A70; /* Esmeralda turquesa */
+  --series-4: #9E3B00; /* Cobre terracota */
+  --series-5: #53389E; /* Índigo violeta */
+  --series-6: #1B4D6B; /* Acero oceánico */
+
+  /* Tokens específicos del sistema glassmorphism azul hielo */
+  --ms-ice-bg: radial-gradient(ellipse at 92% 4%, rgba(104, 168, 255, 0.16), transparent 42%), radial-gradient(ellipse at 4% 58%, rgba(190, 222, 255, 0.28), transparent 44%), linear-gradient(180deg, #F3F8FF 0%, #EAF3FF 52%, #F5FAFF 100%);
+  --ms-glass-surface: rgba(255, 255, 255, 0.88);
+  --ms-glass-elevated: rgba(255, 255, 255, 0.95);
+  --ms-glass-stroke: rgba(180, 210, 248, 0.65);
+  --ms-glass-shadow: 0 14px 36px rgba(34, 96, 192, 0.075), 0 3px 10px rgba(25, 74, 150, 0.035);
+  --ms-pill-bg: #EBF4FF;
+  --ms-pill-active: linear-gradient(115deg, #4B9BFF, #1864EA);
 
   /* Tipografía y ritmo espacial */
   --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
@@ -63,9 +72,9 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 48px;
-  --shadow: 0 10px 28px rgba(20, 35, 56, 0.07), 0 2px 6px rgba(20, 35, 56, 0.04);
+  --shadow: 0 12px 32px rgba(18, 62, 138, 0.07), 0 2px 8px rgba(18, 62, 138, 0.04);
 
-  /* Alias de compatibilidad directa con css/tokens.css actual para migración sin rupturas */
+  /* Alias de compatibilidad directa */
   --bg-2: var(--surface-2);
   --paper: var(--surface);
   --paper-2: var(--surface);
@@ -86,97 +95,113 @@
   --amber: var(--warning);
   --rose: var(--danger);
   --violet: var(--series-5);
-  --grid: rgba(20, 35, 56, 0.10);
+  --grid: rgba(15, 48, 105, 0.10);
   --chart-tick: var(--text-muted);
-  --sidebar: #102033;
-  --side-muted: #B8C7D9;
+  --sidebar: #0D1F3C;
+  --side-muted: #B8CEEB;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    /* Superficies nocturnas de observatorio (Azul noche / Pizarra / Marino) */
-    --bg: #0C1523;
-    --surface: #132033;
-    --surface-2: #1B2C44;
+    /* Superficies nocturnas azul marino profundo */
+    --bg: #071426;
+    --surface: #0D1F38;
+    --surface-2: #152C4D;
 
-    /* Tipografía cálida en crema marfil y arena */
-    --text: #F7F2E6;
-    --text-muted: #C4BBA8;
+    /* Tipografía blanco hielo y azul claro */
+    --text: #EDF5FF;
+    --text-muted: #ADC6EA;
 
     /* Bordes y divisores */
-    --border: #7588A3;
-    --border-subtle: #283C57;
+    --border: #6888B8;
+    --border-subtle: #243F66;
 
     /* Semántica e interacción */
     --primary: #6DA8FF;
-    --primary-soft: rgba(109, 168, 255, 0.14);
-    --accent: #F79D42;
-    --accent-soft: rgba(247, 157, 66, 0.14);
+    --primary-soft: rgba(109, 168, 255, 0.15);
+    --accent: #5CC8FF;
+    --accent-soft: rgba(92, 200, 255, 0.15);
     --success: #44D492;
     --success-soft: rgba(68, 212, 146, 0.14);
     --warning: #F5C842;
     --warning-soft: rgba(245, 200, 66, 0.14);
     --danger: #FF7B73;
     --danger-soft: rgba(255, 123, 115, 0.14);
-    --focus: #FFD452;
+    --focus: #7CC0FF;
 
-    /* Paleta de 6 series para gráficos (DeltaE_OK >= 11.7 en deuteranopía y protanopía) */
-    --series-1: #6DA8FF; /* Azul cobalto claro */
-    --series-2: #FFD452; /* Amarillo dorado */
-    --series-3: #38C998; /* Verde esmeralda claro */
-    --series-4: #FF8533; /* Naranja solar */
-    --series-5: #F3E7CE; /* Crema marfil */
-    --series-6: #467CE0; /* Azul índigo medio */
+    /* Paleta de 6 series para gráficos */
+    --series-1: #6DA8FF;
+    --series-2: #5CC8FF;
+    --series-3: #38C998;
+    --series-4: #FFB84D;
+    --series-5: #DCEBFA;
+    --series-6: #8699FF;
 
-    --shadow: 0 18px 42px rgba(4, 9, 16, 0.42), 0 3px 10px rgba(4, 9, 16, 0.28);
-    --grid: rgba(247, 242, 230, 0.11);
-    --sidebar: #09101B;
-    --side-muted: #A9B8CC;
+    --ms-ice-bg: radial-gradient(ellipse at 92% 4%, rgba(42, 102, 198, 0.24), transparent 44%), radial-gradient(ellipse at 6% 55%, rgba(28, 72, 140, 0.22), transparent 45%), linear-gradient(180deg, #071529 0%, #091B34 55%, #071426 100%);
+    --ms-glass-surface: rgba(15, 34, 64, 0.90);
+    --ms-glass-elevated: rgba(20, 43, 79, 0.95);
+    --ms-glass-stroke: rgba(92, 142, 214, 0.32);
+    --ms-glass-shadow: 0 18px 42px rgba(2, 8, 20, 0.42), 0 3px 10px rgba(2, 8, 20, 0.28);
+    --ms-pill-bg: #152E54;
+    --ms-pill-active: linear-gradient(115deg, #4B9BFF, #1D68EC);
+
+    --shadow: 0 18px 42px rgba(2, 8, 20, 0.42), 0 3px 10px rgba(2, 8, 20, 0.28);
+    --grid: rgba(225, 238, 255, 0.11);
+    --sidebar: #06101F;
+    --side-muted: #A9C2E6;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0C1523;
-  --surface: #132033;
-  --surface-2: #1B2C44;
+  --bg: #071426;
+  --surface: #0D1F38;
+  --surface-2: #152C4D;
 
-  --text: #F7F2E6;
-  --text-muted: #C4BBA8;
+  --text: #EDF5FF;
+  --text-muted: #ADC6EA;
 
-  --border: #7588A3;
-  --border-subtle: #283C57;
+  --border: #6888B8;
+  --border-subtle: #243F66;
 
   --primary: #6DA8FF;
-  --primary-soft: rgba(109, 168, 255, 0.14);
-  --accent: #F79D42;
-  --accent-soft: rgba(247, 157, 66, 0.14);
+  --primary-soft: rgba(109, 168, 255, 0.15);
+  --accent: #5CC8FF;
+  --accent-soft: rgba(92, 200, 255, 0.15);
   --success: #44D492;
   --success-soft: rgba(68, 212, 146, 0.14);
   --warning: #F5C842;
   --warning-soft: rgba(245, 200, 66, 0.14);
   --danger: #FF7B73;
   --danger-soft: rgba(255, 123, 115, 0.14);
-  --focus: #FFD452;
+  --focus: #7CC0FF;
 
   --series-1: #6DA8FF;
-  --series-2: #FFD452;
+  --series-2: #5CC8FF;
   --series-3: #38C998;
-  --series-4: #FF8533;
-  --series-5: #F3E7CE;
-  --series-6: #467CE0;
+  --series-4: #FFB84D;
+  --series-5: #DCEBFA;
+  --series-6: #8699FF;
 
-  --shadow: 0 18px 42px rgba(4, 9, 16, 0.42), 0 3px 10px rgba(4, 9, 16, 0.28);
-  --grid: rgba(247, 242, 230, 0.11);
-  --sidebar: #09101B;
-  --side-muted: #A9B8CC;
+  --ms-ice-bg: radial-gradient(ellipse at 92% 4%, rgba(42, 102, 198, 0.24), transparent 44%), radial-gradient(ellipse at 6% 55%, rgba(28, 72, 140, 0.22), transparent 45%), linear-gradient(180deg, #071529 0%, #091B34 55%, #071426 100%);
+  --ms-glass-surface: rgba(15, 34, 64, 0.90);
+  --ms-glass-elevated: rgba(20, 43, 79, 0.95);
+  --ms-glass-stroke: rgba(92, 142, 214, 0.32);
+  --ms-glass-shadow: 0 18px 42px rgba(2, 8, 20, 0.42), 0 3px 10px rgba(2, 8, 20, 0.28);
+  --ms-pill-bg: #152E54;
+  --ms-pill-active: linear-gradient(115deg, #4B9BFF, #1D68EC);
+
+  --shadow: 0 18px 42px rgba(2, 8, 20, 0.42), 0 3px 10px rgba(2, 8, 20, 0.28);
+  --grid: rgba(225, 238, 255, 0.11);
+  --sidebar: #06101F;
+  --side-muted: #A9C2E6;
 }
 
 :root { --on-primary: #FFFFFF; --shadow-color: rgba(0,0,0,.16); --transparent: transparent; }
-[data-theme="dark"] { --on-primary: #0C1523; }
+[data-theme="dark"] { --on-primary: #071426; }
 
 :root {
   --tint-1: color-mix(in srgb, var(--primary) 18.0%, transparent);
