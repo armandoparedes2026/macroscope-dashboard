@@ -17,7 +17,10 @@
 
     let current = 3; // El módulo principal se ve primero.
     let pointerStart = null;
+    let isDragging = false;
+    let dragX = 0;
     let suppressSwipeClick = false;
+    let dragClickGuard = 0;
     let wheelAccumulated = 0;
     let wheelDirection = 0;
     let lastWheelStep = -Infinity;
@@ -76,7 +79,31 @@
       }
     }
 
+    // El arrastre mueve las siete tarjetas de forma continua, con profundidad:
+    // la central acompaña al puntero y las laterales se desplazan menos.
+    function renderDrag(offset) {
+      slides.forEach((slide, index) => {
+        let relative = (index - current + total) % total;
+        if (relative > Math.floor(total / 2)) relative -= total;
+        const distance = Math.abs(relative);
+        const weight = [1, .74, .48, .27][distance];
+        slide.style.setProperty('--orbit-drag', (offset * weight).toFixed(2) + 'px');
+        slide.style.setProperty('--orbit-drag-angle', (offset / 27 * weight).toFixed(2) + 'deg');
+      });
+    }
+
+    function clearDrag() {
+      stage.classList.remove('is-dragging');
+      isDragging = false;
+      dragX = 0;
+      slides.forEach(slide => {
+        slide.style.setProperty('--orbit-drag', '0px');
+        slide.style.setProperty('--orbit-drag-angle', '0deg');
+      });
+    }
+
     function select(index) {
+      clearDrag();
       const next = (index + total) % total;
       if (next === current) return;
       current = next;
@@ -139,22 +166,62 @@
       wheelAccumulated = 0;
     }, { passive: false });
 
-    // Swipe horizontal. Mantener el desplazamiento vertical natural de la página.
+    // Drag real: mouse y touch. El arrastre mueve las cards antes de soltar.
+    // touch-action:pan-y permite el desplazamiento vertical natural en móvil.
     stage.addEventListener('pointerdown', event => {
-      if (event.target.closest('a,button') || (event.pointerType === 'mouse' && event.button !== 0)) return;
-      pointerStart = { x: event.clientX, y: event.clientY, id: event.pointerId };
+      if (event.target.closest('a,button')) return;
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      pointerStart = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      isDragging = false;
+      dragX = 0;
     });
-    stage.addEventListener('pointerup', event => {
+
+    stage.addEventListener('pointermove', event => {
       if (!pointerStart || event.pointerId !== pointerStart.id) return;
       const dx = event.clientX - pointerStart.x;
       const dy = event.clientY - pointerStart.y;
-      pointerStart = null;
-      if (Math.abs(dx) <= 42 || Math.abs(dx) <= Math.abs(dy) * 1.15) return;
-      suppressSwipeClick = true;
-      select(current + (dx < 0 ? 1 : -1));
-      setTimeout(() => { suppressSwipeClick = false; }, 340);
+      if (!isDragging) {
+        if (Math.abs(dx) < 9 || Math.abs(dx) <= Math.abs(dy) * 1.15) return;
+        isDragging = true;
+        stage.classList.add('is-dragging');
+        try { stage.setPointerCapture(event.pointerId); } catch (_) { /* puntero cancelado */ }
+      }
+      dragX = Math.max(-160, Math.min(160, dx));
+      renderDrag(dragX);
     });
-    stage.addEventListener('pointercancel', () => { pointerStart = null; });
+
+    function finishDrag(event, cancelled = false) {
+      if (!pointerStart || event.pointerId !== pointerStart.id) return;
+      const dx = event.clientX - pointerStart.x;
+      const dy = event.clientY - pointerStart.y;
+      const dragged = isDragging;
+      const shouldSlide = !cancelled && dragged && Math.abs(dx) >= 55 &&
+        Math.abs(dx) > Math.abs(dy) * 1.15;
+      pointerStart = null;
+      if (stage.hasPointerCapture?.(event.pointerId)) {
+        try { stage.releasePointerCapture(event.pointerId); } catch (_) {}
+      }
+      if (dragged) {
+        // El click sintético del pointerup no debe activar otra tarjeta.
+        const guard = ++dragClickGuard;
+        suppressSwipeClick = true;
+        setTimeout(() => {
+          if (guard === dragClickGuard) suppressSwipeClick = false;
+        }, 350);
+      }
+      // Animación de retorno suave cuando el gesto no supera el umbral.
+      if (shouldSlide) select(current + (dx < 0 ? 1 : -1));
+      else clearDrag();
+    }
+
+    stage.addEventListener('pointerup', event => finishDrag(event));
+    stage.addEventListener('pointercancel', event => finishDrag(event, true));
+    stage.addEventListener('lostpointercapture', event => {
+      if (pointerStart && pointerStart.id === event.pointerId) {
+        pointerStart = null;
+        clearDrag();
+      }
+    });
     stage.addEventListener('click', event => {
       if (!suppressSwipeClick) return;
       event.preventDefault();

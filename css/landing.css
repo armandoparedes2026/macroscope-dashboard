@@ -108,7 +108,7 @@ body:has(#inicio:not([hidden])) #themeBtn:focus-visible{outline:3px solid #387de
   position:absolute;left:50%;top:3%;width:284px;height:min(82%,357px);min-height:288px;margin-left:-142px;
   z-index:calc(9 - var(--orbit-depth,0));cursor:pointer;
   opacity:var(--orbit-opacity,1);
-  transform:translate3d(calc(var(--orbit-x,0)*var(--orbit-unit)),var(--orbit-y,0px),var(--orbit-z,0px)) rotateY(var(--orbit-rotation,0deg)) rotateZ(var(--orbit-tilt,0deg)) scale(var(--orbit-scale,1));
+  transform:translate3d(calc(var(--orbit-x,0)*var(--orbit-unit) + var(--orbit-drag,0px)),var(--orbit-y,0px),var(--orbit-z,0px)) rotateY(calc(var(--orbit-rotation,0deg) + var(--orbit-drag-angle,0deg))) rotateZ(var(--orbit-tilt,0deg)) scale(var(--orbit-scale,1));
   transform-origin:center 55%;backface-visibility:hidden;
   transition:transform .76s cubic-bezier(.17,.75,.20,1),opacity .55s ease,filter .55s ease;
   filter:saturate(calc(1 - var(--orbit-depth,0)*.08)) blur(var(--orbit-blur,0px));
@@ -183,6 +183,36 @@ body:has(#inicio:not([hidden])) #themeBtn:focus-visible{outline:3px solid #387de
 .trust-item:last-child{border-right:0}
 .trust-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border:1px solid rgba(255,255,255,.96);border-radius:50%;background:rgba(255,255,255,.51);box-shadow:inset 0 1px #fff,0 5px 13px rgba(67,128,215,.09);font-size:20px;font-weight:800;color:#2a76e8}
 .trust-icon svg{width:22px;height:22px;stroke-width:1.9}
+/* Interacción táctil real sobre la plataforma: drag continuo, no solo swipe final. */
+.orbit-track{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.orbit-card{cursor:grab;user-select:none;-webkit-user-select:none}
+.orbit-stage.is-dragging,.orbit-stage.is-dragging .orbit-track,.orbit-stage.is-dragging .orbit-card{cursor:grabbing}
+.orbit-stage.is-dragging .orbit-card{transition:none!important}
+.orbit-stage.is-dragging .orbit-card-open{pointer-events:none}
+.orbit-stage .orbit-card svg{pointer-events:none}
+.orbit-card .orbit-illustration.premium-chart{
+  opacity:1;overflow:visible;
+  filter:drop-shadow(0 7px 12px rgba(80,143,227,.11));
+  transition:filter .35s ease,opacity .35s ease;
+  pointer-events:none
+}
+.orbit-card.is-active .orbit-illustration.premium-chart{
+  filter:drop-shadow(0 11px 15px rgba(78,142,235,.17));
+}
+.orbit-card:not(.is-active) .orbit-illustration.premium-chart{opacity:.92}
+.premium-chart-grid{stroke:#c4dbfc;stroke-width:.8}
+.premium-chart-points circle{paint-order:stroke fill;vector-effect:non-scaling-stroke}
+.premium-3d-bar{shape-rendering:geometricPrecision}
+.premium-trend-line{stroke-linecap:round;stroke-linejoin:round}
+:root[data-theme="dark"] .orbit-illustration.premium-chart{
+  filter:drop-shadow(0 8px 16px rgba(32,106,221,.18));
+}
+:root[data-theme="dark"] .orbit-card .orbit-illustration.premium-chart .premium-3d-bar{
+  opacity:.95;
+}
+@media(hover:hover) and (pointer:fine){
+  .orbit-card:not(.is-active):not(:active):hover{filter:brightness(1.045) saturate(1.04)}
+}
 /* Tema oscuro diseñado, no simple inversión de colores. */
 :root[data-theme="dark"] #inicio .landing-premium{
   background:radial-gradient(ellipse 50% 37% at 50% 69%,rgba(35,108,214,.34),transparent 78%),radial-gradient(ellipse 40% 48% at -8% 48%,rgba(28,71,136,.42),transparent),radial-gradient(ellipse 40% 48% at 108% 48%,rgba(30,67,131,.36),transparent),linear-gradient(180deg,#07162e,#102345)
