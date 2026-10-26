@@ -100,12 +100,88 @@ await check('home premium: rueda del mouse con cooldown, dirección inversa y en
   assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Modelos y tendencias');
 });
 
+await check('home premium: arrastre horizontal continuo con mouse, retorno y prevención de clics accidentales',async page=>{
+  await page.setViewportSize({width:1440,height:900});
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='inicio';});
+  await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+  const first=page.locator('.orbit-card.is-active');
+  const rect=await first.boundingBox();
+  const x=rect.x+rect.width*.50;
+  const y=rect.y+rect.height*.68; // gráfico, sin tocar el botón de acceso
+  await page.mouse.move(x,y);
+  await page.mouse.down();
+  await page.mouse.move(x-85,y,{steps:12});
+  assert.equal(await page.locator('.orbit-stage.is-dragging').count(),1);
+  const displaced=await first.evaluate(el=>({
+    drag:parseFloat(el.style.getPropertyValue('--orbit-drag')),
+    tilt:parseFloat(el.style.getPropertyValue('--orbit-drag-angle'))
+  }));
+  assert.ok(displaced.drag< -40,'la tarjeta debe moverse mientras se arrastra: '+JSON.stringify(displaced));
+  assert.ok(displaced.tilt< -1,'la tarjeta debe girar con el puntero');
+  await page.mouse.up();
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Comparación de economías');
+  assert.equal(await page.locator('.orbit-stage.is-dragging').count(),0);
+  assert.equal(await page.locator('.orbit-card.is-active').evaluate(el=>el.style.getPropertyValue('--orbit-drag')),'0px');
+  await page.waitForTimeout(400);
+  const second=await page.locator('.orbit-card.is-active').boundingBox();
+  const x2=second.x+second.width*.5,y2=second.y+second.height*.65;
+  await page.mouse.move(x2,y2);
+  await page.mouse.down();
+  await page.mouse.move(x2+95,y2,{steps:10});
+  await page.mouse.up();
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Exploración macroeconómica');
+  await page.waitForTimeout(400);
+  const same=await page.locator('.orbit-card.is-active').boundingBox();
+  const x3=same.x+same.width*.5,y3=same.y+same.height*.67;
+  await page.mouse.move(x3,y3);await page.mouse.down();
+  await page.mouse.move(x3-18,y3,{steps:5});await page.mouse.up();
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Exploración macroeconómica',
+    'un arrastre corto debe devolver las tarjetas a su posición, sin navegar');
+});
+
+await check('home premium: gesto táctil horizontal cambia tarjeta, gesto vertical no secuestra scroll',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='inicio';});
+  await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+  await page.evaluate(()=>{
+    const stage=document.querySelector('.orbit-stage');
+    const pointer=(type,x,y)=>stage.dispatchEvent(new PointerEvent(type,{
+      bubbles:true,pointerId:77,pointerType:'touch',clientX:x,clientY:y,isPrimary:true
+    }));
+    pointer('pointerdown',220,340);
+    pointer('pointermove',132,342);
+    if(!stage.classList.contains('is-dragging')) throw Error('touch drag no reconocido');
+    pointer('pointerup',112,343);
+  });
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Comparación de economías');
+  await page.evaluate(()=>{
+    const stage=document.querySelector('.orbit-stage');
+    const pointer=(type,x,y)=>stage.dispatchEvent(new PointerEvent(type,{
+      bubbles:true,pointerId:78,pointerType:'touch',clientX:x,clientY:y,isPrimary:true
+    }));
+    pointer('pointerdown',220,300);
+    pointer('pointermove',211,425);
+    pointer('pointerup',212,450);
+  });
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Comparación de economías',
+    'la intención vertical no debe cambiar de tarjeta');
+});
+
 await check('home premium: botón de tema solo icono y mini ilustraciones SVG diferenciadas',async page=>{
   await openOffline(page);
   await page.evaluate(()=>{location.hash='inicio';});
   await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
   assert.equal(await page.locator('.orbit-illustration').count(),7);
-  assert.equal(await page.locator('.orbit-illustration filter').count(),7);
+  assert.equal(await page.locator('.orbit-illustration filter').count(),14);
+  assert.equal(await page.locator('.orbit-illustration .premium-3d-bar').count() >= 24,true);
+  assert.equal(await page.locator('.orbit-illustration .premium-chart-points').count(),7);
+  const defsValid=await page.locator('.orbit-illustration').evaluateAll(nodes=>{
+    const gradientIds=nodes.flatMap(svg=>[...svg.querySelectorAll('linearGradient,radialGradient')]
+      .map(node=>node.id));
+    return gradientIds.length===42&&new Set(gradientIds).size===gradientIds.length;
+  });
+  assert.equal(defsValid,true,'las siete tarjetas usan 42 gradientes independientes sin colisiones');
   assert.equal(await page.locator('.orbit-illustration[role="img"]').count(),7);
   const vectors=await page.locator('.orbit-illustration').evaluateAll(nodes=>nodes.map(node=>node.querySelectorAll('path,rect,circle,ellipse').length));
   assert.ok(vectors.every(count=>count>=7),'las siete ilustraciones contienen gráficos vectoriales detallados');
