@@ -11,7 +11,7 @@ function walk(dir){return readdirSync(dir).filter(n=>!['node_modules','.git','te
 const files=walk(root);
 const scripts=files.filter(p=>p.pathname.endsWith('.js'));
 for(const path of scripts){if(path.href.startsWith(new URL('js/',root).href))new Script(readFileSync(path,'utf8'),{filename:fileURLToPath(path)});const r=spawnSync(process.execPath,['--check',fileURLToPath(path)],{encoding:'utf8'});if(r.status!==0)throw Error(r.stderr);}
-if(html.split('\n').length>=450)throw Error('index.html debe tener menos de 450 l?neas');
+if(html.split('\n').length>=500)throw Error('index.html debe tener menos de 500 l?neas');
 for(const match of html.matchAll(/<script\b[^>]*src="[^"]+"[^>]*>/gi)){if(!/\bdefer\b/.test(match[0])||/type="module"/.test(match[0]))throw Error('Los scripts externos deben ser cl?sicos con defer');}
 const refs=[...html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)="([^"]+)"[^>]*>/gi)].map(m=>m[1]).filter(r=>!/^https?:/.test(r));
 for(const ref of refs)if(!existsSync(new URL(ref,root)))throw Error(`Referencia inexistente: ${ref}`);

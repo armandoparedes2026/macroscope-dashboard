@@ -50,9 +50,9 @@ await check('modo sin conexión: respaldo local y gráficos alternativos', async
   assert.ok(await page.locator('#macroTableBody td.cell-fallback').count() > 0, 'las celdas de respaldo deben marcarse');
 });
 
-await check('cinco destinos visibles y navegación accesible', async page => {
+await check('seis destinos visibles y navegación accesible', async page => {
   await openOffline(page);
-  for(const route of ['inicio','laboratorio','panorama','fuentes','ayuda']) {
+  for(const route of ['inicio','laboratorio','panorama','comparacion','fuentes','ayuda']) {
     await page.click(`[data-route="${route}"]`);
     await page.waitForFunction(route=>!document.querySelector(`[data-view="${route}"]`).hidden,route);
     assert.equal(await page.isVisible(`[data-view="${route}"]`),true);
@@ -77,6 +77,88 @@ await check('inicio orbital: siete módulos, flechas, teclado, enlaces y accesib
   assert.equal(await page.locator('.orbit-card-open:visible').count(),1);
   await page.locator('.orbit-card-open:visible').click();
   await page.waitForFunction(()=>!document.querySelector('[data-view="laboratorio"]').hidden);
+});
+
+await check('comparación de economías abre pantalla independiente desde Inicio',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='inicio';});
+  await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+  await page.locator('#homeCarousel').focus();
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(()=>document.querySelector('.orbit-card.is-active h2')?.textContent==='Comparación de economías');
+  await page.locator('.orbit-card.is-active .orbit-card-open').focus();
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(()=>location.hash==='#comparacion');
+  await page.waitForFunction(()=>!document.querySelector('[data-view="comparacion"]').hidden);
+  assert.equal(await page.isVisible('[data-view="comparacion"]'),true,'la sección debe estar visible');
+  assert.equal(await page.getAttribute('[data-route="comparacion"]','aria-current'),'page','el enlace debe marcarse activo');
+  for(const id of ['cd-filters','cd-kpis','cd-chart','cd-ranking','cd-export']){
+    assert.equal(await page.locator(`#${id}`).count(),1,`falta ${id}`);
+  }
+  await page.click('[data-route="panorama"]');
+  await page.waitForFunction(()=>document.querySelector('[data-view="comparacion"]').hidden);
+  assert.equal(await page.isHidden('[data-view="comparacion"]'),true,'al volver a Panorama debe ocultarse Comparación');
+});
+
+await check('comparación premium: series WDI, ranking anual y vistas interactivas',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='comparacion';});
+  await page.waitForFunction(()=>!document.querySelector('#comparacion').hidden);
+  await page.waitForFunction(()=>document.querySelectorAll('#cd-kpis .cd-kpi').length===6,null,{timeout:3500});
+  assert.equal(await page.locator('#cd-countries .cd-chip').count(),4);
+  assert.equal(await page.locator('#cd-countries .cd-flag').count(),4,'las banderas deben tener gráficos locales, sin depender de emoji del sistema');
+  assert.match(await page.textContent('#cd-ranking'),/Perú|Chile|Colombia|México/);
+  assert.match(await page.textContent('#cd-status'),/Banco Mundial|respaldo local/i);
+  assert.doesNotMatch(await page.textContent('#cd-status'),/\[object Object\]/);
+  assert.ok(await page.locator('#cd-map svg').count()>0,'debe haber un mapa orientativo vectorial');
+  assert.equal(await page.locator('#cd-map svg[aria-hidden="true"] [tabindex]').count(),0,'un mapa decorativo no puede contener controles ocultos a lectores de pantalla');
+  assert.ok(await page.locator('#cd-table-body tr').count()>=6);
+  await page.selectOption('#cd-indicator','FP.CPI.TOTL.ZG');
+  assert.match(await page.textContent('#cd-chart-title'),/Inflación/);
+  await page.click('[data-cd-mode="ranking"]');
+  assert.equal(await page.getAttribute('#comparacion','data-mode'),'ranking');
+  await page.click('[data-cd-mode="regions"]');
+  assert.equal(await page.getAttribute('#comparacion','data-mode'),'regions');
+  assert.match(await page.textContent('#cd-ranking-subtitle'),/región|grupo/i);
+  await page.click('[data-cd-mode="indicators"]');
+  assert.equal(await page.getAttribute('#comparacion','data-mode'),'indicators');
+});
+
+await check('comparación premium: economía única, límite cuatro y exportación trazable',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='comparacion';});
+  await page.waitForFunction(()=>document.querySelectorAll('#cd-countries .cd-chip').length===4);
+  assert.equal(await page.isDisabled('#cd-add-country'),true);
+  await page.click('[data-cd-remove="MEX"]');
+  assert.equal(await page.locator('#cd-countries .cd-chip').count(),3);
+  await page.selectOption('#cd-add-country','BRA');
+  assert.equal(await page.locator('#cd-countries .cd-chip').count(),4);
+  assert.equal(await page.locator('#cd-countries [data-cd-remove="BRA"]').count(),1);
+  const [download]=await Promise.all([page.waitForEvent('download'),page.click('#cd-export')]);
+  const csv=(await readFile(await download.path(),'utf8')).replace(/^\uFEFF/,'');
+  assert.match(csv,/"pais_iso3","indicador_codigo","anio","valor","unidad","procedencia"/);
+  assert.match(csv,/"PER","NY\.GDP\.MKTP\.KD\.ZG","\d{4}","[^"\n]+","% anual","respaldo_local"/);
+  assert.ok(!csv.includes(',undefined,'));
+});
+
+await check('comparación premium: datos actualizados y móvil sin overflow',async page=>{
+  await openOffline(page);
+  await page.setViewportSize({width:360,height:800});
+  await page.evaluate(()=>{location.hash='comparacion';});
+  await page.waitForFunction(()=>document.querySelectorAll('#cd-kpis .cd-kpi').length===6);
+  const audit=()=>page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth,boxes:['#comparacion','.cd-shell','.cd-secondary-grid','.cd-data-table','.cd-table-scroll','.cd-table-scroll table'].map(q=>{const el=document.querySelector(q);const r=el.getBoundingClientRect();return {q,width:Math.round(r.width),right:Math.round(r.right),overflow:getComputedStyle(el).overflowX,scroll:el.scrollWidth};}),offenders:[...document.querySelectorAll('#comparacion *')].filter(el=>el.getBoundingClientRect().right>innerWidth+1).slice(0,12).map(el=>({tag:el.tagName,cls:el.className?.baseVal??el.className,right:Math.round(el.getBoundingClientRect().right)}))}));
+  assert.equal((await audit()).scroll<=360+1,true,JSON.stringify(await audit()));
+  await page.evaluate(()=>{
+    const M=globalThis.MacroScope;
+    const latest=M.latestAvailable(M.runtimeDB.PER['NY.GDP.MKTP.KD.ZG'],M.YEARS);
+    M.runtimeDB.PER['NY.GDP.MKTP.KD.ZG'][latest.year]=99.5;
+    M.renderAll();
+  });
+  assert.match(await page.textContent('#cd-kpis'),/99\.5/);
+  await page.click('#themeBtn');
+  assert.equal(await page.getAttribute('html','data-theme'),'dark');
+  assert.equal((await audit()).scroll<=360+1,true,JSON.stringify(await audit()));
+
 });
 
 await check('home premium: rueda del mouse con cooldown, dirección inversa y enlaces funcionales',async page=>{
@@ -737,7 +819,7 @@ await check('rutas: Atrás y hash desconocido; menú móvil siempre etiquetado',
   await page.goBack();await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
   await page.evaluate(()=>{location.hash='desconocido';});await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
   await page.setViewportSize({width:360,height:900});await page.click('.nav-menu>summary');
-  assert.deepEqual(await page.locator('.primary-nav a').allTextContents(),['Inicio','Aprender','Explorar datos','Buscar fuentes','Ayuda']);
+  assert.deepEqual(await page.locator('.primary-nav a').allTextContents(),['Inicio','Aprender','Explorar datos','Comparación','Buscar fuentes','Ayuda']);
   await page.click('[data-route="fuentes"]');await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
   assert.equal(await page.locator('.nav-menu').getAttribute('open'),null);
 });

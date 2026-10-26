@@ -10,6 +10,7 @@ Abre [`index.html`](index.html) en un navegador moderno. No requiere un proceso 
 
 - Panorama económico premium con seis indicadores, cuatro enfoques temáticos, visualizaciones interactivas y procedencia visible por indicador.
 - Comparación entre países y América Latina y el Caribe.
+- **Comparación de economías** (`#comparacion`): panel independiente con cuatro países simultáneos, seis indicadores, gráficos históricos, ranking, mapa de orientación, lectura económica, relaciones entre variables, mercado laboral y exportación CSV.
 - Gráficas de series históricas y comparaciones internacionales.
 - Carrusel de lecturas económicas y visualización adaptable.
 - Referencias cambiarias con Open ER API.
@@ -67,6 +68,8 @@ El modelo está en [`js/islm-model.js`](js/islm-model.js): son funciones puras, 
 - Banco Mundial (World Development Indicators): https://api.worldbank.org/v2/
 - BCRP (series oficiales y API): https://estadisticas.bcrp.gob.pe/estadisticas/series/ayuda/api
 - Tipos de cambio indicativos: https://open.er-api.com/v6/latest/USD
+- Cartografía del mapa interactivo de comparación: [OpenFreeMap](https://openfreemap.org/) (estilos Positron y Dark, teselas de OpenStreetMap; servicio público sin clave) y [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/).
+- Fronteras simplificadas de países: [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/), 1:110m, dominio público; copia local de sus 177 geometrías, conservando solo los atributos ISO3 y nombre para minimizar la transferencia (`data/geo/ne_110m_admin_0_countries.geojson`).
 
 ### Panorama macroeconómico: cobertura de datos
 
@@ -80,6 +83,10 @@ La correspondencia entre códigos y conceptos, junto con las advertencias de com
 
 Los indicadores **WDI** son anuales, mientras que las series del **BCRP** son mensuales o trimestrales; ninguna constituye una cotización intradía. Si falla WDI, las vistas anuales pueden mostrar **datos históricos locales de respaldo**. La procedencia se registra **por celda**: en la tabla, los valores de respaldo aparecen en cursiva con `*`, y el CSV exportado incluye una columna `<indicador>_fuente` (`wdi` o `respaldo`). Si no se puede consultar BCRP, el Panorama muestra «N/D» para las series afectadas, sin generar un valor de reemplazo.
 
+En la vista **Comparación de economías**, la fuente principal es igualmente WDI y la actualización utiliza el servicio existente. Puedes seleccionar hasta cuatro países, el periodo (últimos 5/10/20 años o todo el historial), el grupo temático y el indicador activo. Las modalidades **Indicadores**, **Ranking** y **Regiones** comparten las mismas observaciones. La referencia de América Latina y el Caribe es el agregado oficial WDI `LCN`, que no debe interpretarse como un promedio simple de los países seleccionados. El **mapa interactivo** permite ampliar, desplazar y pulsar economías: los polígonos de los países seleccionados se colorean de acuerdo con los valores del indicador en el último año común y los marcadores de color diferencian cada economía. La posición de los marcadores es referencial; el color por país representa magnitud relativa entre seleccionados y **no** valor absoluto comparable entre indicadores diferentes. Si el proveedor cartográfico o WebGL no está disponible, se conserva el mapa SVG de respaldo. El diagrama de dispersión sirve para explorar relaciones, pero no establece causalidad.
+
+El gráfico histórico permite observar valores originales, índices base 100 para indicadores de nivel y variación acumulada cuando se analiza el crecimiento anual del PBI. Si faltan años consecutivos en una serie de crecimiento, no se interpola ni se calcula una acumulación falsa. Rankings y tarjetas muestran los valores anuales sin transformar. La tabla presenta el último año **común** de cada indicador, evitando comparar cifras de años distintos. Las celdas ausentes se muestran sin inventar ceros. El reporte CSV contiene país ISO3, código WDI, año, valor, unidad y procedencia de cada observación; no incluye las transformaciones visuales.
+
 Los valores de respaldo se transcribieron del WDI, pero **todavía no se han contrastado de nuevo con el API**; algunos datos de 2024 pueden ser estimaciones preliminares. Antes de usarlos en un análisis formal, compáralos con el API del Banco Mundial y anota la fecha de extracción.
 
 Notas metodológicas:
@@ -91,7 +98,7 @@ Los resultados del simulador IS–LM–BP son **didácticos**, no pronósticos e
 
 ## Tecnología
 
-HTML, CSS y JavaScript integrados en `index.html`. Chart.js 4.4.1 se carga desde jsDelivr con `defer` y verificación de integridad (SRI); si no carga, se usa un renderizador de gráficos alternativo incluido en la página. Las tipografías se solicitan a Google Fonts.
+HTML, CSS y JavaScript modularizados. Chart.js 4.4.1 se carga desde jsDelivr con `defer` y verificación de integridad (SRI); si no carga, se usa un renderizador de gráficos alternativo. MapLibre GL JS 5.12.0 se carga desde jsDelivr y renderiza teselas OpenFreeMap cuando existe WebGL y conexión; Natural Earth se sirve localmente. Las tipografías se solicitan a Google Fonts.
 
 ## Estructura
 
@@ -143,7 +150,7 @@ node tests/visual-modularization.mjs after    # comparaci?n con la referencia ve
 
 En PowerShell con scripts deshabilitados, usa `npm.cmd` en lugar de `npm`.
 
-- `tests/smoke.mjs` comprueba los controles principales, la sintaxis de todos los `.js` del proyecto (excepto dependencias y metadatos Git), los scripts cl?sicos con `defer`, las referencias locales en ambos sentidos, el SRI de Chart.js y el l?mite de 450 l?neas del HTML.
+- `tests/smoke.mjs` comprueba los controles principales, la sintaxis de todos los `.js` del proyecto (excepto dependencias y metadatos Git), los scripts cl?sicos con `defer`, las referencias locales en ambos sentidos, el SRI de Chart.js y el l?mite de 500 l?neas del HTML tras integrar Panorama y Comparación.
 - `tests/islm-model.test.mjs` valida los resultados cl?sicos, reg?menes, trilema, calibraci?n y curvas del modelo.
 - `tests/lab-content.test.mjs` verifica escenarios y predicciones del laboratorio contra el modelo.
 - `tests/bcrp.test.mjs` comprueba normalizaci?n de respuestas reales y contratos del proxy.

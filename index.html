@@ -15,6 +15,8 @@
     document.documentElement.dataset.theme = initialTheme;
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.12.0/dist/maplibre-gl.css" integrity="sha384-mnM9NG1099tBMNxdDQNDKIxYcn/fmqQXFJvbT5l1MsrWvzfxBEffceBsw75/cW2R" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.12.0/dist/maplibre-gl.js" integrity="sha384-7+0QVD3+GoeOjaW35yTmpj0FR1K45ugw4ZUY0qEFomHSmAude6e9nB6/Xy5aPnzQ" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
@@ -23,6 +25,7 @@
 <link rel="stylesheet" href="css/students.css">
 <link rel="stylesheet" href="css/landing.css">
 <link rel="stylesheet" href="css/panorama.css">
+<link rel="stylesheet" href="css/comparison.css">
 <script defer src="js/islm-model.js"></script>
 <script defer src="js/lab-content.js"></script>
 <script defer src="js/config/countries.js"></script>
@@ -32,6 +35,8 @@
 <script defer src="js/config/state.js"></script>
 <script defer src="js/services/wdi.js"></script>
 <script defer src="js/services/compare.js"></script>
+<script defer src="js/services/comparison-dashboard-data.js"></script>
+<script defer src="js/services/comparison-map-data.js"></script>
 <script defer src="js/services/bcrp-client.js"></script>
 <script defer src="js/services/panorama-data.js"></script>
 <script defer src="js/services/panorama-client.js"></script>
@@ -42,6 +47,7 @@
 <script defer src="js/ui/panorama-premium.js"></script>
 <script defer src="js/ui/islm-lab.js"></script>
 <script defer src="js/ui/student-views.js"></script>
+<script defer src="js/ui/comparison-dashboard.js"></script>
 <script defer src="js/ui/landing.js"></script>
 <script defer src="js/app.js"></script>
 </head>
@@ -67,7 +73,7 @@
  <div class="workspace">
   <header class="topbar">
     <a class="brand-name" href="#inicio" aria-label="Macroscope · Inicio"><svg class="brand-symbol" viewBox="0 0 50 42" aria-hidden="true"><path d="m9 22 13-13 18 15-17 11-14-13" stroke="currentColor" stroke-width="3" fill="none" opacity=".46"/><circle cx="9" cy="22" r="6" fill="currentColor"/><circle cx="22" cy="9" r="7" fill="currentColor"/><circle cx="40" cy="24" r="6" fill="#73a7f6"/><circle cx="23" cy="35" r="7" fill="#2f6fd3"/></svg><span class="brand-lockup"><strong>Macroscope</strong><small>Laboratorio Interactivo de Economía Aplicada</small></span></a>
-    <details class="nav-menu"><summary>Menú</summary><nav class="primary-nav" aria-label="Navegación principal"><a href="#inicio" data-route="inicio">Inicio</a><a href="#laboratorio" data-route="laboratorio">Aprender</a><a href="#panorama" data-route="panorama">Explorar datos</a><a href="#fuentes" data-route="fuentes">Buscar fuentes</a><a href="#ayuda" data-route="ayuda">Ayuda</a></nav></details>
+    <details class="nav-menu"><summary>Menú</summary><nav class="primary-nav" aria-label="Navegación principal"><a href="#inicio" data-route="inicio">Inicio</a><a href="#laboratorio" data-route="laboratorio">Aprender</a><a href="#panorama" data-route="panorama">Explorar datos</a><a href="#comparacion" data-route="comparacion">Comparación</a><a href="#fuentes" data-route="fuentes">Buscar fuentes</a><a href="#ayuda" data-route="ayuda">Ayuda</a></nav></details>
     <div class="top-right"><a class="nav-premium-cta" href="#panorama">Explorar plataforma <span aria-hidden="true">→</span></a>
       <div class="api-indicator" id="apiStatusBadge" title="Estado de la última conexión"><span class="status-dot" id="apiStatusDot"></span><span id="apiStatusText">Consultando fuentes...</span></div>
       <button class="icon-button" id="themeBtn" type="button" title="Cambiar entre modo claro y oscuro" aria-label="Cambiar tema"><svg fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use id="themeIcon" href="#i-moon"/></svg></button>
@@ -206,7 +212,7 @@
 <g class="ms-map-nodes"><circle cx="51" cy="57" r="6" fill="#b4d5ff" opacity=".33"/><circle cx="51" cy="57" r="4" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="119" cy="45" r="5.8" fill="#b4d5ff" opacity=".33"/><circle cx="119" cy="45" r="3.8" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="186" cy="44" r="6" fill="#b4d5ff" opacity=".33"/><circle cx="186" cy="44" r="4" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="137" cy="88" r="6.5" fill="#b4d5ff" opacity=".33"/><circle cx="137" cy="88" r="4.5" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="213" cy="88" r="6" fill="#b4d5ff" opacity=".33"/><circle cx="213" cy="88" r="4" fill="#468dff" stroke="#fff" stroke-width="1.5"/></g>
 <g fill="none" stroke="#7baff6" opacity=".38"><circle cx="51" cy="57" r="12"/><circle cx="137" cy="88" r="13"/><circle cx="186" cy="44" r="11"/></g>
 </g></svg>
- <a class="orbit-card-open" href="#panorama?focus=compare" aria-label="Abrir Comparación de economías">Explorar módulo <span aria-hidden="true">↗</span></a>
+ <a class="orbit-card-open" href="#comparacion" aria-label="Abrir Comparación de economías">Explorar módulo <span aria-hidden="true">↗</span></a>
  </div></article>
 <article class="orbit-card" data-home-slide="5" aria-label="Simulación de escenarios">
  <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg></span>
@@ -270,9 +276,22 @@
    <div class="trust-item"><span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg></span><span>Un enfoque práctico<br>y aplicado</span></div>
    <div class="trust-item"><span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5v1"/></svg></span><span>Para estudiantes y<br>profesionales</span></div>
   </div>
-  
+
  </div>
 </section>
+   <section class="view comparison-view" id="comparacion" data-view="comparacion" hidden tabindex="-1" aria-labelledby="cd-title">
+    <div class="cd-shell">
+     <header class="cd-heading"><div class="cd-heading-copy"><span class="cd-main-icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M8 30V20M17 30V10M26 30V15M35 30V5"/></svg></span><div><div class="cd-eyebrow">ANÁLISIS INTERNACIONAL · WORLD DEVELOPMENT INDICATORS</div><h1 id="cd-title">Comparación de economías</h1><p>Contrasta países usando indicadores oficiales, gráficos históricos, rankings y contexto económico.</p></div></div><div class="cd-actions"><label class="cd-add-economy"><span aria-hidden="true">⊕</span><select id="cd-add-country" aria-label="Agregar economía"><option value="">Agregar economía</option></select></label><button type="button" class="cd-export" id="cd-export" aria-label="Exportar reporte CSV con procedencia de los datos" title="Descargar observaciones anuales y sus fuentes en CSV">Exportar reporte <span aria-hidden="true">↗</span></button></div></header>
+     <div class="cd-filter-bar" id="cd-filters"><div class="cd-filter-country"><span class="cd-filter-label">Economías a comparar</span><div class="cd-country-chips" id="cd-countries" aria-live="polite"></div></div><label class="cd-filter-item">Periodo<select id="cd-period"><option value="5">Últimos 5 años</option><option value="10" selected>Últimos 10 años</option><option value="all">Toda la serie</option></select></label><label class="cd-filter-item">Frecuencia<select id="cd-frequency" aria-label="Frecuencia disponible" disabled><option>Anual (WDI)</option></select></label><label class="cd-filter-item">Grupo de indicadores<select id="cd-indicator-group"><option value="all">Variables clave</option><option value="activity">Actividad y empleo</option><option value="prices">Precios</option><option value="external">Sector externo</option></select></label><div class="cd-filter-modes"><span class="cd-filter-label">Modo de comparación</span><div class="cd-mode-switch" role="group" aria-label="Modo de comparación"><button type="button" data-cd-mode="indicators" aria-pressed="true">Por indicadores</button><button type="button" data-cd-mode="ranking" aria-pressed="false">Por ranking</button><button type="button" data-cd-mode="regions" aria-pressed="false">Por regiones</button></div></div></div>
+     <div class="cd-kpi-grid" id="cd-kpis" aria-label="Indicadores macroeconómicos comparados"></div>
+     <div class="cd-primary-grid"><article class="cd-panel cd-history"><div class="cd-panel-header"><div><h2 id="cd-chart-title">Evolución histórica</h2><p id="cd-chart-subtitle">Mismo indicador, escala y unidad</p></div><div class="cd-chart-options"><label>Indicador<select id="cd-indicator" aria-label="Indicador de evolución histórica"></select></label><label>Transformación<select id="cd-transform"><option value="raw">Valor observado</option><option value="base">Índice base 100</option><option value="cumulative">Crecimiento acumulado</option></select></label></div></div><div class="cd-chart-box"><canvas id="cd-chart" role="img" aria-label="Evolución histórica por economía"></canvas></div><div class="cd-chart-legend" id="cd-legend"></div></article>
+      <article class="cd-panel cd-geo"><div class="cd-panel-header"><div><h2>Panorama geográfico</h2><p id="cd-map-subtitle">Economías seleccionadas · indicador comparable</p></div></div><div id="cd-map" class="cd-map-surface" aria-label="Mapa geográfico interactivo de economías comparadas"></div><p class="cd-panel-footnote">Fronteras: Natural Earth · Cartografía: OpenFreeMap / OpenStreetMap · Indicadores: Banco Mundial (WDI). Acerca el mapa y selecciona un país para ver sus datos.</p></article>
+      <article class="cd-panel cd-ranking"><div class="cd-panel-header"><div><h2>Ranking por indicador</h2><p id="cd-ranking-subtitle">Orden por valor · mismo año</p></div></div><div id="cd-ranking" role="region" aria-live="polite" aria-label="Ranking comparativo"></div></article>
+      <article class="cd-panel cd-reading"><div class="cd-panel-header"><div><h2>Lectura comparativa</h2><p>Interpretación descriptiva con datos observados</p></div></div><ol id="cd-readings" aria-live="polite"></ol></article></div>
+     <div class="cd-secondary-grid"><article class="cd-panel"><div class="cd-panel-header"><div><h2>Inflación frente a crecimiento</h2><p id="cd-scatter-subtitle">Observaciones del mismo año (%)</p></div></div><div class="cd-chart-box compact"><canvas id="cd-scatter" role="img" aria-label="Dispersión de crecimiento e inflación"></canvas></div></article><article class="cd-panel"><div class="cd-panel-header"><div><h2>Mercado laboral</h2><p id="cd-labor-subtitle">Desempleo · porcentaje de la fuerza laboral</p></div></div><div class="cd-chart-box compact"><canvas id="cd-labor" role="img" aria-label="Tasas de desempleo por economía"></canvas></div></article><article class="cd-panel cd-data-table"><div class="cd-panel-header"><div><h2>Indicadores seleccionados</h2><p>Último año común disponible por indicador</p></div></div><div class="cd-table-scroll"><table><thead id="cd-table-head"></thead><tbody id="cd-table-body"></tbody></table></div></article></div>
+     <footer class="cd-source-footer"><span id="cd-status" role="status" aria-live="polite">Preparando datos anuales…</span><a href="docs/fuentes-wdi.md">Fuentes, cobertura y limitaciones WDI ↗</a></footer>
+    </div>
+   </section>
    <section class="view" id="fuentes" data-view="fuentes" hidden tabindex="-1"><header class="view-heading"><div class="eyebrow">DIRECTORIO ACADÉMICO</div><h1>Buscar fuentes</h1><p>Elige una base para tu curso y comprueba su metodología antes de usarla.</p><a class="control-action" href="#ayuda">Cómo citar una fuente</a></header>
      <form id="sourceFilters" class="source-filters" role="search"><label>Curso<select id="sourceCourse" class="field-select"></select></label><label>Alcance<select id="sourceScope" class="field-select"></select></label><label>Acceso<select id="sourceAccess" class="field-select"></select></label><label>Buscar<input id="sourceQuery" type="search" placeholder="Tema, fuente u organismo"></label><button type="reset" class="control-action">Limpiar filtros</button></form>
      <p id="sourceCount" role="status" aria-live="polite"></p><div class="source-grid" id="sourceResults"></div><p id="sourceChecked" class="data-note"></p></section>
