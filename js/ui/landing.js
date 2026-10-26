@@ -34,7 +34,12 @@
         slide.style.setProperty('--orbit-opacity', String(opacity[distance]));
         slide.setAttribute('aria-hidden', active ? 'false' : 'true');
         const link = slide.querySelector('.orbit-card-open');
-        if (link) link.tabIndex = active ? 0 : -1;
+        if (link) {
+          if (!link.dataset.destination) link.dataset.destination = link.getAttribute('href');
+          if (active) link.setAttribute('href', link.dataset.destination);
+          else link.removeAttribute('href');
+          link.tabIndex = active ? 0 : -1;
+        }
       });
       dots.forEach((dot, index) => dot.setAttribute('aria-pressed', String(index === current)));
       if (hint && announce) hint.textContent = (current + 1) + ' de ' + total + ' · ' +
