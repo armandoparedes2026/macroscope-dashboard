@@ -13,7 +13,13 @@
     const target=document.querySelector(`[data-view="${view}"]`);
     target.focus({preventScroll:true});
     window.scrollTo({top:0,behavior:'instant'});
-    if(view==='panorama') M.renderCharts();
+    if(view==='panorama') {
+      M.renderCharts();
+      // Deep-link desde la portada al comparador, sin crear otra ruta.
+      if(new URLSearchParams(query).get('focus')==='compare'){
+        requestAnimationFrame(()=>document.getElementById('compareTitle')?.scrollIntoView({block:'start',behavior:'instant'}));
+      }
+    }
     if(view==='laboratorio') M.renderIslm();
     M.renderSourceDirectory?.(new URLSearchParams(query));
     M.showGlossaryTerm?.(new URLSearchParams(query).get('term'));

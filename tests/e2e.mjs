@@ -60,6 +60,25 @@ await check('cinco destinos visibles y navegación accesible', async page => {
   assert.equal(await page.isHidden('#tab-overview'),true);
 });
 
+await check('inicio orbital: siete módulos, flechas, teclado, enlaces y accesibilidad',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='inicio';});
+  await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+  assert.equal(await page.locator('.orbit-card').count(),7);
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Exploración macroeconómica');
+  await page.click('#homeNext');
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Comparación de economías');
+  assert.equal(await page.locator('[data-home-dot="4"]').getAttribute('aria-pressed'),'true');
+  await page.locator('#homeCarousel').focus();
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Exploración macroeconómica');
+  await page.click('[data-home-dot="0"]');
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Aprendizaje guiado');
+  assert.equal(await page.locator('.orbit-card-open:visible').count(),1);
+  await page.locator('.orbit-card-open:visible').click();
+  await page.waitForFunction(()=>!document.querySelector('[data-view="laboratorio"]').hidden);
+});
+
 await check('color de la variación según si subir es bueno o malo', async (page) => {
   await openOffline(page);
   await page.selectOption('#countrySelect', 'USA');
@@ -489,8 +508,9 @@ for(const width of [360,390,768,1024,1280,1440,1920])for(const theme of ['light'
         // Programmatic traversal verifies every exposed control; keyboard traversal follows below.
         let focusOK=true;
         for(const el of focusable){el.focus({preventScroll:true});if(document.activeElement!==el){focusOK=false;break;}}
-        const homePaths=[...document.querySelectorAll('.path-card')].map(el=>el.getBoundingClientRect().bottom);
-        return {overflow:root.scrollWidth-root.clientWidth,overlaps,small,clipped,barHeight:bar.height,anchor:active.getBoundingClientRect().top,barBottom:bar.bottom,colors,focusOK,homePaths,chart:document.querySelector('#islmPanelISLM').getBoundingClientRect().top,controls:document.querySelector('.islm-controls').getBoundingClientRect().top};
+        const activeHomeCard=document.querySelector('.orbit-card.is-active')?.getBoundingClientRect();
+        const homeCard=activeHomeCard?{top:activeHomeCard.top,bottom:activeHomeCard.bottom,width:activeHomeCard.width}:null;
+        return {overflow:root.scrollWidth-root.clientWidth,overlaps,small,clipped,barHeight:bar.height,anchor:active.getBoundingClientRect().top,barBottom:bar.bottom,colors,focusOK,homeCard,chart:document.querySelector('#islmPanelISLM').getBoundingClientRect().top,controls:document.querySelector('.islm-controls').getBoundingClientRect().top};
       },{view,width});
       const row={width,theme,view,criteria:{}};
       const verify=(key,value,detail)=>{row.criteria[key]=value;assert.ok(value,`${key} ${view} ${width} ${theme}: ${JSON.stringify(detail)}`);};
@@ -509,7 +529,7 @@ for(const width of [360,390,768,1024,1280,1440,1920])for(const theme of ['light'
       await page.locator(`[data-view="${view}"]`).focus();await page.keyboard.press('Tab');
       const ring=await page.evaluate(()=>{const el=document.activeElement,style=getComputedStyle(el);return el.matches(':focus-visible')&&parseFloat(style.outlineWidth)>=3&&style.outlineStyle==='solid';});
       verify('A7',metrics.focusOK&&ring,{focusOK:metrics.focusOK,ring});
-      verify('A8',view!=='inicio'||![390,1440].includes(width)||metrics.homePaths.every(bottom=>bottom<=height),metrics.homePaths);
+      verify('A8',view!=='inicio'||![390,1440].includes(width)||Boolean(metrics.homeCard && metrics.homeCard.top>=0 && metrics.homeCard.bottom<=height),metrics.homeCard);
       verify('A9',view!=='laboratorio'||width!==1440||(metrics.chart<900&&metrics.controls<900),{chart:metrics.chart,controls:metrics.controls});
       verify('A10',await page.isVisible(`[data-view="${view}"]`),view);
       verify('A11',await page.evaluate(()=>!('carouselTimer' in MacroScope.state)&&!MacroScope.setupCarousel&&!document.querySelector('#insightCarousel')),'lecturas fijas sin estado ni temporizador');
