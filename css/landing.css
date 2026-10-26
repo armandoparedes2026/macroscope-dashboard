@@ -321,3 +321,97 @@ body:has(#inicio:not([hidden])) #themeBtn:focus-visible{outline:3px solid #387de
  .orbit-card,.orbit-dot>span,.landing-cta,.orbit-arrow,.nav-premium-cta{transition:none!important}
  .orbit-card .art-float{animation:none!important}
 }
+
+
+/* Portada v3 — cada tarjeta tiene un lenguaje visual propio, sin barras genéricas.
+   SVGs vectoriales auténticos: libro, historia, indicadores, exploración,
+   comparación geográfica, escenarios y modelos de ondas. */
+.orbit-card-inner{
+  isolation:isolate;
+  background-image:linear-gradient(145deg,rgba(255,255,255,.98) 0%,rgba(241,248,255,.90) 65%,rgba(222,239,255,.69) 100%);
+}
+.orbit-card-inner::before{
+  content:"";position:absolute;inset:0 0 auto;height:39%;border-radius:inherit;
+  background:linear-gradient(155deg,rgba(255,255,255,.83),rgba(255,255,255,0) 75%);
+  pointer-events:none;z-index:0
+}
+.orbit-card-inner::after{
+  content:"";position:absolute;left:-18%;right:-20%;height:46%;bottom:-29%;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(110,173,253,.17),rgba(194,223,255,.04) 63%,transparent 75%);
+  pointer-events:none;z-index:0
+}
+.orbit-card .orbit-icon,.orbit-card .orbit-card-number,.orbit-card h2,.orbit-card p,
+.orbit-card .orbit-illustration,.orbit-card .orbit-card-open{z-index:1}
+.orbit-card .orbit-illustration.module-art{
+  left:8px;width:calc(100% - 16px);
+  height:clamp(103px,37%,139px);bottom:8px;max-height:40%;
+  overflow:visible;opacity:1;
+  filter:drop-shadow(0 12px 16px rgba(75,130,216,.13));
+  transform:translateZ(0);
+}
+.orbit-card.is-active .orbit-illustration.module-art{
+  filter:drop-shadow(0 13px 17px rgba(59,128,237,.15))
+}
+.orbit-card:not(.is-active) .orbit-illustration.module-art{
+  opacity:.93;filter:drop-shadow(0 6px 12px rgba(86,143,230,.10))
+}
+.orbit-card h2{letter-spacing:-.044em}
+.orbit-card p{color:#58749e}
+.orbit-card.is-active .orbit-icon{box-shadow:inset 0 1px rgba(255,255,255,.96),0 7px 16px rgba(58,135,244,.12)}
+.module-art .ms-continent{
+  fill:#a7cdfd;
+  fill-opacity:.87;
+  stroke:#8fbaf5;
+  stroke-width:.7
+}
+.module-art-comparison .ms-continent{
+  fill:#a0c8fb;
+  fill-opacity:.76;
+  stroke:#7caef4;
+  stroke-width:1;
+}
+.module-art-indicators .ms-continent{fill-opacity:.48;stroke-opacity:.45}
+.module-art .ms-prism{shape-rendering:geometricPrecision}
+.module-art .ms-illustration{transform-box:fill-box;transform-origin:center}
+.module-art-learning .ms-book-leaf,.module-art-learning .ms-learning-sparks,
+.module-art-history .ms-history-line,.module-art-indicators .ms-indicator-bars,
+.module-art-exploration .ms-explore-bars,.module-art-comparison .ms-map-nodes,
+.module-art-simulation .ms-decision-curves,.module-art-trends .ms-wave-ribbons{
+  transform-box:fill-box;transform-origin:center;
+  transition:transform .7s cubic-bezier(.22,.8,.28,1),opacity .5s ease,filter .5s ease;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+ .orbit-card.is-active:hover .ms-book-leaf-left{transform:translate(-3px,-3px) rotate(-1.3deg)}
+ .orbit-card.is-active:hover .ms-book-leaf-right{transform:translate(3px,-3px) rotate(1.3deg)}
+ .orbit-card.is-active:hover .ms-learning-sparks{transform:translateY(-3px)}
+ .orbit-card.is-active:hover .ms-history-line{filter:drop-shadow(0 1px 3px rgba(62,137,245,.4))}
+ .orbit-card.is-active:hover .ms-indicator-bars{transform:translateY(-4px)}
+ .orbit-card.is-active:hover .ms-explore-bars{transform:translateY(-3px)}
+ .orbit-card.is-active:hover .ms-map-nodes{filter:drop-shadow(0 0 4px rgba(56,133,255,.6))}
+ .orbit-card.is-active:hover .ms-decision-curves{transform:translateY(-2px)}
+ .orbit-card.is-active:hover .ms-wave-ribbons{transform:translateY(-4px)}
+}
+:root[data-theme="dark"] .orbit-card-inner::before{
+  background:linear-gradient(155deg,rgba(93,142,208,.13),transparent 76%)
+}
+:root[data-theme="dark"] .orbit-card-inner::after{
+  background:radial-gradient(ellipse,rgba(54,117,213,.22),transparent 74%)
+}
+:root[data-theme="dark"] .orbit-card .orbit-illustration.module-art{
+  filter:drop-shadow(0 7px 17px rgba(38,111,216,.22)) brightness(1.09)
+}
+:root[data-theme="dark"] .module-art-comparison .ms-continent{
+  fill:#7eacf0;fill-opacity:.80;stroke:#b5d6ff
+}
+@media(max-width:760px){
+ .orbit-card .orbit-illustration.module-art{
+   height:100px;max-height:38%;bottom:4px;left:5px;width:calc(100% - 10px)
+ }
+}
+@media(max-width:760px) and (max-height:740px){
+ .orbit-card .orbit-illustration.module-art{height:81px;max-height:34%}
+}
+@media(prefers-reduced-motion:reduce){
+ .module-art *{animation:none!important;transition:none!important}
+}
