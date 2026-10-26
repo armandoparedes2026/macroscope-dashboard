@@ -35,6 +35,11 @@
 .nav-premium-cta span{font-size:18px}
 body:has(#inicio:not([hidden])){background:var(--landing-canvas)}
 body:has(#inicio:not([hidden])) .workspace{padding-bottom:0}
+/* En escritorio alto, la portada cabe íntegra en el viewport. Se recorta solo
+   el excedente decorativo de las capas 3D, sin ocultar tarjetas ni CTA. */
+@media(min-width:761px) and (min-height:760px){
+  body:has(#inicio:not([hidden])) .app-shell{height:100svh;min-height:0;overflow:hidden}
+}
 body:has(#inicio:not([hidden])) .content{max-width:none;padding:0}
 body:has(#inicio:not([hidden])) .topbar{background:color-mix(in srgb,var(--landing-canvas) 90%,transparent);border-bottom:1px solid rgba(100,156,235,.09);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);padding-inline:max(21px,calc((100vw - 1280px)/2))}
 body:has(#inicio:not([hidden])) .api-indicator{display:none}
