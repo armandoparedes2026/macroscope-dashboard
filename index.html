@@ -22,6 +22,7 @@
 <link rel="stylesheet" href="css/islm.css">
 <link rel="stylesheet" href="css/students.css">
 <link rel="stylesheet" href="css/landing.css">
+<link rel="stylesheet" href="css/panorama.css">
 <script defer src="js/islm-model.js"></script>
 <script defer src="js/lab-content.js"></script>
 <script defer src="js/config/countries.js"></script>
@@ -32,10 +33,13 @@
 <script defer src="js/services/wdi.js"></script>
 <script defer src="js/services/compare.js"></script>
 <script defer src="js/services/bcrp-client.js"></script>
+<script defer src="js/services/panorama-data.js"></script>
+<script defer src="js/services/panorama-client.js"></script>
 <script defer src="js/services/fx.js"></script>
 <script defer src="js/ui/format.js"></script>
 <script defer src="js/ui/charts.js"></script>
 <script defer src="js/ui/overview.js"></script>
+<script defer src="js/ui/panorama-premium.js"></script>
 <script defer src="js/ui/islm-lab.js"></script>
 <script defer src="js/ui/student-views.js"></script>
 <script defer src="js/ui/landing.js"></script>
@@ -283,19 +287,36 @@
        <details><summary>¿Por qué dos países muestran años distintos?</summary><p>La publicación y cobertura varían entre series y países. Compara el mismo año cuando sea posible. El comparador conserva las ausencias como «sin dato» y permite seleccionar solo años comunes.</p></details>
      </section>
      <section class="surface help-card" aria-labelledby="citationTitle"><h2 id="citationTitle">Cómo citar</h2><p>Banco Mundial. (s. f.). World Development Indicators [Base de datos]. Indicador: FP.CPI.TOTL.ZG. País: Perú. Recuperado el [fecha de extracción], de https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG</p><p>Banco Central de Reserva del Perú. (s. f.). BCRPData [Base de datos]. Serie: [código]. Recuperado el [fecha de extracción], de https://estadisticas.bcrp.gob.pe/estadisticas/series/</p><p>La inflación WDI mide el cambio del IPC promedio anual. La inflación BCRP interanual compara un mes con el mismo mes del año anterior. No son medidas equivalentes.</p></section></section>
-   <section class="view" id="tab-overview" data-view="panorama" hidden tabindex="-1" aria-label="Panorama económico">
-     <div class="page-heading"><div><div class="eyebrow">LABORATORIO INTERACTIVO DE ECONOMÍA APLICADA</div><h1>Explorar datos económicos.</h1><p>Selecciona un país y compara indicadores oficiales con su fuente y periodo.</p></div><div class="page-badge"><svg fill="none" stroke="currentColor" stroke-width="1.7"><use href="#i-calendar"/></svg><span id="headingPeriod">Serie anual · 2014–2024</span></div></div>
-     <div class="filter-bar" id="overviewFilters" aria-label="Filtros globales">
-      <div class="filter-group main-country"><label class="control-label" for="countrySelect">ECONOMÍA PRINCIPAL</label><select class="field-select" id="countrySelect"><option value="PER">🇵🇪 Perú</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="USA">🇺🇸 Estados Unidos</option></select></div>
-      <div class="filter-group"><label class="control-label" for="benchmarkSelect">COMPARAR CON</label><select class="field-select" id="benchmarkSelect"><option value="LCN">🌎 América Latina y el Caribe</option><option value="USA">🇺🇸 Estados Unidos</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="PER">🇵🇪 Perú</option></select></div>
-      <div class="filter-group"><label class="control-label" for="periodSelect">PERIODO DE ANÁLISIS</label><select class="field-select" id="periodSelect"><option value="5">Últimos 5 años disponibles</option><option value="10" selected>Últimos 10 años disponibles</option><option value="all">Toda la serie (2014 en adelante)</option></select></div>
-      <button type="button" id="syncApiBtn" class="control-action primary"><svg id="syncIcon" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg><span>Actualizar datos</span></button>
+   <section class="view panorama-premium" id="tab-overview" data-view="panorama" hidden tabindex="-1" aria-label="Panorama económico">
+     <div class="page-heading p-hero"><div class="p-hero-copy"><span class="p-hero-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="18" width="5" height="10" rx="1"/><rect x="13.5" y="9" width="5" height="19" rx="1"/><rect x="23" y="3" width="5" height="25" rx="1"/></svg></span><div><h1>Panorama macroeconómico</h1><p>Indicadores oficiales, tendencias y lectura económica para un análisis integral y comparativo.</p></div></div><button type="button" class="p-export" id="panoramaReportBtn">Exportar reporte <span aria-hidden="true">→</span></button></div>
+     <div class="p-filter-shell" id="panoramaFilterShell">
+       <div class="filter-bar" id="overviewFilters" aria-label="Filtros del Panorama">
+        <div class="filter-group main-country"><label class="control-label" for="countrySelect">País / Región</label><select class="field-select" id="countrySelect"><option value="PER">🇵🇪 Perú</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="USA">🇺🇸 Estados Unidos</option></select></div>
+        <div class="filter-group"><label class="control-label" for="periodSelect">Periodo</label><select class="field-select" id="periodSelect"><option value="5">Últimos 5 años</option><option value="10" selected>Últimos 10 años</option><option value="all">Toda la serie</option></select></div>
+        <div class="filter-group"><label class="control-label" for="panoramaFrequencySelect">Frecuencia</label><select class="field-select" id="panoramaFrequencySelect"><option value="all">Según indicador</option><option value="monthly">Mensual</option><option value="quarterly">Trimestral</option><option value="annual">Anual</option></select></div>
+        <div class="filter-group"><label class="control-label" for="panoramaSourceSelect">Fuente oficial</label><select class="field-select" id="panoramaSourceSelect"><option value="all">Todas las fuentes</option><option value="BCRP">BCRP</option><option value="WDI">Banco Mundial</option></select></div>
+       </div>
+       <div class="p-segments" role="tablist" aria-label="Categoría del Panorama"><button type="button" id="panoramaSegmentActivity" role="tab" aria-selected="true" data-panorama-area="activity">Actividad</button><button type="button" role="tab" aria-selected="false" data-panorama-area="prices">Precios</button><button type="button" role="tab" aria-selected="false" data-panorama-area="labor">Laboral</button><button type="button" role="tab" aria-selected="false" data-panorama-area="external">Sector externo</button></div>
      </div>
+     <div class="p-dashboard" aria-label="Panel principal de Panorama">
+       <div id="panoramaKpis" class="p-kpi-grid" aria-label="Seis indicadores macroeconómicos" aria-live="polite"></div>
+       <div class="p-analytics-grid">
+         <article class="p-panel p-main-panel"><div class="p-panel-heading"><div><h2 id="panoramaMainTitle">Evolución del PBI real</h2><p id="panoramaMainSubtitle">Índice 2015 = 100, serie desestacionalizada</p></div><div class="p-chart-controls"><div class="p-chart-toggle" role="group" aria-label="Medida de PBI"><button type="button" id="panoramaLevelToggle" aria-pressed="true">Nivel</button><button type="button" id="panoramaGrowthToggle" aria-pressed="false">Var. %</button></div><span class="p-chart-period" id="panoramaMainPeriod">Sin observaciones</span></div></div><div class="p-chart-container p-main-chart"><canvas id="panoramaMainChart" role="img" aria-label="Serie histórica principal de Panorama"></canvas><div class="p-chart-empty" id="panoramaMainEmpty" hidden>Esperando observaciones oficiales de la fuente seleccionada.</div></div><div class="p-chart-footer"><span id="panoramaMainSource">Fuente pendiente</span><span>Datos observados · consulta las fechas y unidades</span></div></article>
+         <article class="p-panel p-side-panel"><div class="p-panel-heading"><div><div class="p-panel-kicker">INDICADOR COMPLEMENTARIO</div><h2 id="panoramaSideTitle">Cargando indicador…</h2><p id="panoramaSideSubtitle">Fuente y periodicidad</p></div></div><div class="p-chart-container p-side-chart"><canvas id="panoramaSideChart" role="img" aria-label="Serie histórica complementaria"></canvas><div class="p-chart-empty" id="panoramaSideEmpty" hidden>Sin observaciones para este indicador.</div></div><div class="p-chart-footer"><span id="panoramaSideSource">Fuente pendiente</span></div></article>
+         <aside class="p-panel p-reading" aria-labelledby="panoramaReadingTitle"><div class="p-reading-heading"><div class="p-reading-icon" aria-hidden="true">▣</div><h2 id="panoramaReadingTitle">Lectura económica</h2><span class="p-reading-arrow" aria-hidden="true">→</span></div><div class="p-reading-highlight" id="panoramaReadingHighlight">Síntesis descriptiva de los últimos datos disponibles.</div><div id="panoramaInsights" class="p-reading-items" aria-live="polite"><p>Preparando síntesis basada en las últimas observaciones.</p></div><p class="p-reading-note">Lecturas descriptivas, no pronósticos ni inferencias causales.</p></aside>
+         <div class="p-minis" id="panoramaMinis" aria-label="Tendencias económicas complementarias"></div>
+       </div>
+       <div class="p-footer-source"><span><span class="p-live-dot" aria-hidden="true"></span> <span id="headingPeriod">Fuentes oficiales y últimos periodos disponibles</span> · <span id="panoramaDataBadge" role="status">Consultando datos oficiales…</span></span><div class="p-footer-actions"><button type="button" id="panoramaMoreMetrics" aria-expanded="false" aria-controls="panoramaKpis">Más indicadores +2</button><button type="button" id="syncApiBtn" aria-label="Actualizar datos oficiales" title="Actualizar datos"><svg id="syncIcon" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-refresh"/></svg> Actualizar</button><a href="docs/fuentes-bcrp.md">Metodología y códigos ↗</a></div></div>
+     </div>
+     <div class="p-detail-intro"><div><span class="p-panel-kicker">EXPLORACIÓN AVANZADA</span><h2>Profundiza en los datos</h2><p>Comparaciones internacionales, series anuales, herramientas de análisis y trazabilidad de cada consulta.</p></div><span class="p-detail-counter">02 / ANÁLISIS DETALLADO</span></div>
+     <div class="p-secondary-filters"><label for="benchmarkSelect">Comparar con</label><select class="field-select" id="benchmarkSelect"><option value="LCN">🌎 América Latina y el Caribe</option><option value="USA">🇺🇸 Estados Unidos</option><option value="CHL">🇨🇱 Chile</option><option value="COL">🇨🇴 Colombia</option><option value="MEX">🇲🇽 México</option><option value="BRA">🇧🇷 Brasil</option><option value="PER">🇵🇪 Perú</option></select></div>
+     <details class="p-more-bcrp"><summary>Ver series adicionales del BCRP <span aria-hidden="true">↗</span></summary>
      <article class="surface" style="padding:var(--space-5);margin-bottom:var(--space-5)" aria-labelledby="bcrpTitle">
        <h2 id="bcrpTitle">Perú en profundidad (BCRP)</h2>
        <p>Series mensuales oficiales · Banco Central de Reserva del Perú</p>
        <div id="bcrpResults" aria-live="polite">Consultando BCRP…</div>
      </article>
+     </details>
      <div class="executive-grid reveal">
       <div class="executive premium-ring">
        <div class="executive-content"><div class="executive-top"><span class="eyebrow">LECTURA ECONÓMICA</span><span id="summaryYearTag" class="cut-tag">Corte WDI: 2024</span></div><h2 id="executiveHeadline">Preparando síntesis macroeconómica...</h2><p id="executiveNarrative">Consultando los indicadores disponibles.</p></div>

@@ -40,14 +40,17 @@
    const horizontal=cfg.options?.indexAxis==='y';
    const bars=ds.filter(d=>(d.type||cfg.type)==='bar'),lines=ds.filter(d=>(d.type||cfg.type)==='line');
    const showLegend=ds.length>1 && cfg.options?.plugins?.legend?.display!==false;
-   const pad={left:horizontal?124:52,right:horizontal?34:14,top:showLegend?41:17,bottom:horizontal?33:43};
+   const compact=!horizontal&&h<155;
+   const pad={left:horizontal?124:compact?43:52,right:horizontal?34:14,top:showLegend?41:compact?10:17,bottom:horizontal?33:compact?26:43};
    if(w<470&&horizontal)pad.left=105;
    const plot={x:pad.left,y:pad.top,w:Math.max(30,w-pad.left-pad.right),h:Math.max(30,h-pad.top-pad.bottom)};
    this.plot=plot;this.horizontal=horizontal;this.labels=labels;this.ds=ds;
    const values=ds.flatMap(d=>d.data||[]).filter(v=>Number.isFinite(v));
-   let min=Math.min(0,...values), max=Math.max(0,...values);
+   const includeZero=cfg.options?.scales?.y?.beginAtZero!==false;
+   let min=values.length?Math.min(...values):0,max=values.length?Math.max(...values):0;
+   if(includeZero){min=Math.min(0,min);max=Math.max(0,max);}
    if(min===max){min-=1;max+=1;}
-   let extra=(max-min)*.09;max+=extra;min-=extra;
+   let extra=(max-min)*.09;max+=extra;min=includeZero&&min===0?0:min-extra;
    this.min=min;this.max=max;
    ctx.font='500 10px DM Sans,Arial,sans-serif';ctx.textBaseline='middle';
    if(showLegend){let xx=plot.x;
@@ -59,7 +62,7 @@
       ctx.fillText(name,xx+13,14);xx+=ctx.measureText(name).width+35;
     });
    }
-   const nTicks=4;
+   const nTicks=Math.max(2,Math.min(4,Number(cfg.options?.scales?.y?.ticks?.maxTicksLimit||5)-1));
    for(let j=0;j<=nTicks;j++){
     const value=min+(max-min)*(horizontal?j:nTicks-j)/nTicks;
     if(horizontal){const x=plot.x+plot.w*j/nTicks;
@@ -86,9 +89,16 @@
       });
     });
    }else{
-    labels.forEach((lab,i)=>{const skip=w<400?3:w<620?2:labels.length>10?2:1;if(i%skip&&i!==labels.length-1)return;
+    let lastTickRight=-Infinity;
+    labels.forEach((lab,i)=>{
+     const skip=w<400?3:w<620?2:labels.length>10?2:1;
+     if((i%skip&&i!==labels.length-1)||!String(lab).trim())return;
      const x=plot.x+plot.w*(i+.5)/Math.max(1,labels.length);
-     ctx.font='500 10px DM Sans,Arial,sans-serif';ctx.fillStyle=text;ctx.textAlign='center';ctx.fillText(String(lab),x,plot.y+plot.h+18);
+     ctx.font='500 10px DM Sans,Arial,sans-serif';
+     const width=ctx.measureText(String(lab)).width;
+     if(x-width/2<lastTickRight+7||x-width/2<2||x+width/2>w-2)return;
+     ctx.fillStyle=text;ctx.textAlign='center';ctx.fillText(String(lab),x,plot.y+plot.h+18);
+     lastTickRight=x+width/2;
     });
     if(bars.length){
      const band=plot.w/Math.max(1,labels.length),barGroup=band*.66,one=barGroup/Math.max(1,bars.length);
@@ -104,15 +114,18 @@
       const color=this.color(ix,d);this.points.push(...points.filter(Boolean));
       if(d.fill){
        const gradient=ctx.createLinearGradient(0,plot.y,0,plot.y+plot.h);
-       gradient.addColorStop(0,M.color('--tint-78'));gradient.addColorStop(1,M.color('--tint-89'));
+       gradient.addColorStop(0,cfg.options?.premiumPanorama?'rgba(48,134,255,.22)':M.color('--tint-78'));
+       gradient.addColorStop(1,cfg.options?.premiumPanorama?'rgba(48,134,255,0)':M.color('--tint-89'));
        ctx.beginPath();let start=null;
-       points.forEach((p,i)=>{if(!p)return;if(!start){ctx.moveTo(p.x,scaleY(0));ctx.lineTo(p.x,p.y);start=p;}else ctx.lineTo(p.x,p.y);});
-       if(start){const last=points.filter(Boolean).at(-1);ctx.lineTo(last.x,scaleY(0));ctx.closePath();ctx.fillStyle=gradient;ctx.fill();}
+       const baseline=includeZero?0:min;
+       points.forEach((p,i)=>{if(!p)return;if(!start){ctx.moveTo(p.x,scaleY(baseline));ctx.lineTo(p.x,p.y);start=p;}else ctx.lineTo(p.x,p.y);});
+       if(start){const last=points.filter(Boolean).at(-1);ctx.lineTo(last.x,scaleY(baseline));ctx.closePath();ctx.fillStyle=gradient;ctx.fill();}
       }
       ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=d.borderWidth||2.4;ctx.lineCap='round';ctx.lineJoin='round';
       if(d.borderDash)ctx.setLineDash(d.borderDash);
-      let prev=false;points.forEach(p=>{if(!p){prev=false;return;}if(prev)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);prev=true;});ctx.stroke();ctx.setLineDash([]);
-      points.forEach(p=>{if(!p)return;ctx.beginPath();ctx.arc(p.x,p.y,3.15,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=dark?M.color('--primary'):M.color('--surface');ctx.stroke();});
+      let prev=null;points.forEach(p=>{if(!p){prev=null;return;}if(prev&&cfg.options?.premiumPanorama&&d.tension){const dx=p.x-prev.x;ctx.bezierCurveTo(prev.x+dx*.32,prev.y,p.x-dx*.32,p.y,p.x,p.y);}else if(prev)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);prev=p;});ctx.stroke();ctx.setLineDash([]);
+      const radius=Number.isFinite(d.pointRadius)?d.pointRadius:3.15;
+      if(radius>0)points.forEach(p=>{if(!p)return;ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=dark?M.color('--primary'):M.color('--surface');ctx.stroke();});
     });
    }
   }

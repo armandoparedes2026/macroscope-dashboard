@@ -15,6 +15,7 @@
     window.scrollTo({top:0,behavior:'instant'});
     if(view==='panorama') {
       M.renderCharts();
+      M.renderPanorama?.();
       // Deep-link desde la portada al comparador, sin crear otra ruta.
       if(new URLSearchParams(query).get('focus')==='compare'){
         requestAnimationFrame(()=>document.getElementById('compareTitle')?.scrollIntoView({block:'start',behavior:'instant'}));

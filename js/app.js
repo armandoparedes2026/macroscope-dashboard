@@ -23,7 +23,7 @@
   delete globalThis.ISLM;
   delete globalThis.LAB_CONTENT;
     function renderAll() {
-      renderExecutiveBanner();renderHeroPanels();renderInsightCards();renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();renderIslm();renderDataTableAndInspector();
+      renderExecutiveBanner();renderHeroPanels();renderInsightCards();renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();renderIslm();renderDataTableAndInspector();M.renderPanorama?.();
     }
 
     window.addEventListener('DOMContentLoaded',()=>{
@@ -36,19 +36,20 @@
       });
       choose('benchmarkSelect',state.benchmark,val=>{state.benchmark=val;renderAll();});
       syncBenchmarkOptions();
-      choose('periodSelect',state.period,val=>{state.period=val;renderExecutiveBanner();renderKpiCards();renderCharts();});
+      choose('periodSelect',state.period,val=>{state.period=val;renderExecutiveBanner();renderKpiCards();renderCharts();M.renderPanorama?.();});
       choose('indicatorSelectChart',state.activeIndicator,val=>globalThis.MacroScope.selectIndicator(val));
-      document.getElementById('syncApiBtn').addEventListener('click',()=>{syncLiveWorldBankData(true);loadBcrp();});
+      document.getElementById('syncApiBtn').addEventListener('click',()=>{syncLiveWorldBankData(true);loadBcrp();M.loadPanoramaBcrp?.();});
       document.getElementById('copyBriefBtn').addEventListener('click',copyExecutiveBrief);
       document.getElementById('exportCsvBtn').addEventListener('click',exportCsv);
       document.getElementById('tableSearchInput').addEventListener('input',e=>{state.tableFilter=e.target.value;renderDataTableAndInspector();});
       setupIslm();
       M.setupStudentViews();
+      M.setupPanorama?.();
       document.getElementById('themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
       const mode=document.documentElement.dataset.theme;
       document.documentElement.dataset.theme = mode === 'light' ? 'light' : 'dark';
       document.getElementById('themeIcon').setAttribute('href', mode === 'light' ? '#i-moon' : '#i-sun');
-      renderAll(); syncLiveWorldBankData(false); loadBcrp();
+      renderAll(); syncLiveWorldBankData(false); loadBcrp(); M.loadPanoramaBcrp?.();
       // Keep the sticky mobile nav right below the topbar, whatever its rendered height.
       const topbar=document.querySelector('.topbar');
       if(topbar && typeof ResizeObserver!=='undefined'){

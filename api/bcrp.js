@@ -19,6 +19,36 @@ export const SERIES = {
     "title": "Cuentas monetarias del Banco Central de Reserva del Perú - Reservas Internacionales Netas (millones US$)",
     "unit": "millones US$",
     "frequency": "monthly"
+  },
+  "PN02507AQ": {
+    "title": "Producto bruto interno (variación porcentual interanual) - PBI Global",
+    "unit": "% interanual",
+    "frequency": "quarterly"
+  },
+  "PD38045AM": {
+    "title": "Expectativas empresariales totales - Índice de expectativas de la economía a 3 meses",
+    "unit": "puntos",
+    "frequency": "monthly"
+  },
+  "PN38723BM": {
+    "title": "Balanza comercial - valores FOB (millones US$) - Balanza Comercial",
+    "unit": "millones US$",
+    "frequency": "monthly"
+  },
+  "PN01773AM": {
+    "title": "Producto bruto interno y demanda interna (índice 2007 = 100) - PBI Desestacionalizado - mensual",
+    "unit": "índice 2007=100",
+    "frequency": "monthly"
+  },
+  "PN38714BM": {
+    "title": "Balanza comercial - valores FOB (millones US$) - Exportaciones",
+    "unit": "millones US$",
+    "frequency": "monthly"
+  },
+  "PN38718BM": {
+    "title": "Balanza comercial - valores FOB (millones US$) - Importaciones",
+    "unit": "millones US$",
+    "frequency": "monthly"
   }
 };
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -32,13 +62,21 @@ export function parseBcrp(raw,codes,fetchedAt=new Date().toISOString()) {
     const index=data.config.series.findIndex(s=>s.name===meta.title);
     if(index<0)throw Error('Título BCRP inesperado para '+code);
     const observations=data.periods.map(row=>{
-      const match=/^([A-Za-z]{3})\.(\d{4})$/.exec(row.name);
-      const month=match?MONTHS.indexOf(match[1]):-1;
-      if(month<0||!Array.isArray(row.values)||row.values.length!==codes.length)throw Error('Periodo BCRP inválido');
+      const monthly=/^([A-Za-z]{3})\.(\d{4})$/.exec(row.name);
+      const quarter=/^T([1-4])\.(\d{2}|\d{4})$/.exec(row.name);
+      let date;
+      if(meta.frequency==='monthly'&&monthly&&MONTHS.includes(monthly[1])){
+        date=monthly[2]+'-'+String(MONTHS.indexOf(monthly[1])+1).padStart(2,'0')+'-01';
+      }else if(meta.frequency==='quarterly'&&quarter){
+        const fragment=quarter[2];
+        const year=fragment.length===2?(Number(fragment)>=70?1900:2000)+Number(fragment):Number(fragment);
+        date=year+'-'+String(1+(Number(quarter[1])-1)*3).padStart(2,'0')+'-01';
+      }
+      if(!date||!Array.isArray(row.values)||row.values.length!==codes.length)throw Error('Periodo BCRP inválido');
       const rawValue=row.values[index];
       const value=rawValue===null||String(rawValue).trim().toLowerCase()==='n.d.'?null:Number(rawValue);
       if(value!==null&&(String(rawValue).trim()===''||!Number.isFinite(value)))throw Error('Valor BCRP inválido');
-      return {period:row.name,date:match[2]+'-'+String(month+1).padStart(2,'0')+'-01',value};
+      return {period:row.name,date,value};
     }).sort((a,b)=>a.date.localeCompare(b.date));
     return {source:'BCRP',code,...meta,observations,fetchedAt};
   });
