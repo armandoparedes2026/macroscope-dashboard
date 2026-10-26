@@ -1,56 +1,33 @@
 (function () {
   'use strict';
   const M = globalThis.MacroScope;
-  const ALL_VIEWS = [
-    'inicio',
-    'aprendizaje',
-    'historico',
-    'indicadores',
-    'exploracion',
-    'panorama',
-    'comparacion',
-    'simulacion',
-    'laboratorio',
-    'modelos',
-    'observatorio',
-    'fuentes',
-    'ayuda'
-  ];
   let selectedSourceId = 'bcrpdata';
 
   function route() {
     const [requested, query=''] = location.hash.slice(1).split('?');
-    const view = ALL_VIEWS.includes(requested) ? requested : 'inicio';
+    const view = M.navigation.canonicalView(requested);
+    const canonical = M.navigation.canonicalHash(location.hash);
+    if (location.hash !== canonical) history.replaceState(null, '', canonical);
+    document.documentElement.dataset.activeView = view;
     const overviewSection = document.getElementById('tab-overview');
     const simulatorSection = document.getElementById('tab-simulator');
     if (overviewSection) {
-      overviewSection.dataset.view = view === 'exploracion' ? 'exploracion' : 'panorama';
+      overviewSection.dataset.view = 'exploracion';
     }
     if (simulatorSection) {
-      simulatorSection.dataset.view = view === 'simulacion' ? 'simulacion' : 'laboratorio';
+      simulatorSection.dataset.view = 'simulacion';
     }
-    M.state.activeTab =
-      view === 'panorama' || view === 'exploracion'
-        ? 'overview'
-        : view === 'laboratorio' || view === 'simulacion'
-          ? 'simulator'
-          : view;
+    M.state.activeTab = M.navigation.destinations.find(d => d.id === view)?.tab || view;
     document.querySelectorAll('[data-view]').forEach(el => { el.hidden = el.dataset.view !== view; });
-    const navRoute =
-      view === 'exploracion' || view === 'historico' || view === 'indicadores' || view === 'observatorio'
-        ? 'panorama'
-        : view === 'simulacion' || view === 'aprendizaje' || view === 'modelos'
-          ? 'laboratorio'
-          : view;
     document.querySelectorAll('[data-route]').forEach(el => {
-      if(el.dataset.route === navRoute) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current');
+      if(el.dataset.route === view) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current');
     });
     document.querySelector('.nav-menu').open = innerWidth>1120;
     const target=document.querySelector(`[data-view="${view}"]`);
     if (target) target.focus({preventScroll:true});
     window.scrollTo({top:0,behavior:'instant'});
     const params = new URLSearchParams(query);
-    if(view==='panorama' || view==='exploracion') {
+    if(view==='exploracion') {
       M.renderCharts();
       M.renderPanorama?.();
       if(params.get('focus')==='compare'){
@@ -58,7 +35,7 @@
       }
     }
     if(view==='comparacion') M.renderComparisonDashboard?.();
-    if(view==='laboratorio' || view==='simulacion') M.renderIslm();
+    if(view==='simulacion') M.renderIslm();
     if(view==='aprendizaje') M.renderAprendizajeView?.();
     if(view==='historico') M.renderHistoricoView?.();
     if(view==='indicadores') M.renderIndicadoresView?.();
@@ -120,13 +97,25 @@
       </div>
     `;
   }
+  function sourceCard(source) {
+    const catalog = M.SOURCES_CATALOG;
+    return `<article class="source-card surface" data-source-card="${escapeHTML(source.id)}">
+      <div class="source-card-identity"><span class="source-emblem" aria-hidden="true">${escapeHTML(source.orgShort)}</span><div><div class="eyebrow">${escapeHTML(catalog.SCOPES[source.scope])}</div><h2>${escapeHTML(source.name)}</h2></div></div>
+      <p class="source-org">${escapeHTML(source.org)}</p><p class="source-description">${escapeHTML(source.useFor)}</p>
+      <div class="source-access-tags">${source.access.slice(0,3).map(key=>`<span>${escapeHTML(catalog.ACCESS[key])}</span>`).join('')}</div>
+      ${source.note?`<p class="source-warning">${escapeHTML(source.note)}</p>`:''}
+      ${source.linkStatus==='antibot'?'<p class="source-warning">Puede pedir una verificación del navegador</p>':''}
+      <div class="source-actions"><button class="control-action source-sheet-action" type="button" data-select-source="${escapeHTML(source.id)}">Ver ficha <span aria-hidden="true">→</span></button><a class="control-action source-icon-action" href="${escapeHTML(source.url)}" target="_blank" rel="noopener" aria-label="Abrir ${escapeHTML(source.name)}" title="Abrir fuente oficial">↗</a><button class="control-action source-icon-action" type="button" data-cite-source="${escapeHTML(source.id)}" aria-label="Copiar cita de ${escapeHTML(source.name)}" title="Copiar cita">${M.navigation.icon('book')}</button></div>
+    </article>`;
+  }
   function renderSourceDirectory(params) {
     const catalog=M.SOURCES_CATALOG;
     const filters={course:params.get('course')||'',scope:params.get('scope')||'',access:params.get('access')||'',query:params.get('q')||''};
     for(const [key,id] of [['course','Course'],['scope','Scope'],['access','Access'],['query','Query']]) document.getElementById('source'+id).value=filters[key];
     const sources=catalog.filterSources(filters);
     document.getElementById('sourceCount').textContent=`${sources.length} fuentes encontradas`;
-    document.getElementById('sourceResults').innerHTML=sources.length?sources.map(source=>`<article class="source-card surface" data-source-card="${escapeHTML(source.id)}"><div class="eyebrow">${escapeHTML(catalog.SCOPES[source.scope])}</div><h2>${escapeHTML(source.name)}</h2><p class="source-org">${escapeHTML(source.org)}</p><p>${escapeHTML(source.useFor)}</p><p class="data-note">Temas: ${escapeHTML(source.topics.join(', '))}</p><dl><dt>Frecuencia</dt><dd>${escapeHTML(source.frequency)}</dd><dt>Acceso</dt><dd>${escapeHTML(source.access.map(key=>catalog.ACCESS[key]).join(' · '))}</dd><dt>Nivel</dt><dd>${escapeHTML({basico:'Básico',intermedio:'Intermedio',avanzado:'Avanzado'}[source.level])}</dd></dl>${source.note?`<p class="source-warning">${escapeHTML(source.note)}</p>`:''}${source.linkStatus==='antibot'?'<p class="source-warning">Puede pedir una verificación del navegador al abrirse</p>':''}<div class="source-actions"><a class="control-action primary" href="${escapeHTML(source.url)}" target="_blank" rel="noopener">Abrir fuente</a><button class="control-action" type="button" data-cite-source="${source.id}">Copiar cita</button><button class="control-action" type="button" data-select-source="${source.id}">Ver ficha</button></div></article>`).join(''):'<p>Sin resultados. Prueba otro tema o limpia los filtros.</p>';
+    document.getElementById('sourceResults').innerHTML=sources.length?sources.map(sourceCard).join(''):'<p>Sin resultados. Prueba otro tema o limpia los filtros.</p>';
+    document.querySelectorAll('[data-source-access]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.sourceAccess===filters.access)));
     renderSourceDetailSheet(sources);
     const dates=[...new Set(catalog.SOURCES.map(source=>source.checked))];
     document.getElementById('sourceChecked').textContent='Enlaces comprobados el '+dates.map(date=>new Date(date+'T12:00:00').toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'})).join(', ');
@@ -191,6 +180,6 @@
   function citationButton(options) {
     const button=document.createElement('button');button.type='button';button.className='control-action citation-button';button.textContent='Cómo citar';button.setAttribute('aria-label','Cómo citar '+options.code);button.addEventListener('click',()=>copyText(dataCitation(options)));return button;
   }
-  function setupStudentViews() { setupSourceDirectory(); window.addEventListener('resize',()=>{document.querySelector('.nav-menu').open=innerWidth>1120;}); renderGlossary(); document.getElementById('glossarySearch').addEventListener('input',renderGlossary); window.addEventListener('hashchange',route); route(); }
+  function setupStudentViews() { M.setupNavigation(); M.setupReferenceLayout(); setupSourceDirectory(); window.addEventListener('resize',()=>{document.querySelector('.nav-menu').open=innerWidth>1120;}); renderGlossary(); document.getElementById('glossarySearch').addEventListener('input',renderGlossary); window.addEventListener('hashchange',route); route(); }
   Object.assign(M,{setupStudentViews,route,renderSourceDirectory,copyText,escapeHTML,showGlossaryTerm,localDate,dataCitation,citationButton});
 })();

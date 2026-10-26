@@ -7,19 +7,7 @@
   'use strict';
   const M = (globalThis.MacroScope ||= {});
 
-  const EXP_ROUTES = [
-    { route: 'inicio', num: '00', label: 'Inicio' },
-    { route: 'aprendizaje', num: '01', label: 'Aprendizaje guiado' },
-    { route: 'historico', num: '02', label: 'Análisis histórico' },
-    { route: 'indicadores', num: '03', label: 'Indicadores' },
-    { route: 'exploracion', num: '04', label: 'Exploración' },
-    { route: 'comparacion', num: '05', label: 'Comparación' },
-    { route: 'simulacion', num: '06', label: 'Simulación' },
-    { route: 'modelos', num: '07', label: 'Modelos y tendencias' },
-    { route: 'observatorio', num: 'PE', label: 'Observatorio del Perú' },
-    { route: 'fuentes', num: 'DB', label: 'Fuentes' },
-    { route: 'ayuda', num: '?', label: 'Ayuda' }
-  ];
+  const EXP_ROUTES = M.navigation.destinations.map((d, i) => ({ route: d.id, num: String(i).padStart(2, '0'), label: d.label }));
 
   const esc = val =>
     String(val ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -30,21 +18,8 @@
       : 'N/D';
 
   function renderRibbonHTML(activeRoute) {
-    const normalized =
-      activeRoute === 'panorama'
-        ? 'exploracion'
-        : activeRoute === 'laboratorio'
-          ? 'simulacion'
-          : activeRoute;
-    return `<nav class="ms-exp-ribbon" aria-label="Navegación de las siete experiencias">
-      <div class="ms-exp-ribbon-links">
-        ${EXP_ROUTES.map(
-          item => `<a class="ms-exp-pill${normalized === item.route ? ' is-active' : ''}" href="#${item.route}" ${
-            normalized === item.route ? 'aria-current="page"' : ''
-          }><span class="ms-exp-pill-num">${esc(item.num)}</span><span>${esc(item.label)}</span></a>`
-        ).join('')}
-      </div>
-    </nav>`;
+    // Global navigation owns destinations; do not repeat eleven competing tabs in every view.
+    return '';
   }
 
   function downloadCsvFile(filename, csvContent) {

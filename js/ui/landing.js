@@ -114,13 +114,18 @@
     document.getElementById('homeNext')?.addEventListener('click', () => select(current + 1));
     dots.forEach((dot, index) => dot.addEventListener('click', () => select(index)));
 
+    function openSlide(index) {
+      const link = slides[index].querySelector('.orbit-card-open');
+      const destination = link?.dataset.destination || link?.getAttribute('href');
+      if (destination) location.hash = globalThis.MacroScope.navigation.canonicalHash(destination).slice(1);
+    }
+
     slides.forEach((slide, index) => slide.addEventListener('click', event => {
       if (suppressSwipeClick || event.target.closest('a')) return;
       if (index !== current) {
         select(index);
       } else {
-        const href = slide.querySelector('.orbit-card-open')?.getAttribute('href');
-        if (href) location.hash = href.slice(1);
+        openSlide(index);
       }
     }));
 
@@ -139,8 +144,7 @@
         event.preventDefault();
         select(total - 1);
       } else if (event.key === 'Enter' && event.target === track) {
-        const href = slides[current].querySelector('.orbit-card-open')?.getAttribute('href');
-        if (href) location.hash = href.slice(1);
+        openSlide(current);
       }
     });
 
@@ -227,6 +231,15 @@
       event.preventDefault();
       event.stopPropagation();
     }, true);
+
+    // During a perspective transition Chromium can hit the track instead of the
+    // visible card. Honour clicks inside the active card's projected bounds,
+    // while leaving side-card selection, buttons and drag suppression intact.
+    stage.addEventListener('click', event => {
+      if (suppressSwipeClick || event.defaultPrevented || ![stage, track].includes(event.target)) return;
+      const box = slides[current].getBoundingClientRect();
+      if (event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom) openSlide(current);
+    });
 
     // Etiqueta accesible actualizada sin interferir con setTheme() del resto de la web.
     if (themeButton) {

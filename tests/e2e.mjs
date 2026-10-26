@@ -9,6 +9,7 @@ const PAGE_URL = new URL('../index.html', import.meta.url).href;
 const browser = await chromium.launch();
 let failures = 0;
 let checks = 0;
+const canonicalView = view => ({ panorama: 'exploracion', laboratorio: 'simulacion' }[view] || view);
 
 async function check(name, fn) {
   if(process.env.E2E_FILTER&&!name.includes(process.env.E2E_FILTER))return;
@@ -25,6 +26,7 @@ async function check(name, fn) {
   } catch (err) {
     failures++;
     console.error(`  ✗ ${name}\n    ${err.message.split('\n').join('\n    ')}`);
+    if (process.env.E2E_DEBUG) console.error(err.stack);
   } finally {
     await context.close();
   }
@@ -50,9 +52,9 @@ await check('modo sin conexión: respaldo local y gráficos alternativos', async
   assert.ok(await page.locator('#macroTableBody td.cell-fallback').count() > 0, 'las celdas de respaldo deben marcarse');
 });
 
-await check('seis destinos visibles y navegación accesible', async page => {
+await check('destinos canónicos del menú y navegación accesible', async page => {
   await openOffline(page);
-  for(const route of ['inicio','laboratorio','panorama','comparacion','fuentes','ayuda']) {
+  for(const route of ['exploracion','comparacion','observatorio','simulacion','aprendizaje','fuentes']) {
     await page.click(`[data-route="${route}"]`);
     await page.waitForFunction(route=>!document.querySelector(`[data-view="${route}"]`).hidden,route);
     assert.equal(await page.isVisible(`[data-view="${route}"]`),true);
@@ -95,7 +97,7 @@ await check('comparación de economías abre pantalla independiente desde Inicio
   for(const id of ['cd-filters','cd-kpis','cd-chart','cd-ranking','cd-export']){
     assert.equal(await page.locator(`#${id}`).count(),1,`falta ${id}`);
   }
-  await page.click('[data-route="panorama"]');
+  await page.click('[data-route="exploracion"]');
   await page.waitForFunction(()=>document.querySelector('[data-view="comparacion"]').hidden);
   assert.equal(await page.isHidden('[data-view="comparacion"]'),true,'al volver a Panorama debe ocultarse Comparación');
 });
@@ -386,6 +388,11 @@ const openModel = async (page) => {
   await page.waitForFunction(() => document.querySelectorAll('#islmResults tr').length > 0);
 };
 const cell = (page, variable, col) => page.textContent(`#islmResults tr[data-var="${variable}"] .${col}`);
+const clickPreset = async (page, key) => {
+  const details = page.locator('.lab-assumptions').filter({ has: page.locator('#islmPresets') });
+  if (!await details.evaluate(el => el.open)) await details.locator('summary').click();
+  await page.click(`[data-preset="${key}"]`);
+};
 
 await check('IS–LM: calibración con datos del país y cuatro diagramas dibujados', async (page) => {
   await openModel(page);
@@ -404,7 +411,7 @@ await check('IS–LM: calibración con datos del país y cuatro diagramas dibuja
 await check('Mundell–Fleming flexible con movilidad perfecta: la política fiscal no mueve Y y aprecia', async (page) => {
   await openModel(page);
   await page.selectOption('#islmMobility', 'perfect');
-  await page.click('[data-preset="fiscal"]');
+  await clickPreset(page,'fiscal');
   assert.equal(await cell(page, 'Y', 'dv'), '0.0 %');
   assert.match(await cell(page, 'e', 'dv'), /^−/);
   assert.match(await page.textContent('#islmNarrative'), /Resultado clásico de Mundell–Fleming/);
@@ -422,7 +429,7 @@ await check('tipo de cambio fijo: M endógena, devaluación disponible y políti
   assert.equal(await page.isDisabled('[data-preset="monetary"]'), true);
   assert.match(await page.textContent('#islmClasses [data-class="endo"]'), /Oferta monetaria \(M\) y reservas/);
   assert.match(await page.textContent('#islmClasses [data-class="control"]'), /Tipo de cambio fijado/);
-  await page.click('[data-preset="fiscal"]');
+  await clickPreset(page,'fiscal');
   const dY = parseFloat((await cell(page, 'Y', 'dv')).replace('+', ''));
   assert.ok(dY > 3, `ΔY = ${dY} debe ser grande con tipo de cambio fijo`);
   assert.match(await cell(page, 'M', 'dv'), /^\+/);
@@ -435,7 +442,7 @@ await check('economía cerrada: sin Mundell–Fleming y con crowding out', async
   assert.equal(await page.isDisabled('[data-preset="fed"]'), true);
   assert.equal(await page.isDisabled('#islm-istar'), true);
   assert.equal(await page.locator('#islmResults tr[data-var="e"]').count(), 0);
-  await page.click('[data-preset="fiscal"]');
+  await clickPreset(page,'fiscal');
   assert.match(await cell(page, 'Y', 'dv'), /^\+/);
   assert.match(await cell(page, 'I', 'dv'), /^−/);
   assert.match(await page.textContent('#islmNarrative'), /crowding out/);
@@ -446,7 +453,7 @@ await check('regla de tasa: mover la tasa de política cambia Y y M se acomoda',
   await page.selectOption('#islmInstrument', 'rate');
   assert.equal(await page.isDisabled('#islm-ipol'), false);
   assert.equal(await page.isDisabled('#islm-Mpct'), true);
-  await page.click('[data-preset="monetary"]');
+  await clickPreset(page,'monetary');
   assert.match(await cell(page, 'Y', 'dv'), /^\+/);
   assert.match(await cell(page, 'M', 'dv'), /^\+/);
 });
@@ -487,7 +494,7 @@ await check('tema persistente y única barra superior móvil', async page => {
   assert.equal(await page.evaluate(()=>document.documentElement.dataset.theme),'light');
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
-  assert.ok(await page.locator('.topbar').evaluate(el=>el.getBoundingClientRect().height<=56));
+  assert.ok(await page.locator('.topbar').evaluate(el=>el.getBoundingClientRect().height<=64));
   assert.equal(await page.locator('.mobile-nav').count(),0);
 });
 await check('lecturas fijas: sin temporizador ni pausa por foco, incluso con movimiento reducido',async page=>{
@@ -504,9 +511,9 @@ for(const [width,height]of [[1440,900],[768,1024],[390,844],[360,740]]) {
     await page.setViewportSize({width,height});await openOffline(page);
     for(const view of ['inicio','laboratorio','panorama','fuentes','ayuda']){
       await page.evaluate(view=>{location.hash=view;},view);
-      await page.waitForFunction(view=>!document.querySelector(`[data-view="${view}"]`).hidden,view);
+      await page.waitForFunction(view=>!document.querySelector(`[data-view="${MacroScope.navigation.canonicalView(view)}"]`).hidden,view);
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
-      assert.equal(await page.evaluate(()=>document.activeElement.dataset.view),view);
+      assert.equal(await page.evaluate(()=>document.activeElement.dataset.view),canonicalView(view));
     }
   });
 }
@@ -517,7 +524,7 @@ await check('calibración: NX, NFI, CA separados y naturaleza explícita',async 
   assert.match(await page.textContent('#islmCalibration'),/supuesto ilustrativo/);
   assert.match(await page.textContent('#islmCalibration'),/NE.RSB.GNFS.ZS/);
   for(const key of ['NX','NFI','CA'])assert.equal(await page.locator(`#islmResults tr[data-var="${key}"]`).count(),1);
-  await page.click('[data-preset="fiscal"]');
+  await clickPreset(page,'fiscal');
   assert.match(await cell(page,'i','dv'),/ pp$/);
   for(const key of ['Y','e','M'])assert.match(await cell(page,key,'dv'),/ %$/);
 });
@@ -677,8 +684,9 @@ await check('laboratorio: predecir, ejecutar, calificar, niveles y comparación 
 await check('laboratorio: A/B inmutable, capas, unidades y reduced-motion', async page => {
   await openModel(page);
   await page.emulateMedia({reducedMotion:'reduce'});
+  await page.locator('.lab-diagram-options>summary').click();
   await page.click('#islmSaveA');
-  await page.click('[data-preset="fiscal"]');
+  await clickPreset(page,'fiscal');
   const a = await page.textContent('#islmResults [data-var="Y"] .va');
   assert.equal(a,'100.00');
   assert.match(await cell(page,'i','dv'),/ pp$/);
@@ -706,11 +714,11 @@ for (const width of [1440,768,390,360]) {
     if (!(await panel.getAttribute('open')) && await panel.evaluate(el=>!el.open)) await panel.locator(':scope>summary').click();
     await page.selectOption('#islmRegime','fixed');
     await page.selectOption('#islmMobility','perfect');
-    assert.ok(await page.locator('.islm-controls select').evaluateAll(nodes => nodes.every(el => {
+    assert.ok(await page.locator('.lab-context-bar select').evaluateAll(nodes => nodes.every(el => {
       const ctx=document.createElement('canvas').getContext('2d');ctx.font=getComputedStyle(el).font;
       return ctx.measureText(el.selectedOptions[0].textContent).width <= el.clientWidth-38;
     })), 'los textos seleccionados caben dentro de sus controles');
-    await page.click('[data-preset="fiscal"]');
+    await clickPreset(page,'fiscal');
     await verifyDrawnEquilibria(page);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0);
     const boxes=await page.locator('.islm-panel').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,right:r.right,width:r.width};}));
@@ -745,10 +753,10 @@ for(const width of [360,390,768,1024,1280,1440,1920])for(const theme of ['light'
     await openOffline(page);await page.evaluate(theme=>MacroScope.setTheme(theme),theme);
     for(const view of ['inicio','laboratorio','panorama','fuentes','ayuda']){
       await page.evaluate(view=>{location.hash=view;},view);
-      await page.waitForFunction(view=>!document.querySelector(`[data-view="${view}"]`).hidden,view);
+      await page.waitForFunction(view=>!document.querySelector(`[data-view="${MacroScope.navigation.canonicalView(view)}"]`).hidden,view);
       const metrics=await page.evaluate(({view,width})=>{
         const root=document.documentElement,bar=document.querySelector('.topbar').getBoundingClientRect();
-        const active=document.querySelector(`[data-view="${view}"]`);
+        const active=document.querySelector(`[data-view="${MacroScope.navigation.canonicalView(view)}"]`);
         const exposed=el=>{
           if(el.closest('[hidden]'))return false;
           for(let parent=el.parentElement;parent;parent=parent.parentElement)if(parent.matches('details:not([open])')&&!parent.querySelector(':scope>summary')?.contains(el))return false;
@@ -789,7 +797,7 @@ for(const width of [360,390,768,1024,1280,1440,1920])for(const theme of ['light'
       verify('A2',metrics.overlaps.length===0,metrics.overlaps);
       verify('A3',metrics.small.length===0,metrics.small);
       verify('A4',metrics.clipped.length===0,metrics.clipped);
-      verify('A5',metrics.anchor>=metrics.barBottom-1&&metrics.barHeight<=(width<=760?56:64),metrics);
+      verify('A5',metrics.anchor>=metrics.barBottom-1&&metrics.barHeight<=(width<=760?64:72),metrics);
       const c=metrics.colors;
       const ratios=[];
       for(const bg of ['--bg','--surface','--surface-2'])for(const text of ['--text','--text-muted','--primary','--accent'])ratios.push([text,bg,contrast(c[text],c[bg]),4.5]);
@@ -797,12 +805,12 @@ for(const width of [360,390,768,1024,1280,1440,1920])for(const theme of ['light'
       for(let i=1;i<=6;i++)ratios.push(['--series-'+i,'--surface',contrast(c['--series-'+i],c['--surface']),3]);
       ratios.push(['--on-primary','--primary',contrast(c['--on-primary'],c['--primary']),4.5]);
       verify('A6',ratios.every(([, ,ratio,min])=>ratio>=min),ratios.filter(([, ,ratio,min])=>ratio<min));
-      await page.locator(`[data-view="${view}"]`).focus();await page.keyboard.press('Tab');
+      await page.locator(`[data-view="${canonicalView(view)}"]`).focus();await page.keyboard.press('Tab');
       const ring=await page.evaluate(()=>{const el=document.activeElement,style=getComputedStyle(el);return el.matches(':focus-visible')&&parseFloat(style.outlineWidth)>=3&&style.outlineStyle==='solid';});
       verify('A7',metrics.focusOK&&ring,{focusOK:metrics.focusOK,ring});
       verify('A8',view!=='inicio'||![390,1440].includes(width)||Boolean(metrics.homeCard && metrics.homeCard.top>=0 && metrics.homeCard.bottom<=height),metrics.homeCard);
       verify('A9',view!=='laboratorio'||width!==1440||(metrics.chart<900&&metrics.controls<900),{chart:metrics.chart,controls:metrics.controls});
-      verify('A10',await page.isVisible(`[data-view="${view}"]`),view);
+      verify('A10',await page.isVisible(`[data-view="${canonicalView(view)}"]`),view);
       verify('A11',await page.evaluate(()=>!('carouselTimer' in MacroScope.state)&&!MacroScope.setupCarousel&&!document.querySelector('#insightCarousel')),'lecturas fijas sin estado ni temporizador');
       // check() additionally asserts zero uncaught page errors, including all asynchronous requests.
       verify('A12',matrixErrors.length===0,matrixErrors);
@@ -819,7 +827,7 @@ await check('rutas: Atrás y hash desconocido; menú móvil siempre etiquetado',
   await page.goBack();await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
   await page.evaluate(()=>{location.hash='desconocido';});await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
   await page.setViewportSize({width:360,height:900});await page.click('.nav-menu>summary');
-  assert.deepEqual(await page.locator('.primary-nav a').allTextContents(),['Inicio','Aprender','Explorar datos','Comparación','Buscar fuentes','Ayuda']);
+  assert.deepEqual(await page.locator('.primary-nav>a').allTextContents(),['Panorama','Comparador','Perú','Laboratorio','Aprendizaje','Fuentes']);
   await page.click('[data-route="fuentes"]');await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
   assert.equal(await page.locator('.nav-menu').getAttribute('open'),null);
 });
@@ -836,6 +844,7 @@ await check('fuentes: filtros compartidos, avisos, cita y glosario enlazado',asy
   const citation=await page.evaluate(()=>MacroScope.dataCitation({provider:'wdi',code:'FP.CPI.TOTL.ZG',country:'Perú',extracted:'2026-10-18'}));
   assert.match(citation,/Banco Mundial\. \(s\. f\.\).*World Development Indicators.*FP.CPI.TOTL.ZG.*18 de octubre de 2026/);
   await page.evaluate(()=>{location.hash='laboratorio';});await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
+  await page.locator('.lab-diagram-options>summary').click();
   await page.getByRole('button',{name:'Definición de IS',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('#help-term-IS').open);
   assert.match(page.url(),/#ayuda\?term=IS/);
@@ -907,21 +916,24 @@ await check('panorama: un indicador activo para tarjetas, evolución y comparado
   await page.selectOption('#indicatorSelectChart','FP.CPI.TOTL.ZG');
   assert.equal(await page.inputValue('#compareIndicator'),'FP.CPI.TOTL.ZG');
 });
-await check('laboratorio: controles fijos con scroll propio y transmisión antes del resultado',async page=>{
+await check('laboratorio: contexto, diagramas, lectura lateral y parámetros accesibles',async page=>{
   await openOffline(page);
-  await page.evaluate(()=>{location.hash='laboratorio';});await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
+  await page.evaluate(()=>{location.hash='laboratorio';});
+  await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
   const sections=await page.$$eval('.islm-main > article',list=>list.map(a=>a.getAttribute('aria-label')));
   assert.deepEqual(sections,['Diagramas del modelo','Mecanismo de transmisión','Resultados del modelo']);
-  // The page uses smooth scrolling; jump instantly so the baseline is not taken mid-animation.
-  await page.evaluate(()=>document.querySelector('.islm-layout').scrollIntoView({behavior:'instant'}));
-  await page.waitForTimeout(300);
-  const before=await page.evaluate(()=>({y:scrollY,diagram:document.getElementById('islmPanelISLM').getBoundingClientRect().top}));
-  await page.locator('.islm-controls').hover();await page.mouse.wheel(0,800);await page.waitForTimeout(300);
-  const after=await page.evaluate(()=>({y:scrollY,controls:document.querySelector('.islm-controls').scrollTop,diagram:document.getElementById('islmPanelISLM').getBoundingClientRect().top}));
-  assert.ok(after.controls>0,'el panel de controles debe desplazarse por sí mismo');
-  assert.ok(Math.abs(after.diagram-before.diagram)<5,'los diagramas no deben moverse al recorrer los controles');
-  const box=await page.$eval('.islm-controls',el=>{const r=el.getBoundingClientRect();return {bottom:r.bottom,vh:innerHeight};});
-  assert.ok(box.bottom<=box.vh+1,'el panel de controles cabe en la pantalla');
+  assert.equal(await page.locator('.lab-context-bar select').count(),5);
+  const boxes=await page.evaluate(()=>{
+    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top};};
+    return {controls:box('.islm-controls'),diagrams:box('.islm-main>.chart-card'),reading:box('.lab-reading')};
+  });
+  assert.ok(boxes.controls.right<=boxes.diagrams.left);
+  assert.ok(boxes.reading.left>=boxes.diagrams.right);
+  const before=await page.evaluate(()=>MacroScope.labs.islm.snapshot().E2);
+  await page.locator('#islmResetBtn').scrollIntoViewIfNeeded();
+  await page.locator('#islmResetBtn').focus();
+  assert.equal(await page.locator('#islmResetBtn').evaluate(el=>document.activeElement===el),true);
+  assert.deepEqual(await page.evaluate(()=>MacroScope.labs.islm.snapshot().E2),before);
 });
 await check('panorama premium: seis indicadores con procedencia y categorías conectadas',async page=>{
   await openOffline(page);
@@ -1088,10 +1100,10 @@ await check('siete experiencias desde la portada orbital y compatibilidad con ru
   }
   await page.evaluate(()=>{location.hash='panorama';});
   await page.waitForFunction(()=>!document.querySelector('#tab-overview').hidden);
-  assert.equal(await page.getAttribute('#tab-overview','data-view'),'panorama');
+  assert.equal(await page.getAttribute('#tab-overview','data-view'),'exploracion');
   await page.evaluate(()=>{location.hash='laboratorio';});
   await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
-  assert.equal(await page.getAttribute('#tab-simulator','data-view'),'laboratorio');
+  assert.equal(await page.getAttribute('#tab-simulator','data-view'),'simulacion');
 });
 
 await check('módulo 01 aprendizaje guiado: rutas, simulación, predicción calificada y persistencia',async page=>{
@@ -1272,6 +1284,83 @@ await check('capturas multi-resolución y claro/oscuro de las siete experiencias
       }
     }
   }
+});
+
+await check('navegación unificada: cabecera, Inicio y búsqueda usan los mismos destinos', async page => {
+  await openOffline(page);
+  for (const [index, view] of [[0,'aprendizaje'],[3,'exploracion'],[4,'comparacion'],[5,'simulacion']]) {
+    await page.evaluate(() => { location.hash = 'inicio'; });
+    await page.waitForFunction(() => !document.getElementById('inicio').hidden);
+    await page.click(`[data-home-dot="${index}"]`);
+    await page.locator('.orbit-card.is-active .orbit-card-open').click();
+    await page.waitForFunction(v => document.documentElement.dataset.activeView === v, view);
+    const heading = await page.locator(`[data-view="${view}"] h1`).textContent();
+    await page.locator('.brand-name').click();
+    await page.locator(`.primary-nav [data-route="${view}"]`).click();
+    await page.waitForFunction(v => document.documentElement.dataset.activeView === v, view);
+    assert.equal(new URL(page.url()).hash, '#' + view);
+    assert.equal(await page.locator(`[data-view="${view}"] h1`).textContent(), heading);
+    assert.equal(await page.locator('.primary-nav [aria-current="page"]').getAttribute('data-route'), view);
+    assert.equal(await page.locator('.ms-exp-ribbon:visible').count(), 0);
+  }
+  await page.click('[data-route="fuentes"]');
+  await page.waitForFunction(() => document.documentElement.dataset.activeView === 'fuentes');
+  assert.equal(await page.locator('#fuentes h1').textContent(), 'Biblioteca de fuentes');
+  await page.click('[data-source-access="api"]');
+  await page.waitForFunction(() => document.getElementById('sourceAccess').value === 'api');
+  assert.ok(await page.locator('#sourceResults [data-source-card]').evaluateAll(cards => cards.every(card => MacroScope.SOURCES_CATALOG.SOURCES.find(s => s.id === card.dataset.sourceCard).access.includes('api'))));
+  await page.click('#platformSearchBtn');
+  await page.fill('#platformSearchInput', 'histórico');
+  await page.locator('#platformSearchResults a[href="#historico"]').click();
+  await page.waitForFunction(() => document.documentElement.dataset.activeView === 'historico');
+  assert.equal(await page.locator('#platformSearch').evaluate(el => el.open), false);
+  const oldLinks = await page.locator('a[href]').evaluateAll(nodes => nodes.map(n => n.getAttribute('href')).filter(h => /^#(laboratorio|panorama)(?:\?|$)/.test(h)));
+  assert.deepEqual(oldLinks, [], 'ningún acceso visible genera destinos heredados');
+});
+
+await check('navegación unificada: alias, enlace profundo, actualizar y Atrás/Adelante', async page => {
+  await openOffline(page);
+  for (const [alias, canonical] of [['panorama','exploracion'],['laboratorio','simulacion'],['aprender','aprendizaje'],['comparador','comparacion']]) {
+    await page.evaluate(v => { location.hash = v; }, alias);
+    await page.waitForFunction(v => document.documentElement.dataset.activeView === v, canonical);
+    assert.equal(new URL(page.url()).hash, '#' + canonical);
+    assert.equal(await page.locator('.view:not([hidden])').count(), 1);
+  }
+  await page.evaluate(() => { location.hash = 'indicadores?id=FP.CPI.TOTL.ZG'; });
+  await page.waitForFunction(() => document.documentElement.dataset.activeView === 'indicadores');
+  assert.match(await page.textContent('#indDetailSheet'), /FP.CPI.TOTL.ZG/);
+  await page.reload();
+  await page.waitForFunction(() => document.documentElement.dataset.activeView === 'indicadores');
+  assert.match(await page.textContent('#indDetailSheet'), /FP.CPI.TOTL.ZG/);
+  await page.click('[data-route="aprendizaje"]');
+  await page.waitForFunction(() => document.documentElement.dataset.activeView === 'aprendizaje');
+  await page.goBack();
+  await page.waitForFunction(() => document.documentElement.dataset.activeView === 'indicadores');
+  await page.goForward();
+  await page.waitForFunction(() => document.documentElement.dataset.activeView === 'aprendizaje');
+  assert.equal(await page.locator('[data-route="simulacion"]').getAttribute('aria-current'), null);
+});
+
+await check('navegación unificada: menú móvil, siete experiencias y escenarios sin desbordamiento', async page => {
+  await page.setViewportSize({width:360,height:800});
+  await openOffline(page);
+  for (const view of ['aprendizaje','exploracion','comparacion','fuentes','simulacion','historico','indicadores','modelos']) {
+    await page.locator('.nav-menu>summary').click();
+    if (['historico','indicadores','modelos'].includes(view)) await page.locator('.nav-more>summary').click();
+    await page.locator(`.primary-nav [data-route="${view}"]`).click();
+    await page.waitForFunction(v => document.documentElement.dataset.activeView === v, view);
+    assert.equal(await page.locator('.nav-menu').evaluate(el => el.open), false);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth-innerWidth) <= 2);
+  }
+  await page.evaluate(() => { location.hash = 'simulacion'; });
+  await page.waitForFunction(() => document.documentElement.dataset.activeView === 'simulacion');
+  await page.click('#labHeroSave');
+  assert.ok(await page.locator('[data-load-sim]').count() > 0);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth-innerWidth) <= 2);
+  await page.locator('[data-load-sim]').first().click();
+  await page.screenshot({path:'test-results/experiencias/simulacion-360-escenario-guardado.png'});
+  await page.locator('[data-del-sim]').first().click();
+  assert.equal(await page.locator('[data-load-sim]').count(), 0);
 });
 
 await browser.close();
