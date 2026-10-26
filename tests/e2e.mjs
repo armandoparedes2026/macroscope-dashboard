@@ -84,6 +84,7 @@ await check('comparación de economías abre pantalla independiente desde Inicio
   await page.evaluate(()=>{location.hash='inicio';});
   await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
   await page.click('[data-home-dot="4"]');
+  await page.waitForTimeout(650); // Permite que termine la transición 3D antes de pulsar el enlace.
   await page.locator('.orbit-card.is-active .orbit-card-open').click();
   await page.waitForFunction(()=>location.hash==='#comparacion');
   await page.waitForFunction(()=>!document.querySelector('[data-view="comparacion"]').hidden);

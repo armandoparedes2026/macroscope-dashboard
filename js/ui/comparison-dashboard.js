@@ -9,6 +9,8 @@
   const POS={PER:[-75.0,-9.2],CHL:[-71.5,-33.4],COL:[-74.1,4.7],MEX:[-102.5,23.6],BRA:[-52.9,-14.2],USA:[-98.6,38.5],ARG:[-63.6,-38.4],BOL:[-64.7,-16.3],ECU:[-78.2,-1.8],URY:[-56.0,-32.5],PRY:[-58.4,-23.4],CRI:[-84.0,9.7],CHN:[103.8,35.9],JPN:[138.3,36.2],DEU:[10.5,51.2],ESP:[-3.7,40.4],CAN:[-106.3,56.1],KOR:[127.9,36.4]};
   const model={countries:['PER','CHL','COL','MEX'],indicator:SERIES[0],period:'10',group:'all',mode:'indicators',transform:'raw'};
   const charts={history:null,labor:null};
+  const mapState={map:null,geo:null,markers:[],failed:false,style:null,styleReady:false,lastSelection:null,timeout:null,geometryRequested:false,handlersBound:false};
+  const MAP_STYLE={light:'https://tiles.openfreemap.org/styles/positron',dark:'https://tiles.openfreemap.org/styles/dark'};
   const $=id=>document.getElementById('cd-'+id);
   const escapeHTML=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const flag=code=>`<span class="cd-flag" data-country="${code}" role="img" aria-label="Bandera de ${escapeHTML(COUNTRIES[code].name)}"></span>`;
@@ -106,18 +108,130 @@
     }}}},scales:{x:{grid:{color:'rgba(85,139,211,.1)'},ticks:{color:'#7693bc'}},y:{grid:{color:'rgba(85,139,211,.1)'},ticks:{color:'#7693bc'}}}}});
   }
 
-  function renderMap(selectedYears) {
-    const {year}=info(model.indicator,selectedYears);
-    $('map-subtitle').textContent=year?`${INDICATORS[model.indicator].title} · ${year}`:'Sin año común · localización orientativa';
+  function mapTags(year) {
+    return `<div class="cd-map-tags" aria-label="Economías representadas">${model.countries.map((country,i)=>{const value=year?runtimeDB[country]?.[model.indicator]?.[year]:null;return `<button type="button" data-cd-map-country="${country}" class="cd-map-tag"><span class="cd-map-dot" style="background:${PALETTE[i%PALETTE.length]}"></span>${flag(country)} ${escapeHTML(COUNTRIES[country].name)} <strong>${valueText(value,model.indicator)}</strong></button>`;}).join('')}</div>`;
+  }
+
+  function renderMapFallback(year) {
     const americas=model.countries.every(c=>COUNTRIES[c].group==='América Latina'||c==='USA'||c==='CAN');
     const project=([lon,lat])=>americas?[(lon+121)/98*560+18,(40-lat)/100*300+16]:[(lon+180)/360*574+14,(90-lat)/180*300+17];
     const land=americas?'<path d="M75 12 117 15 153 48 170 75 189 96 201 120 222 138 257 155 263 173 247 189 256 205 273 221 286 244 281 259 267 279 250 301 239 315 221 300 213 276 197 255 195 235 181 216 180 193 153 174 146 144 125 127 115 106 91 94 88 69 63 47Z"/><path d="M267 152 305 155 327 170 326 189 311 202 294 202 281 183Z"/>':'<path d="M57 54 104 31 145 51 172 94 165 118 191 151 178 184 148 213 119 229 100 197 92 164 70 139Z"/><path d="M170 177 198 190 214 228 203 282 181 321 160 282 155 239Z"/><path d="M299 71 351 34 420 45 471 33 548 65 550 101 506 114 476 136 441 124 414 156 394 179 366 170 348 133 315 124Z"/><path d="M331 178 380 177 396 222 382 272 352 295 323 252Z"/><path d="M478 253 525 245 544 278 519 297 489 286Z"/>';
     const markers=model.countries.map((country,i)=>{
       const point=project(POS[country]||[0,0]);
-      const raw=year?runtimeDB[country]?.[model.indicator]?.[year]:null;
       return `<g class="cd-map-point"><circle cx="${point[0]}" cy="${point[1]}" r="14" fill="${PALETTE[i%PALETTE.length]}" opacity=".14"/><circle cx="${point[0]}" cy="${point[1]}" r="6" fill="${PALETTE[i%PALETTE.length]}" stroke="#fff" stroke-width="2.5"/></g>`;
     }).join('');
-    $('map').innerHTML=`<svg viewBox="0 0 600 335" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><radialGradient id="cd-map-grad"><stop stop-color="#c9e2ff"/><stop offset="1" stop-color="#f3f9ff"/></radialGradient></defs><rect width="600" height="335" fill="url(#cd-map-grad)"/><g stroke="#dcebf9" stroke-width="1">${[90,180,270,360,450,540].map(x=>`<path d="M${x} 0v335"/>`).join('')}${[67,134,201,268].map(y=>`<path d="M0 ${y}h600"/>`).join('')}</g><g fill="#a8c8f7" stroke="#f7fbff" stroke-width="2" opacity=".6">${land}</g>${markers}</svg><div class="cd-map-tags">${model.countries.map((country,i)=>{const value=year?runtimeDB[country]?.[model.indicator]?.[year]:null;return `<button type="button" data-cd-map-country="${country}" class="cd-map-tag"><span class="cd-map-dot" style="background:${PALETTE[i%PALETTE.length]}"></span>${flag(country)} ${escapeHTML(COUNTRIES[country].name)} <strong>${valueText(value,model.indicator)}</strong></button>`;}).join('')}</div>`;
+    $('map').classList.remove('is-live');
+    $('map').innerHTML=`<svg viewBox="0 0 600 335" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><radialGradient id="cd-map-grad"><stop stop-color="#c9e2ff"/><stop offset="1" stop-color="#f3f9ff"/></radialGradient></defs><rect width="600" height="335" fill="url(#cd-map-grad)"/><g stroke="#dcebf9" stroke-width="1">${[90,180,270,360,450,540].map(x=>`<path d="M${x} 0v335"/>`).join('')}${[67,134,201,268].map(y=>`<path d="M0 ${y}h600"/>`).join('')}</g><g fill="#a8c8f7" stroke="#f7fbff" stroke-width="2" opacity=".6">${land}</g>${markers}</svg>${mapTags(year)}`;
+  }
+
+  function mapPopup(country,year) {
+    const value=year?runtimeDB[country]?.[model.indicator]?.[year]:null;
+    const unit=INDICATORS[model.indicator].title;
+    return `<div class="cd-map-popup"><strong>${escapeHTML(COUNTRIES[country].name)}</strong><span>${escapeHTML(unit)} · ${escapeHTML(year||'sin año común')}</span><b>${valueText(value,model.indicator)}</b><small>Banco Mundial · WDI · ${year&&Number.isFinite(value)?source(country,model.indicator,year):'sin dato'}</small></div>`;
+  }
+
+  function mapBounds() {
+    if(!mapState.map)return;
+    const chosen=model.countries.map(code=>POS[code]).filter(Boolean);
+    if(!chosen.length)return;
+    const bounds=new maplibregl.LngLatBounds(chosen[0],chosen[0]);
+    chosen.forEach(point=>bounds.extend(point));
+    mapState.map.fitBounds(bounds,{padding:{top:42,bottom:46,left:42,right:42},maxZoom:4.6,duration:matchMedia('(prefers-reduced-motion: reduce)').matches?0:450});
+  }
+
+  function refreshVectorMap() {
+    const map=mapState.map;
+    if(!map)return;
+    const {year}=info(model.indicator);
+    const tags=$('map').querySelector('.cd-map-tags');
+    if(tags)tags.outerHTML=mapTags(year);
+    mapState.markers.forEach(marker=>marker.remove());
+    mapState.markers=model.countries.filter(code=>POS[code]).map((country,i)=>{
+      const element=document.createElement('button');
+      element.type='button';element.className='cd-map-marker';element.style.setProperty('--marker-color',PALETTE[i%PALETTE.length]);
+      element.setAttribute('aria-label',`Ver datos de ${COUNTRIES[country].name}`);
+      element.title=`${COUNTRIES[country].name} · ${valueText(year?runtimeDB[country]?.[model.indicator]?.[year]:null,model.indicator)}`;
+      element.addEventListener('click',event=>{event.stopPropagation();new maplibregl.Popup({offset:19,closeButton:true,maxWidth:'225px'}).setLngLat(POS[country]).setHTML(mapPopup(country,year)).addTo(map);});
+      return new maplibregl.Marker({element,anchor:'bottom'}).setLngLat(POS[country]).addTo(map);
+    });
+    if(!mapState.geo||!mapState.styleReady)return;
+    const featureCollection=M.comparisonMapData.selectedCountryFeatures(mapState.geo,model.countries,runtimeDB,model.indicator,year);
+    const values=featureCollection.features.map(feature=>feature.properties.cdValue);
+    const [lower,upper]=M.comparisonMapData.indicatorStops(values);
+    const sourceId='cd-selected-countries';
+    if(!map.getSource(sourceId)){
+      map.addSource(sourceId,{type:'geojson',data:featureCollection});
+      map.addLayer({id:'cd-no-data',type:'fill',source:sourceId,filter:['==',['get','cdHasValue'],false],paint:{'fill-color':'#8ca5c5','fill-opacity':.28}});
+      map.addLayer({id:'cd-country-fill',type:'fill',source:sourceId,filter:['==',['get','cdHasValue'],true],paint:{'fill-color':'#1556dd','fill-opacity':.48}});
+      map.addLayer({id:'cd-country-border',type:'line',source:sourceId,paint:{'line-color':'#1556dd','line-width':1.8,'line-opacity':.83}});
+      if(!mapState.handlersBound){
+        map.on('click','cd-country-fill',event=>{
+          const code=event.features?.[0]?.properties?.cdCode;
+          if(!COUNTRIES[code])return;
+          new maplibregl.Popup({maxWidth:'225px'}).setLngLat(event.lngLat).setHTML(mapPopup(code,info(model.indicator).year)).addTo(map);
+        });
+        map.on('mouseenter','cd-country-fill',()=>{map.getCanvas().style.cursor='pointer';});
+        map.on('mouseleave','cd-country-fill',()=>{map.getCanvas().style.cursor='';});
+        mapState.handlersBound=true;
+      }
+    }else map.getSource(sourceId).setData(featureCollection);
+    map.setPaintProperty('cd-country-fill','fill-color',['interpolate',['linear'],['get','cdValue'],lower,'#a8dbf5',upper,'#1654df']);
+    const legend=$('map').querySelector('.cd-map-key');
+    if(legend)legend.innerHTML=year?`<span>${number(lower,1)}</span><span class="cd-map-gradient" aria-hidden="true"></span><span>${number(upper,1)}</span><small>${escapeHTML(INDICATORS[model.indicator].unit)} · ${year}</small>`:'<small>Sin año común para colorear las fronteras</small>';
+  }
+
+  function failVectorMap() {
+    if(mapState.failed)return;
+    mapState.failed=true;
+    clearTimeout(mapState.timeout);
+    mapState.markers.forEach(marker=>marker.remove());
+    try{mapState.map?.remove();}catch(error){/* Fallback también si falló la inicialización WebGL. */}
+    mapState.map=null;
+    renderMapFallback(info(model.indicator).year);
+    $('map-subtitle').textContent+=' · vista de respaldo';
+  }
+
+  function canRenderVectorMap() {
+    if(typeof maplibregl==='undefined'||typeof maplibregl.Map!=='function')return false;
+    try{return Boolean(document.createElement('canvas').getContext('webgl2'));}
+    catch(error){return false;}
+  }
+
+  function renderMap(selectedYears) {
+    const {year}=info(model.indicator,selectedYears);
+    $('map-subtitle').textContent=year?`${INDICATORS[model.indicator].title} · ${year} · desliza y amplía el mapa`:'Sin año común · mapa geográfico';
+    if(mapState.failed||!canRenderVectorMap()){
+      renderMapFallback(year);
+      return;
+    }
+    if(!mapState.map){
+      const surface=$('map');
+      surface.classList.add('is-live');
+      surface.innerHTML=`<div class="cd-vector-map" aria-label="Mapa mundial interactivo: desplazar, acercar y seleccionar economías"></div><div class="cd-map-key" aria-live="polite"><small>Preparando fronteras oficiales…</small></div>${mapTags(year)}`;
+      const theme=document.documentElement.dataset.theme==='dark'?'dark':'light';
+      try{
+        mapState.map=new maplibregl.Map({container:surface.querySelector('.cd-vector-map'),style:MAP_STYLE[theme],center:[-74,-14],zoom:1.7,minZoom:1,maxZoom:10,attributionControl:false,dragRotate:false,pitchWithRotate:false});
+        mapState.style=theme;
+        mapState.map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+        mapState.map.addControl(new maplibregl.AttributionControl({compact:true}),'bottom-right');
+        mapState.map.on('style.load',()=>{mapState.styleReady=true;clearTimeout(mapState.timeout);refreshVectorMap();});
+        mapState.map.on('error',event=>{if(!mapState.styleReady&&event.error)console.warn('Proveedor cartográfico temporalmente no disponible:',event.error.message);});
+        mapState.timeout=setTimeout(()=>{if(mapState.map&&!mapState.styleReady)failVectorMap();},12000);
+        if(!mapState.geometryRequested){
+          mapState.geometryRequested=true;
+          fetch(new URL('data/geo/ne_110m_admin_0_countries.geojson',document.baseURI))
+            .then(response=>{if(!response.ok)throw Error('Natural Earth no disponible');return response.json();})
+            .then(geo=>{mapState.geo=geo;refreshVectorMap();})
+            .catch(()=>{if(mapState.map)failVectorMap();});
+        }
+      }catch(error){failVectorMap();return;}
+    }
+    const theme=document.documentElement.dataset.theme==='dark'?'dark':'light';
+    if(mapState.style!==theme){mapState.style=theme;mapState.styleReady=false;mapState.map.setStyle(MAP_STYLE[theme]);}
+    refreshVectorMap();
+    const selection=model.countries.join(',');
+    if(mapState.lastSelection!==selection){mapState.lastSelection=selection;mapBounds();}
+    requestAnimationFrame(()=>mapState.map?.resize());
   }
 
   function renderReadings(selectedYears) {
