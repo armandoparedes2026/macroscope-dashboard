@@ -177,6 +177,7 @@ body:has(#inicio:not([hidden])) #themeBtn:focus-visible{outline:3px solid #387de
 .trust-item{display:flex;align-items:center;justify-content:center;gap:12px;min-height:57px;color:var(--landing-muted);font:500 11px/1.4 var(--font-body);border-right:1px solid rgba(115,167,237,.21)}
 .trust-item:last-child{border-right:0}
 .trust-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border:1px solid rgba(255,255,255,.96);border-radius:50%;background:rgba(255,255,255,.51);box-shadow:inset 0 1px #fff,0 5px 13px rgba(67,128,215,.09);font-size:20px;font-weight:800;color:#2a76e8}
+.trust-icon svg{width:22px;height:22px;stroke-width:1.9}
 /* Tema oscuro diseñado, no simple inversión de colores. */
 :root[data-theme="dark"] #inicio .landing-premium{
   background:radial-gradient(ellipse 50% 37% at 50% 69%,rgba(35,108,214,.34),transparent 78%),radial-gradient(ellipse 40% 48% at -8% 48%,rgba(28,71,136,.42),transparent),radial-gradient(ellipse 40% 48% at 108% 48%,rgba(30,67,131,.36),transparent),linear-gradient(180deg,#07162e,#102345)
