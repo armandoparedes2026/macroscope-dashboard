@@ -3,6 +3,9 @@
 - **Repositorio remoto (`origin`)**: `armandoparedes2026/macroscope-dashboard` (`https://github.com/armandoparedes2026/macroscope-dashboard.git`)
 - **Rama de trabajo**: `cristivenog88-prog/harmonia-final`
 - **Commit base inicial**: `7db6f4721c74eb3c96d31cf47e89f9d722a2462c`
+- **Commit de implementación y auditoría (Fase F)**: `b2ff681cbe7dfcf14ed55faedbebde942d61c1dd`
+- **Pull Request**: [#9 — `feat(harmonia): construcción integral y armonización de las siete experiencias de Macroscope`](https://github.com/armandoparedes2026/macroscope-dashboard/pull/9) (**Estado: `MERGED`**, `2026-10-26T06:14:46Z`)
+- **Commit de fusión en `main` (Fase G)**: `44fb8310db60aa2bc86bff3baea7c0fa8fa6d997`
 - **Trabajador de implementación**: `ARGON` (`gemini-4-argon`)
 
 ---
@@ -87,3 +90,51 @@ Las siete imágenes de referencia ubicadas en `docs/ux/referencias/` se conserva
   - **`73 tests, 73 pass, 0 fail`** (`tests/islm-model.test.mjs`, `tests/bcrp.test.mjs`, `tests/lab-content.test.mjs`, `tests/wdi.test.mjs`, `tests/compare.test.mjs`, `tests/comparison-dashboard.test.mjs`, `tests/comparison-map-data.test.mjs`, `tests/sources-catalog.test.mjs`, `tests/panorama-data.test.mjs`, `tests/models-engine.test.mjs`).
 - **`npm.cmd run test:e2e`**:
   - **`MacroScope e2e OK: 83 comprobaciones` (`0` fallos)** en Playwright, incluyendo la matriz `A1–A13` en `360px`, `390px`, `768px`, `1024px`, `1280px`, `1440px` y `1920px` en modos `light` y `dark`, más las pruebas funcionales, geométricas y de persistencia de las 7 experiencias y secciones transversales, y las 44 capturas regeneradas en `test-results/experiencias/`.
+
+---
+
+## 6. Publicación, Pull Request, CI y Estado de Despliegue (Fase G)
+
+### 6.1 Push, Pull Request, Checks de CI y Merge en GitHub
+- **Push de rama**: `git push -u origin cristivenog88-prog/harmonia-final` completado sin force-push hacia `https://github.com/armandoparedes2026/macroscope-dashboard.git`.
+- **Pull Request creado y fusionado**:
+  - **PR**: [#9 — `feat(harmonia): construcción integral y armonización de las siete experiencias de Macroscope`](https://github.com/armandoparedes2026/macroscope-dashboard/pull/9)
+  - **Validación en GitHub Actions (`Validate MacroScope`)**: Run [`40277639149` / Job `121423681408`](https://github.com/armandoparedes2026/macroscope-dashboard/actions/runs/40277639149/job/121423681408) completado con **`conclusion: SUCCESS`** (`8m35s`).
+  - **Fusión en `main`**: Estado **`MERGED`** (`2026-10-26T06:14:46Z`), commit de fusión `44fb8310db60aa2bc86bff3baea7c0fa8fa6d997`.
+
+### 6.2 Resumen de Archivos Modificados (`7db6f4721c74eb3c96d31cf47e89f9d722a2462c..b2ff681cbe7dfcf14ed55faedbebde942d61c1dd`)
+```text
+ README.md                                |  246 ++--
+ css/experiences.css                      |  971 +++++++++++++
+ css/tokens.css                           |  189 +--
+ docs/INFORME-HARMONIA-FINAL.md           |  135 ++
+ docs/arquitectura.md                     |  176 +--
+ docs/ux/referencias/1.png                |  Bin 0 -> 1699805 bytes
+ docs/ux/referencias/2.png                |  Bin 0 -> 1664352 bytes
+ docs/ux/referencias/3.png                |  Bin 0 -> 1814084 bytes
+ docs/ux/referencias/4.png                |  Bin 0 -> 1783399 bytes
+ docs/ux/referencias/5.png                |  Bin 0 -> 1783825 bytes
+ docs/ux/referencias/6.png                |  Bin 0 -> 610884 bytes
+ docs/ux/referencias/7.png                |  Bin 0 -> 1825021 bytes
+ docs/ux/referencias/MAPEO-REFERENCIAS.md |   18 +
+ index.html                               |   22 +-
+ js/app.js                                |    5 +-
+ js/services/models-engine.js             | 1062 ++++++++++++++
+ js/ui/experiences.js                     | 2268 ++++++++++++++++++++++++++++++
+ js/ui/islm-lab.js                        |   27 +-
+ js/ui/student-views.js                   |  136 +-
+ package.json                             |    4 +-
+ tests/e2e.mjs                            |  216 ++-
+ tests/models-engine.test.mjs             |  243 ++++
+ 22 files changed, 5269 insertions(+), 403 deletions(-)
+```
+
+### 6.3 Evidencia Exacta sobre Despliegue en Vercel (Preview / Producción)
+- **Integración GitHub Deployments**: La consulta `gh api repos/armandoparedes2026/macroscope-dashboard/deployments` y `gh api repos/armandoparedes2026/macroscope-dashboard/commits/b2ff681cbe7dfcf14ed55faedbebde942d61c1dd/statuses` devuelve `[]` (el repositorio remoto `armandoparedes2026/macroscope-dashboard` no tiene vinculada la GitHub App automática de Vercel ni existe directorio `.vercel/project.json` en el checkout local ni en `D:/ORCA/macroscope-dashboard`).
+- **CLI de Vercel local (`npx.cmd vercel whoami`)**: Al verificar credenciales locales de Vercel CLI (`65.2.0`), el entorno devuelve el siguiente bloqueo de autenticación:
+  ```text
+  Vercel CLI 65.2.0 (Node.js 24.21.0)
+  Error: The specified token is not valid. Use `vercel login` to generate a new token.
+  ```
+- **Acción tomada**: Conforme a las instrucciones operativas (*"If credentials/external permissions block publication, document exact evidence and complete all independent work"*), se completaron íntegramente el push al remoto, la creación del PR #9, la ejecución y aprobación del workflow de GitHub Actions (`Validate MacroScope` `SUCCESS`) y la fusión limpia en `main` (`44fb8310db60aa2bc86bff3baea7c0fa8fa6d997`), dejando documentada la evidencia exacta del token expirado de Vercel CLI.
+
