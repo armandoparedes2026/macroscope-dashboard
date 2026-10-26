@@ -83,9 +83,11 @@ await check('comparación de economías abre pantalla independiente desde Inicio
   await openOffline(page);
   await page.evaluate(()=>{location.hash='inicio';});
   await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
-  await page.click('[data-home-dot="4"]');
-  await page.waitForTimeout(650); // Permite que termine la transición 3D antes de pulsar el enlace.
-  await page.locator('.orbit-card.is-active .orbit-card-open').click();
+  await page.locator('#homeCarousel').focus();
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(()=>document.querySelector('.orbit-card.is-active h2')?.textContent==='Comparación de economías');
+  await page.locator('.orbit-card.is-active .orbit-card-open').focus();
+  await page.keyboard.press('Enter');
   await page.waitForFunction(()=>location.hash==='#comparacion');
   await page.waitForFunction(()=>!document.querySelector('[data-view="comparacion"]').hidden);
   assert.equal(await page.isVisible('[data-view="comparacion"]'),true,'la sección debe estar visible');
@@ -254,8 +256,27 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
   await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
   assert.equal(await page.locator('.orbit-illustration').count(),7);
   assert.equal(await page.locator('.orbit-illustration filter').count(),14);
-  assert.equal(await page.locator('.orbit-illustration .premium-3d-bar').count() >= 24,true);
-  assert.equal(await page.locator('.orbit-illustration .premium-chart-points').count(),7);
+  const semantics=[
+    ['learning','.ms-book-leaf-left','.ms-book-leaf-right'],
+    ['history','.ms-history-line','.ms-history-grid'],
+    ['indicators','.ms-map-ghost','.ms-indicator-bars'],
+    ['exploration','.ms-explore-bars','.ms-exploration-curve'],
+    ['comparison','.ms-map-network','.ms-map-nodes'],
+    ['simulation','.ms-decision-curves','.ms-decision-marker'],
+    ['trends','.ms-wave-ribbons','.ms-projection-line']
+  ];
+  const kinds=await page.locator('.orbit-illustration').evaluateAll(nodes=>nodes.map(n=>n.dataset.chartKind));
+  assert.deepEqual(kinds,semantics.map(row=>row[0]),'cada tarjeta debe tener su propio concepto gráfico');
+  for(const [type,primary,secondary] of semantics){
+    const card=page.locator('.orbit-illustration[data-chart-kind="'+type+'"]');
+    assert.equal(await card.locator(primary).count(),1,type+' gráfico principal');
+    assert.equal(await card.locator(secondary).count(),1,type+' contexto propio');
+  }
+  assert.equal(await page.locator('.orbit-illustration .ms-prism').count(),9,
+    'solo indicadores (4) y exploración (5) incluyen barras 3D');
+  assert.equal(await page.locator('.orbit-illustration[data-chart-kind="comparison"] .ms-prism').count(),0);
+  assert.equal(await page.locator('.orbit-illustration[data-chart-kind="learning"] .ms-prism').count(),0);
+  assert.equal(await page.locator('.orbit-illustration[data-chart-kind="simulation"] .ms-prism').count(),0);
   const defsValid=await page.locator('.orbit-illustration').evaluateAll(nodes=>{
     const gradientIds=nodes.flatMap(svg=>[...svg.querySelectorAll('linearGradient,radialGradient')]
       .map(node=>node.id));
@@ -277,6 +298,33 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
   assert.equal(await button.getAttribute('aria-label'),'Cambiar a modo claro');
   await button.click();
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+});
+
+
+await check('home premium: los siete artes son específicos, legibles y conservan referencias SVG accesibles',async page=>{
+  for(const [width,height] of [[390,844],[1440,900]]){
+    await page.setViewportSize({width,height});
+    await openOffline(page);
+    await page.evaluate(()=>{location.hash='inicio';});
+    await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+    const semantics=await page.locator('.orbit-illustration.module-art').evaluateAll(svgs=>
+      svgs.map(svg=>({
+        kind:svg.dataset.chartKind,
+        title:svg.getAttribute('aria-label'),
+        uniqueDefs:[...svg.querySelectorAll('linearGradient,radialGradient,filter')].map(x=>x.id),
+        nonEmpty:svg.querySelectorAll('path,rect,ellipse,circle').length>=5
+      }))
+    );
+    assert.equal(semantics.length,7);
+    assert.ok(semantics.every(x=>x.title&&x.nonEmpty));
+    const allIds=semantics.flatMap(x=>x.uniqueDefs);
+    assert.equal(allIds.length,new Set(allIds).size,'no debe haber ID SVG duplicado');
+    const active=page.locator('.orbit-card.is-active');
+    const box=await active.locator('.orbit-illustration').boundingBox();
+    const parent=await active.boundingBox();
+    assert.ok(box.height>=70&&box.y>parent.y+parent.height*.42,
+      'el gráfico debe estar en el tercio inferior a '+width);
+  }
 });
 
 await check('home premium: composición responsive y preferencia de movimiento reducido',async page=>{
@@ -874,6 +922,143 @@ await check('laboratorio: controles fijos con scroll propio y transmisión antes
   assert.ok(Math.abs(after.diagram-before.diagram)<5,'los diagramas no deben moverse al recorrer los controles');
   const box=await page.$eval('.islm-controls',el=>{const r=el.getBoundingClientRect();return {bottom:r.bottom,vh:innerHeight};});
   assert.ok(box.bottom<=box.vh+1,'el panel de controles cabe en la pantalla');
+});
+await check('panorama premium: seis indicadores con procedencia y categorías conectadas',async page=>{
+  await openOffline(page);
+  assert.equal(await page.locator('#panoramaKpis [data-panorama-card]').count(),6);
+  assert.match(await page.textContent('#headingPeriod'),/mensuales y trimestrales/);
+  assert.match(await page.locator('[data-panorama-card="unemployment"]').textContent(),/OIT/);
+  assert.match(await page.locator('[data-panorama-card="gdp"]').textContent(),/N\/D/);
+  await page.getByRole('tab',{name:'Precios'}).click();
+  assert.match(await page.textContent('#panoramaMainTitle'),/Inflación/);
+  assert.equal(await page.getByRole('tab',{name:'Precios'}).getAttribute('aria-selected'),'true');
+  await page.selectOption('#countrySelect','CHL');
+  assert.match(await page.textContent('#headingPeriod'),/Indicadores anuales del Banco Mundial/);
+  assert.equal(await page.locator('#panoramaKpis .p-kpi-tag').filter({hasText:'Respaldo histórico'}).count(),6);
+  assert.match(await page.textContent('#panoramaMainSource'),/Banco Mundial/);
+});
+await check('panorama premium: navegación accesible, móvil sin desbordamiento y tema oscuro',async page=>{
+  await page.setViewportSize({width:390,height:844});
+  await openOffline(page);
+  await page.getByRole('tab',{name:'Actividad'}).focus();
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await page.getByRole('tab',{name:'Precios'}).getAttribute('aria-selected'),'true');
+  assert.equal(await page.getByRole('tab',{name:'Precios'}).evaluate(el=>document.activeElement===el),true);
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+  assert.ok(overflow<=2,`Panorama móvil no debe causar overflow horizontal: ${overflow}px`);
+  const allSegmentsVisible=await page.evaluate(()=>{
+    const container=document.querySelector('.p-segments').getBoundingClientRect();
+    return [...document.querySelectorAll('.p-segments button')].every(button=>{
+      const rect=button.getBoundingClientRect();return rect.left>=container.left-1&&rect.right<=container.right+1&&button.scrollWidth<=button.clientWidth+1;
+    });
+  });
+  assert.equal(allSegmentsVisible,true,'las cuatro categorías deben quedar completamente visibles en móvil');
+  const beforeTheme=await page.locator('html').getAttribute('data-theme');
+  await page.click('#themeBtn');
+  assert.notEqual(await page.locator('html').getAttribute('data-theme'),beforeTheme);
+  assert.equal(await page.locator('.p-kpi-source-link').count(),6);
+});
+await check('panorama premium: caída parcial de BCRP conserva indicadores válidos sin atribuir valores inventados',async page=>{
+  await page.route(/^https?:/,async route=>{
+    const url=route.request().url();
+    if(!url.includes('/api/bcrp'))return route.abort();
+    if(url.includes('PN02507AQ'))return route.fulfill({status:502,contentType:'application/json',body:'{"error":"fuente caída"}'});
+    if(url.includes('PD38045AM'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{source:'BCRP',code:'PD38045AM',frequency:'monthly',title:'Expectativas empresariales totales - Índice de expectativas de la economía a 3 meses',unit:'puntos',fetchedAt:'2026-10-25T00:00:00Z',observations:[{date:'2026-09-01',period:'Sep.2026',value:56.8}]}])});
+    return route.fulfill({status:502,contentType:'application/json',body:'{"error":"fuente caída"}'});
+  });
+  await page.goto(PAGE_URL);
+  await page.evaluate(()=>{location.hash='panorama';});
+  await page.waitForFunction(()=>document.querySelector('#panoramaDataBadge')?.textContent?.includes('trimestral: error'));
+  assert.match(await page.locator('[data-panorama-card="confidence"]').textContent(),/56[.,]8/);
+  assert.match(await page.locator('[data-panorama-card="gdp"]').textContent(),/N\/D/);
+  assert.match(await page.textContent('#panoramaDataBadge'),/mensual: partial/);
+});
+await check('panorama referencia: módulo de la tarjeta 03, filtros y tarjetas expandibles',async page=>{
+ await openOffline(page);
+ assert.equal(await page.locator('[data-home-slide="2"] .orbit-card-open').getAttribute('data-destination'),'#panorama');
+ assert.equal(await page.locator('#panoramaKpis [data-panorama-card]').count(),6);
+ assert.equal(await page.locator('#panoramaFilterShell').count(),1);
+ assert.equal(await page.locator('#panoramaFrequencySelect').count(),1);
+ assert.equal(await page.locator('#panoramaSourceSelect').count(),1);
+ await page.locator('#panoramaMoreMetrics').click();
+ assert.equal(await page.locator('#panoramaKpis [data-panorama-card]').count(),8);
+ await page.locator('#panoramaMoreMetrics').click();
+ assert.equal(await page.locator('#panoramaKpis [data-panorama-card]').count(),6);
+ await page.selectOption('#panoramaSourceSelect','BCRP');
+ assert.equal(await page.locator('#panoramaKpis [data-panorama-card]').count(),5);
+ await page.selectOption('#panoramaSourceSelect','all');
+ await page.selectOption('#panoramaFrequencySelect','annual');
+ assert.equal(await page.locator('#panoramaKpis [data-panorama-card]').count(),1);
+});
+await check('panorama referencia: grilla PBI, inflación, lectura y tres gráficos bajo la línea superior',async page=>{
+ await page.setViewportSize({width:1672,height:941});
+ await openOffline(page);
+ const areas=await page.evaluate(()=>{
+  const rect=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom};};
+  return {main:rect('.p-main-panel'),side:rect('.p-side-panel'),reading:rect('.p-reading'),minis:rect('.p-minis'),overflow:document.documentElement.scrollWidth-innerWidth};
+ });
+ assert.equal(areas.overflow,0);
+ assert.ok(areas.main.right<areas.side.left&&areas.side.right<areas.reading.left,'PBI, IPC y lecturas deben alinearse en tres columnas');
+ assert.ok(Math.abs(areas.main.top-areas.side.top)<2&&Math.abs(areas.side.top-areas.reading.top)<2,'paneles superiores en una fila');
+ assert.ok(areas.minis.top>=areas.main.bottom-1,'tres minigráficos bajo PBI e IPC');
+ assert.ok(areas.reading.bottom>=areas.minis.bottom-1,'lectura ocupa ambas filas');
+ assert.ok(areas.minis.bottom<=930,`los minigráficos deben caber en el alto de la referencia de 941 px: ${areas.minis.bottom}`);
+ assert.ok(areas.reading.bottom<=930,`la columna de lectura debe caber en el alto de la referencia: ${areas.reading.bottom}`);
+ assert.equal(await page.locator('#panoramaMinis canvas').count(),3);
+ assert.equal(await page.locator('#panoramaLevelToggle').count(),1);
+});
+await check('panorama referencia: gráfico local sin puntos decorativos y escala de índice no truncada',async page=>{
+ await openOffline(page);
+ const metric=await page.evaluate(()=>{
+  const container=document.createElement('div');container.style.cssText='position:absolute;left:-9999px;width:360px;height:180px';
+  const canvas=document.createElement('canvas');canvas.style.cssText='display:block;width:100%;height:100%';container.appendChild(canvas);document.body.appendChild(container);
+  const ctx=canvas.getContext('2d'),arc=ctx.arc.bind(ctx);let circles=0;
+  ctx.arc=(...args)=>{circles++;return arc(...args);};
+  const chart=new Chart(canvas,{type:'line',data:{labels:['2015','2016','2017'],datasets:[{label:'PBI indexado',data:[99,103,109],pointRadius:0,borderColor:'#267aff',fill:false}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:false}}}});
+  const metric={min:chart.min,circles};chart.destroy();container.remove();return metric;
+ });
+ assert.ok(metric.min>85,`el nivel de PBI debe mantener escala real sin forzar cero: ${metric.min}`);
+ assert.equal(metric.circles,0,'pointRadius:0 evita un círculo por cada observación mensual');
+});
+await check('panorama referencia: las ocho tarjetas abren su propia serie al seleccionarlas',async page=>{
+ await openOffline(page);
+ await page.locator('[data-panorama-card="confidence"]').click();
+ assert.match(await page.locator('#panoramaMainTitle').textContent(),/Confianza empresarial/);
+ assert.equal(await page.locator('[data-panorama-card="confidence"]').getAttribute('aria-pressed'),'true');
+ await page.locator('[data-panorama-card="fx"]').click();
+ assert.match(await page.locator('#panoramaMainTitle').textContent(),/Tipo de cambio/);
+ await page.locator('#panoramaMoreMetrics').click();
+ await page.locator('[data-panorama-card="reserves"]').click();
+ assert.match(await page.locator('#panoramaMainTitle').textContent(),/Reservas internacionales/);
+ await page.locator('[data-panorama-area="activity"]').click();
+ assert.match(await page.locator('#panoramaMainTitle').textContent(),/PBI real/);
+});
+await check('panorama referencia: minigráficos con etiquetas legibles, sin solapamiento ni escala bajo cero',async page=>{
+ await openOffline(page);
+ const result=await page.evaluate(()=>{
+  const host=document.createElement('div');host.style.cssText='position:absolute;left:-9999px;width:280px;height:105px';
+  const canvas=document.createElement('canvas');canvas.style.cssText='width:100%;height:100%;display:block';host.appendChild(canvas);document.body.appendChild(host);
+  const ctx=canvas.getContext('2d'),draw=ctx.fillText.bind(ctx),texts=[];
+  ctx.fillText=(value,x,y,...args)=>{if(y>80&&String(value).includes('202'))texts.push({left:x-ctx.measureText(String(value)).width/2,right:x+ctx.measureText(String(value)).width/2});return draw(value,x,y,...args);};
+  const labels=['ene 2025','feb 2025','mar 2025','abr 2025','may 2025','jun 2025','jul 2025','ago 2025','sep 2025','oct 2025','nov 2025'];
+  const chart=new Chart(canvas,{type:'bar',data:{labels,datasets:[{label:'Serie anual',data:labels.map((_,i)=>5+i/10),backgroundColor:'#2478ff'}]},options:{premiumPanorama:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{maxTicksLimit:4}},x:{ticks:{maxTicksLimit:5}}}}});
+  const output={min:chart.min,texts};chart.destroy();host.remove();return output;
+ });
+ assert.equal(result.min,0,'las barras no negativas empiezan en cero');
+ for(let i=0;i<result.texts.length;i++){
+  assert.ok(result.texts[i].right<=280&&result.texts[i].left>=0,'ninguna etiqueta sale de la figura');
+  if(i)assert.ok(result.texts[i].left>=result.texts[i-1].right+5,'las etiquetas mantienen espacio legible');
+ }
+});
+await check('panorama referencia: los pies de las tres minigráficas permanecen dentro de su tarjeta',async page=>{
+ await page.setViewportSize({width:1440,height:900});
+ await openOffline(page);
+ const overflow=await page.evaluate(()=>[...document.querySelectorAll('.p-mini')].map(card=>{
+  const frame=card.getBoundingClientRect(),footer=card.querySelector('.p-mini-footer').getBoundingClientRect();
+  return Math.round(footer.bottom-frame.bottom);
+ }));
+ assert.equal(overflow.length,3);
+ assert.ok(overflow.every(value=>value<=-5),`pies fuera de sus tarjetas: ${overflow.join(', ')}`);
 });
 await writeFile('test-results/rediseno/aceptacion.json',JSON.stringify(acceptance,null,2));
 

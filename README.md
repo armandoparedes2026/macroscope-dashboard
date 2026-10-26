@@ -8,7 +8,7 @@ Abre [`index.html`](index.html) en un navegador moderno. No requiere un proceso 
 
 ## Funciones
 
-- Panorama económico con indicadores del Banco Mundial (WDI) y series mensuales del BCRP.
+- Panorama económico premium con seis indicadores, cuatro enfoques temáticos, visualizaciones interactivas y procedencia visible por indicador.
 - Comparación entre países y América Latina y el Caribe.
 - **Comparación de economías** (`#comparacion`): panel independiente con cuatro países simultáneos, seis indicadores, gráficos históricos, ranking, mapa de orientación, lectura económica, relaciones entre variables, mercado laboral y exportación CSV.
 - Gráficas de series históricas y comparaciones internacionales.
@@ -66,11 +66,22 @@ El modelo está en [`js/islm-model.js`](js/islm-model.js): son funciones puras, 
 ## Fuentes y limitaciones
 
 - Banco Mundial (World Development Indicators): https://api.worldbank.org/v2/
+- BCRP (series oficiales y API): https://estadisticas.bcrp.gob.pe/estadisticas/series/ayuda/api
 - Tipos de cambio indicativos: https://open.er-api.com/v6/latest/USD
 - Cartografía del mapa interactivo de comparación: [OpenFreeMap](https://openfreemap.org/) (estilos Positron y Dark, teselas de OpenStreetMap; servicio público sin clave) y [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/).
 - Fronteras simplificadas de países: [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/), 1:110m, dominio público; copia local de sus 177 geometrías, conservando solo los atributos ISO3 y nombre para minimizar la transferencia (`data/geo/ne_110m_admin_0_countries.geojson`).
 
-Los indicadores macroeconómicos son de periodicidad **anual**, no cifras intradía. Si fallan las APIs, el dashboard muestra **datos históricos locales de respaldo**. La procedencia se registra **por celda**: en la tabla, los valores de respaldo aparecen en cursiva con `*`, y el CSV exportado incluye una columna `<indicador>_fuente` (`wdi` o `respaldo`).
+### Panorama macroeconómico: cobertura de datos
+
+Al seleccionar **Perú**, el encabezado del Panorama combina series del BCRP de distinta frecuencia: crecimiento interanual del PBI trimestral (`PN02507AQ`), inflación interanual del IPC de Lima (`PN01273PM`), tipo de cambio interbancario mensual (`PN01207PM`), balanza comercial FOB (`PN38723BM`) como **suma móvil de 12 meses**, y expectativas empresariales a tres meses (`PD38045AM`). El desempleo es la estimación anual nacional modelada por la OIT que difunde WDI (`SL.UEM.TOTL.ZS`), **no** la tasa urbana del INEI.
+
+El rediseño basado en la imagen de Panorama mantiene seis tarjetas iniciales, con dos más ampliables (**tasa de referencia** y **reservas internacionales**) y filtros por frecuencia/fuente. Organiza un gráfico amplio del PBI, un gráfico del IPC, una lectura económica y tres paneles inferiores. La gráfica principal de PBI puede alternar entre crecimiento interanual trimestral y un índice mensual desestacionalizado del BCRP (`PN01773AM`), **rebasado a promedio 2015=100 mediante un cálculo explícito**. El vínculo a `#panorama` de la tarjeta **03/07 — Indicadores macroeconómicos** de la portada se conserva; los cambios visuales a la portada se desarrollan en otra rama.
+
+El BCRP se consulta desde el proxy `/api/bcrp` de Vercel, por lo que abrir `index.html` como `file://` permite ver el diseño, pero no garantiza datos BCRP en vivo. Para otros países, las seis tarjetas emplean series anuales WDI y muestran sus fechas y unidades; no se extrapolan series peruanas. Si faltan datos, el indicador muestra «N/D» o identifica el respaldo histórico; la interfaz no sustituye ausencias por cifras ficticias. Cada tarjeta muestra el proveedor, frecuencia, período y vínculo a la fuente. El estado de conexión distingue cargas completas y parciales.
+
+La correspondencia entre códigos y conceptos, junto con las advertencias de comparabilidad, está documentada en [fuentes BCRP](docs/fuentes-bcrp.md). La implementación está separada en `js/services/panorama-data.js` (cálculos), `panorama-client.js` (consultas) y `js/ui/panorama-premium.js` (interacción y gráficos), con estilos encapsulados en `css/panorama.css` para no alterar la portada que se trabaja en otra rama.
+
+Los indicadores **WDI** son anuales, mientras que las series del **BCRP** son mensuales o trimestrales; ninguna constituye una cotización intradía. Si falla WDI, las vistas anuales pueden mostrar **datos históricos locales de respaldo**. La procedencia se registra **por celda**: en la tabla, los valores de respaldo aparecen en cursiva con `*`, y el CSV exportado incluye una columna `<indicador>_fuente` (`wdi` o `respaldo`). Si no se puede consultar BCRP, el Panorama muestra «N/D» para las series afectadas, sin generar un valor de reemplazo.
 
 En la vista **Comparación de economías**, la fuente principal es igualmente WDI y la actualización utiliza el servicio existente. Puedes seleccionar hasta cuatro países, el periodo (últimos 5/10/20 años o todo el historial), el grupo temático y el indicador activo. Las modalidades **Indicadores**, **Ranking** y **Regiones** comparten las mismas observaciones. La referencia de América Latina y el Caribe es el agregado oficial WDI `LCN`, que no debe interpretarse como un promedio simple de los países seleccionados. El **mapa interactivo** permite ampliar, desplazar y pulsar economías: los polígonos de los países seleccionados se colorean de acuerdo con los valores del indicador en el último año común y los marcadores de color diferencian cada economía. La posición de los marcadores es referencial; el color por país representa magnitud relativa entre seleccionados y **no** valor absoluto comparable entre indicadores diferentes. Si el proveedor cartográfico o WebGL no está disponible, se conserva el mapa SVG de respaldo. El diagrama de dispersión sirve para explorar relaciones, pero no establece causalidad.
 
@@ -139,10 +150,12 @@ node tests/visual-modularization.mjs after    # comparaci?n con la referencia ve
 
 En PowerShell con scripts deshabilitados, usa `npm.cmd` en lugar de `npm`.
 
-- `tests/smoke.mjs` comprueba los controles principales, la sintaxis de todos los `.js` del proyecto (excepto dependencias y metadatos Git), los scripts cl?sicos con `defer`, las referencias locales en ambos sentidos, el SRI de Chart.js y el l?mite de 450 l?neas del HTML.
+- `tests/smoke.mjs` comprueba los controles principales, la sintaxis de todos los `.js` del proyecto (excepto dependencias y metadatos Git), los scripts cl?sicos con `defer`, las referencias locales en ambos sentidos, el SRI de Chart.js y el l?mite de 500 l?neas del HTML tras integrar Panorama y Comparación.
 - `tests/islm-model.test.mjs` valida los resultados cl?sicos, reg?menes, trilema, calibraci?n y curvas del modelo.
 - `tests/lab-content.test.mjs` verifica escenarios y predicciones del laboratorio contra el modelo.
 - `tests/bcrp.test.mjs` comprueba normalizaci?n de respuestas reales y contratos del proxy.
+- `tests/panorama-data.test.mjs` valida seis indicadores, faltantes, frecuencias, sumas móviles, procedencia y selección internacional.
+- `tests/e2e.mjs` también verifica interacción, cambios de país, diseño móvil y fallos parciales del BCRP en el nuevo Panorama.
 - `tests/wdi.test.mjs` importa el servicio cl?sico en Node sin DOM y valida paginaci?n con fixtures reales, nulos, ?ltimo a?o disponible, errores oficiales, cach? y actualizaci?n forzada. La procedencia de los fixtures est? en `tests/fixtures/wdi-source.json`.
 - `tests/e2e.mjs` abre `file://` en Chromium con red controlada y verifica respaldo, procedencia por celda y CSV, indicadores, accesibilidad, simulador, temas, m?vil, carrusel, paginaci?n, reintentos y BCRP. Las capturas de este test se guardan en `docs/evidence/fase-modularizacion/e2e-hero-*.png`.
 - `tests/visual-modularization.mjs` compara p?gina completa de Panorama, IS?LM y Datos, en temas claro/oscuro a 1440 y 390 px, con fechas fijas y APIs bloqueadas. Conserva las capturas originales en `before/`; usa `before` ?nicamente para crear una nueva referencia deliberada. El umbral y los resultados est?n en [la evidencia](docs/evidence/fase-modularizacion/README.md).

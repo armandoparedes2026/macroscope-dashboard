@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/smoke.mjs && node --test tests/islm-model.test.mjs tests/bcrp.test.mjs tests/lab-content.test.mjs tests/wdi.test.mjs tests/compare.test.mjs tests/comparison-dashboard.test.mjs tests/comparison-map-data.test.mjs tests/sources-catalog.test.mjs && node tests/e2e.mjs",
+    "test": "node tests/smoke.mjs && node --test tests/islm-model.test.mjs tests/bcrp.test.mjs tests/lab-content.test.mjs tests/wdi.test.mjs tests/compare.test.mjs tests/comparison-dashboard.test.mjs tests/comparison-map-data.test.mjs tests/sources-catalog.test.mjs tests/panorama-data.test.mjs && node tests/e2e.mjs",
     "test:smoke": "node tests/smoke.mjs",
-    "test:unit": "node --test tests/islm-model.test.mjs tests/bcrp.test.mjs tests/lab-content.test.mjs tests/wdi.test.mjs tests/compare.test.mjs tests/comparison-dashboard.test.mjs tests/comparison-map-data.test.mjs tests/sources-catalog.test.mjs",
+    "test:unit": "node --test tests/islm-model.test.mjs tests/bcrp.test.mjs tests/lab-content.test.mjs tests/wdi.test.mjs tests/compare.test.mjs tests/comparison-dashboard.test.mjs tests/comparison-map-data.test.mjs tests/sources-catalog.test.mjs tests/panorama-data.test.mjs",
     "test:e2e": "node tests/e2e.mjs"
   },
   "devDependencies": {

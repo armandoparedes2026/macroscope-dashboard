@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import handler,{parseBcrp,SERIES} from '../api/bcrp.js';
 const raw=await readFile(new URL('./fixtures/bcrp-real.json',import.meta.url),'utf8');
-const codes=Object.keys(SERIES);
+const codes=['PD04722MM','PN01273PM','PN01207PM','PN00027MM'];
 test('BCRP: fixture real, series reordenadas y sufijo HTML',()=>{
  const result=parseBcrp(raw,codes,'2026-10-18T00:00:00Z');
  assert.equal(result.length,4);
@@ -29,6 +29,39 @@ test('BCRP: n.d. es null y respuestas inválidas se rechazan',()=>{
  assert.throws(()=>parseBcrp(data,codes));
  assert.throws(()=>parseBcrp({},codes));
  assert.throws(()=>parseBcrp(raw,['PN01288PM']));
+});
+test('BCRP: trimestral 2025-2026 usa fecha de primer mes y frecuencia quarter',()=>{
+ const quarterly={config:{series:[{name:'Producto bruto interno (variación porcentual interanual) - PBI Global'}]},periods:[{name:'T4.25',values:['3.32']},{name:'T1.26',values:['n.d.']},{name:'T2.26',values:['2.56']}]};
+ const [pbi]=parseBcrp(quarterly,['PN02507AQ'],'2026-10-25T00:00:00Z');
+ assert.equal(pbi.frequency,'quarterly');
+ assert.deepEqual(pbi.observations.map(x=>[x.date,x.value]),[['2025-10-01',3.32],['2026-01-01',null],['2026-04-01',2.56]]);
+ assert.throws(()=>parseBcrp({...quarterly,periods:[{name:'T5.26',values:['1']}]},['PN02507AQ']),/Periodo/);
+});
+test('BCRP: balanza comercial y expectativas usan títulos oficiales distintos',()=>{
+ const monthly={config:{series:[
+  {name:'Balanza comercial - valores FOB (millones US$) - Balanza Comercial'},
+  {name:'Expectativas empresariales totales - Índice de expectativas de la economía a 3 meses'}
+ ]},periods:[{name:'Ago.2026',values:['4713.99','57.31']},{name:'Sep.2026',values:['n.d.','56.83']}]};
+ const [expectations,trade]=parseBcrp(monthly,['PD38045AM','PN38723BM']);
+ assert.equal(expectations.observations[1].value,56.83);
+ assert.equal(trade.observations[0].value,4713.99);
+ assert.equal(trade.observations[1].value,null);
+ assert.throws(()=>parseBcrp({...monthly,config:{series:[{name:'Incorrecto'},{name:'Incorrecto'}]}},['PD38045AM','PN38723BM']),/Título/);
+});
+test('BCRP: tres nuevas series oficiales validan título, frecuencia y observaciones',()=>{
+ const newCodes=['PN01773AM','PN38714BM','PN38718BM'];
+ const titles=[
+  'Producto bruto interno y demanda interna (índice 2007 = 100) - PBI Desestacionalizado - mensual',
+  'Balanza comercial - valores FOB (millones US$) - Exportaciones',
+  'Balanza comercial - valores FOB (millones US$) - Importaciones'
+ ];
+ const payload={config:{series:titles.map(name=>({name}))},periods:[{name:'Ago.2026',values:['197.067951906273','10815.4041778185','6101.41347990082']}]};
+ const series=parseBcrp(payload,newCodes);
+ assert.deepEqual(series.map(row=>row.code),newCodes);
+ assert.deepEqual(series.map(row=>row.frequency),['monthly','monthly','monthly']);
+ assert.equal(series[0].observations[0].value,197.067951906273);
+ assert.equal(series[2].unit,'millones US$');
+ assert.throws(()=>parseBcrp({...payload,config:{series:[...payload.config.series.slice(0,2),{name:'Erróneo'}]}},newCodes),/Título/);
 });
 const response=()=>({headers:{},status(n){this.statusCode=n;return this;},json(body){this.body=body;return this;},setHeader(k,v){this.headers[k]=v;}});
 test('BCRP proxy: validación de método, allowlist y periodos',async()=>{

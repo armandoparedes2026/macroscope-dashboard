@@ -113,7 +113,7 @@
       document.documentElement.dataset.theme = mode;
       document.getElementById('themeIcon')?.setAttribute('href', mode==='dark' ? '#i-sun' : '#i-moon');
       try {localStorage.setItem('macroscope_theme',mode);} catch(e) {}
-      renderCharts(); renderIslm();
+      renderCharts(); renderIslm(); M.renderPanorama?.();
     }
     function updateRangeStyles() {
       document.querySelectorAll('.sim-range').forEach(el=>{
