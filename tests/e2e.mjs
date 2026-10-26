@@ -79,6 +79,73 @@ await check('inicio orbital: siete módulos, flechas, teclado, enlaces y accesib
   await page.waitForFunction(()=>!document.querySelector('[data-view="laboratorio"]').hidden);
 });
 
+await check('home premium: rueda del mouse con cooldown, dirección inversa y enlaces funcionales',async page=>{
+  await page.setViewportSize({width:1440,height:900});
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='inicio';});
+  await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+  await page.locator('.orbit-stage').hover();
+  await page.mouse.wheel(0,110);
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Comparación de economías');
+  await page.mouse.wheel(0,260); // inercia: no debe adelantar otra tarjeta
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Comparación de economías');
+  await page.waitForTimeout(650);
+  await page.mouse.wheel(0,-110);
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Exploración macroeconómica');
+  assert.equal(await page.evaluate(()=>scrollY),0,'el scroll sobre el carrusel no desplaza la página');
+  await page.locator('#homeCarousel').focus();
+  await page.keyboard.press('Home');
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Aprendizaje guiado');
+  await page.keyboard.press('End');
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Modelos y tendencias');
+});
+
+await check('home premium: botón de tema solo icono y mini ilustraciones SVG diferenciadas',async page=>{
+  await openOffline(page);
+  await page.evaluate(()=>{location.hash='inicio';});
+  await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+  assert.equal(await page.locator('.orbit-illustration').count(),7);
+  assert.equal(await page.locator('.orbit-illustration filter').count(),7);
+  assert.equal(await page.locator('.orbit-illustration[role="img"]').count(),7);
+  const vectors=await page.locator('.orbit-illustration').evaluateAll(nodes=>nodes.map(node=>node.querySelectorAll('path,rect,circle,ellipse').length));
+  assert.ok(vectors.every(count=>count>=7),'las siete ilustraciones contienen gráficos vectoriales detallados');
+  await page.evaluate(()=>MacroScope.setTheme('light'));
+  const button=page.locator('#themeBtn');
+  await page.waitForFunction(()=>document.getElementById('themeBtn').getAttribute('aria-label')==='Cambiar a modo oscuro');
+  let style=await button.evaluate(el=>({border:getComputedStyle(el).borderStyle,background:getComputedStyle(el).backgroundColor,borderRadius:getComputedStyle(el).borderRadius}));
+  assert.equal(style.border,'none');
+  assert.ok(Number(style.background.match(/[\d.]+(?=\))/)?.[0] || 0)<.15,'fondo de hover casi transparente');
+  assert.equal(style.borderRadius,'50%');
+  await button.click();
+  await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
+  assert.equal(await button.getAttribute('aria-label'),'Cambiar a modo claro');
+  await button.click();
+  await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+});
+
+await check('home premium: composición responsive y preferencia de movimiento reducido',async page=>{
+  for(const [width,height] of [[360,740],[390,844],[768,1024],[1024,768],[1280,800],[1440,900],[1920,1080]]){
+    await page.setViewportSize({width,height});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await openOffline(page);
+    await page.evaluate(()=>{location.hash='inicio';});
+    await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+    const metrics=await page.evaluate(()=>{
+      const rect=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width};};
+      return {viewport:innerHeight,horizontalOverflow:document.documentElement.scrollWidth-innerWidth,
+        documentHeight:document.documentElement.scrollHeight,bodyHeight:document.body.scrollHeight,landing:rect('.landing-premium'),intro:rect('.landing-intro'),stage:rect('.orbit-stage'),footer:rect('.orbit-footer'),cta:rect('.landing-cta'),
+        benefits:rect('.landing-trust'),card:rect('.orbit-card.is-active'),
+        duration:getComputedStyle(document.querySelector('.orbit-card')).transitionDuration};
+    });
+    assert.ok(metrics.horizontalOverflow<=0,'sin desbordamiento horizontal a '+width);
+    assert.ok(metrics.card.top>=0&&metrics.card.bottom<=height,'card principal visible a '+width);
+    assert.ok(metrics.cta.top>=0&&metrics.cta.bottom<=height+2,'CTA visible a '+width);
+    assert.equal(metrics.duration,'0s','respetar reduce motion a '+width);
+    if(width>=1280) assert.ok(metrics.documentHeight<=height+2,'hero sin scroll vertical a '+width+'x'+height+': '+JSON.stringify(metrics));
+    if(width===390) assert.ok(metrics.benefits.bottom<=height+2,'beneficios en pantalla a 390x844');
+  }
+});
+
 await check('color de la variación según si subir es bueno o malo', async (page) => {
   await openOffline(page);
   await page.selectOption('#countrySelect', 'USA');
