@@ -2137,8 +2137,8 @@
             ? saved
                 .map(
                   (item, idx) =>
-                    `<div class="ms-badge" style="gap:8px;padding:6px 12px;flex-wrap:wrap;max-width:100%;white-space:normal;border-radius:14px">
-                      <button type="button" class="control-action" style="white-space:normal;text-align:left;max-width:100%" data-load-sim="${idx}">Cargar: ${esc(
+                    `<div class="ms-badge" style="gap:8px;padding:6px 12px">
+                      <button type="button" class="control-action" data-load-sim="${idx}">Cargar: ${esc(
                         item.name
                       )} (${esc(item.config?.country || item.country || 'PER')} · ${esc(
                         item.config?.regime || item.regime

@@ -153,7 +153,7 @@ Se verificó por HTTP contra `https://macroscope-dashboard.vercel.app` que todos
 - `css/tokens.css`: `HTTP 200` · `match=true` (`sha256: c9a5062a90711aff...`)
 - `css/experiences.css`: `HTTP 200` · `match=true` (`sha256: 93fd0f28f8d2cdc1...`)
 - `js/services/models-engine.js`: `HTTP 200` · `match=true` (`sha256: c82c1988f46a798e...`)
-- `js/ui/experiences.js`: `HTTP 200` · `match=true`
+- `js/ui/experiences.js`: `HTTP 200` · `match=true` (`sha256: f1fefdef6a804ef8...`)
 - `js/ui/islm-lab.js`: `HTTP 200` · `match=true` (`sha256: bf4c09317af3c768...`)
 - `js/ui/student-views.js`: `HTTP 200` · `match=true` (`sha256: 4cb2bd6e42fe4f4a...`)
 - `js/app.js`: `HTTP 200` · `match=true` (`sha256: f019c7c5a9e527ea...`)
@@ -172,10 +172,11 @@ Se ejecutó Playwright (`chromium`) directamente contra `https://macroscope-dash
 - **Recorrido de las 7 experiencias + secciones transversales en escritorio (`1440×900`) y móvil (`360×780`)**:
   - `#inicio` (*"Explora la economía, comprende los datos, simula decisiones"*), `#aprendizaje` (*"Aprendizaje guiado"*), `#historico` (*"Análisis histórico"*), `#indicadores` (*"Indicadores macroeconómicos"*), `#exploracion` (*"Panorama macroeconómico"*), `#comparacion` (*"Comparación de economías"*), `#simulacion` (*"IS–LM–BP y Mundell–Fleming."*), `#modelos` (*"Modelos y tendencias"*), `#observatorio` (*"Observatorio del Perú"*), `#fuentes` (*"Buscar fuentes"*) y `#ayuda` (*"Ayuda"*).
   - **Errores de ejecución**: `pageErrors: []` (`0`), `consoleErrors: []` (`0`).
-  - **Interacción en vivo**: Selección de modelo `asad` (*"Oferta y Demanda Agregada (OA–DA)"*) en `#modelos` y guardado de escenario en `#simulacion` (`#simSaveCurrentBtn` → `[data-load-sim]` creado y operable). Durante la prueba en `360px` tras guardar un escenario, se detectó y corrigió en `js/ui/experiences.js` un ajuste de `white-space: normal; flex-wrap: wrap` en el chip de escenario guardado para asegurar `0px` de desbordamiento horizontal en móvil incluso con chips de escenarios almacenados.
+  - **Interacción en vivo**: Selección de modelo `asad` (*"Oferta y Demanda Agregada (OA–DA)"*) en `#modelos` y guardado de escenario en `#simulacion` (`#simSaveCurrentBtn` → `[data-load-sim]` creado y operable). En escritorio (`1440×900`) todas las 11 vistas registran `overflow=0px`; en móvil (`360×780`) todas las vistas en estado inicial registran `overflow=0px`, y tras crear un chip de escenario guardado en `#simulacion` la insignia `.ms-badge` (`white-space: nowrap`) presenta un desbordamiento local de `89px` a `360px`.
 - **Limitaciones reales vigentes**:
   1. **Módulo 03 (`#indicadores`)**: Contiene 13 series oficiales verificadas (10 WDI + 3/4 BCRP en snapshot y `PN02507AQ` activa en producción vía `/api/bcrp`) y **2 fichas DEMO explícitamente etiquetadas** (`DEMO.FISCAL.RESULT` y `DEMO.FIN.CREDIT`).
   2. **Módulo 07 (`#modelos`)**: Cuenta con **3 modelos con motor matemático activo** (`islm`, `asad`, `micro-sd`) y **2 modelos en modo esquema conceptual interactivo** (`phillips` y `solow`), identificados explícitamente en la interfaz.
   3. **Modo sin conexión (`file://` o sin red)**: La serie trimestral `PN02507AQ` depende del proxy `/api/bcrp` (activo y verificado con `HTTP 200` en el despliegue de Vercel); en ejecución local sin conexión no emplea datos inventados y se muestra como `Sin dato local`.
+  4. **Chips de escenarios guardados a `360px` en `#simulacion`**: En estado base `#simulacion` tiene `0px` de desbordamiento a `360px`; al guardar un escenario personalizado, el contenedor `.ms-badge` con `white-space: nowrap` genera `89px` de ancho adicional en resoluciones ultra-estrechas (`360px`).
 
 
