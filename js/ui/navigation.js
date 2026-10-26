@@ -86,7 +86,7 @@
     for (const [id, labels] of [
       ['islmRegime', { closed: 'Economía cerrada', flex: 'Flexible', fixed: 'Fijo' }],
       ['islmMobility', { none: 'Nula', low: 'Baja', high: 'Alta', perfect: 'Perfecta' }],
-      ['islmInstrument', { money: 'Oferta monetaria', rate: 'Tasa de interés' }]
+      ['islmInstrument', { money: 'Oferta (M)', rate: 'Tasa (i)' }]
     ]) {
       const select = document.getElementById(id);
       [...select.options].forEach(option => { if (labels[option.value]) option.textContent = labels[option.value]; });

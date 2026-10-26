@@ -153,6 +153,8 @@ html[data-active-view="inicio"] .platform-search {display:none;}
 #tab-simulator .islm-layout .islm-main>.chart-card>.card-top {margin-bottom:10px;}
 #tab-simulator .islm-layout .islm-main>.chart-card #islmABStatus:empty {display:none;}
 .ms-filter-bar .ms-filter-field {padding:0 4px;}
+.p-detail-intro .ms-cross-links {min-width:0;max-width:100%;}
+.p-detail-intro .ms-cross-links a {min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;}
 .ap-controls-box {gap:8px;padding:12px;}
 .ap-slider-group {gap:2px;}
 .ap-canvas-wrap {height:245px;}
@@ -243,6 +245,7 @@ body:has(#inicio:not([hidden])) #inicio .landing-premium {height:calc(100svh - v
   .ms-exp-hero-copy {flex-basis:100%;gap:12px;}
   .ms-exp-hero-icon {width:48px;height:48px;border-radius:16px;}
   .ms-panel {padding:15px;}
+  .p-detail-intro {flex-direction:column;align-items:stretch;}
   .ap-workspace {grid-template-columns:minmax(0,1fr);}
   .ap-workspace>aside:last-child {grid-column:auto;}
   .lab-context-bar {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;}

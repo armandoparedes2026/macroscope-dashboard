@@ -36,7 +36,9 @@ Fuentes incorpora tarjetas de organismo/recurso, filtros de acceso, ficha latera
 - `node tests/platform-visual.mjs`: 66 capturas de once vistas, en escritorio/tablet/móvil y claro/oscuro; medición de desbordamiento y errores JavaScript. Resultados en `test-results/platform/visual-results.json`.
 - Regresión móvil de escenarios: guardar, cargar y eliminar a 360 px sin desbordamiento. Captura en `test-results/experiencias/simulacion-360-escenario-guardado.png`.
 
-Resultado del 26 de octubre de 2026: `npm test` completo aprobado, con smoke (34 controles y 29 scripts), 73 pruebas unitarias y 86 comprobaciones E2E. La galería adicional produjo 66 capturas, sin errores JavaScript ni desbordamientos horizontales en sus mediciones. Las trece capturas representativas se publican en `docs/evidence/platform/`.
+Resultado del 26 de octubre de 2026: `npm test` completo aprobado, con smoke (34 controles y 29 scripts), 73 pruebas unitarias y 87 comprobaciones E2E. La galería adicional produjo 66 capturas, sin errores JavaScript ni desbordamientos horizontales en sus mediciones. Las trece capturas representativas se publican en `docs/evidence/platform/`.
+
+La validación de CI en Linux detectó desbordamiento con fuentes de reserva más anchas. Los enlaces contextuales de Panorama ahora pueden partir líneas dentro de su columna y los selectores del Laboratorio conservan etiquetas legibles a 360 px. Una regresión adicional comprueba Arial, Verdana y DejaVu Sans; las pruebas conservan sus límites de ancho originales.
 
 Las capturas de la galería se realizaron sin red para verificar estados de respaldo y ausencia de datos; no certifican disponibilidad permanente de APIs externas. Se conservan los datos ausentes y su procedencia. La aproximación visual adapta las referencias a los controles, modelos y fuentes realmente implementados, sin copiar estadísticas ilustrativas ni inventar usuarios, notificaciones o resultados.
 

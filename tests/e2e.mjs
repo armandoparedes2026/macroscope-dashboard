@@ -1363,6 +1363,26 @@ await check('navegación unificada: menú móvil, siete experiencias y escenario
   assert.equal(await page.locator('[data-load-sim]').count(), 0);
 });
 
+await check('navegación móvil: fuentes alternativas no desbordan enlaces ni selectores', async page => {
+  await page.setViewportSize({width:360,height:800});
+  await openOffline(page);
+  for (const font of ['Arial','Verdana','DejaVu Sans']) {
+    await page.evaluate(f => {
+      document.documentElement.style.setProperty('--font-body', `'${f}'`);
+      document.documentElement.style.setProperty('--font-heading', `'${f}'`);
+      location.hash = 'exploracion';
+    }, font);
+    await page.waitForFunction(() => document.documentElement.dataset.activeView === 'exploracion');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth-innerWidth), 0, font);
+    await page.evaluate(() => { location.hash = 'simulacion'; });
+    await page.waitForFunction(() => document.documentElement.dataset.activeView === 'simulacion');
+    assert.ok(await page.locator('.lab-context-bar select').evaluateAll(nodes => nodes.every(el => {
+      const ctx = document.createElement('canvas').getContext('2d'); ctx.font = getComputedStyle(el).font;
+      return ctx.measureText(el.selectedOptions[0].textContent).width <= el.clientWidth-38;
+    })), font);
+  }
+});
+
 await browser.close();
 if (failures) {
   console.error(`\n${failures} comprobación(es) fallida(s)`);
