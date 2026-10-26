@@ -10,6 +10,7 @@ Abre [`index.html`](index.html) en un navegador moderno. No requiere un proceso 
 
 - Panorama económico con indicadores del Banco Mundial (WDI) y series mensuales del BCRP.
 - Comparación entre países y América Latina y el Caribe.
+- **Comparación de economías** (`#comparacion`): panel independiente con cuatro países simultáneos, seis indicadores, gráficos históricos, ranking, mapa de orientación, lectura económica, relaciones entre variables, mercado laboral y exportación CSV.
 - Gráficas de series históricas y comparaciones internacionales.
 - Carrusel de lecturas económicas y visualización adaptable.
 - Referencias cambiarias con Open ER API.
@@ -68,6 +69,10 @@ El modelo está en [`js/islm-model.js`](js/islm-model.js): son funciones puras, 
 - Tipos de cambio indicativos: https://open.er-api.com/v6/latest/USD
 
 Los indicadores macroeconómicos son de periodicidad **anual**, no cifras intradía. Si fallan las APIs, el dashboard muestra **datos históricos locales de respaldo**. La procedencia se registra **por celda**: en la tabla, los valores de respaldo aparecen en cursiva con `*`, y el CSV exportado incluye una columna `<indicador>_fuente` (`wdi` o `respaldo`).
+
+En la vista **Comparación de economías**, la fuente principal es igualmente WDI y la actualización utiliza el servicio existente. Puedes seleccionar hasta cuatro países, el periodo (últimos 5/10/20 años o todo el historial), el grupo temático y el indicador activo. Las modalidades **Indicadores**, **Ranking** y **Regiones** comparten las mismas observaciones. La referencia de América Latina y el Caribe es el agregado oficial WDI `LCN`, que no debe interpretarse como un promedio simple de los países seleccionados. El mapa solo orienta geográficamente; las posiciones no codifican la magnitud del indicador. El diagrama de dispersión sirve para explorar relaciones, pero no establece causalidad.
+
+El gráfico histórico permite observar valores originales, índices base 100 para indicadores de nivel y variación acumulada cuando se analiza el crecimiento anual del PBI. Si faltan años consecutivos en una serie de crecimiento, no se interpola ni se calcula una acumulación falsa. Rankings y tarjetas muestran los valores anuales sin transformar. La tabla presenta el último año **común** de cada indicador, evitando comparar cifras de años distintos. Las celdas ausentes se muestran sin inventar ceros. El reporte CSV contiene país ISO3, código WDI, año, valor, unidad y procedencia de cada observación; no incluye las transformaciones visuales.
 
 Los valores de respaldo se transcribieron del WDI, pero **todavía no se han contrastado de nuevo con el API**; algunos datos de 2024 pueden ser estimaciones preliminares. Antes de usarlos en un análisis formal, compáralos con el API del Banco Mundial y anota la fecha de extracción.
 

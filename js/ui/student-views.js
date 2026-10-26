@@ -3,7 +3,7 @@
   const M = globalThis.MacroScope;
   function route() {
     const [requested, query=''] = location.hash.slice(1).split('?');
-    const view = ['inicio','laboratorio','panorama','fuentes','ayuda'].includes(requested) ? requested : 'inicio';
+    const view = ['inicio','laboratorio','panorama','comparacion','fuentes','ayuda'].includes(requested) ? requested : 'inicio';
     M.state.activeTab = view === 'panorama' ? 'overview' : view === 'laboratorio' ? 'simulator' : view;
     document.querySelectorAll('[data-view]').forEach(el => { el.hidden = el.dataset.view !== view; });
     document.querySelectorAll('[data-route]').forEach(el => {
@@ -20,6 +20,7 @@
         requestAnimationFrame(()=>document.getElementById('compareTitle')?.scrollIntoView({block:'start',behavior:'instant'}));
       }
     }
+    if(view==='comparacion') M.renderComparisonDashboard?.();
     if(view==='laboratorio') M.renderIslm();
     M.renderSourceDirectory?.(new URLSearchParams(query));
     M.showGlossaryTerm?.(new URLSearchParams(query).get('term'));

@@ -23,7 +23,7 @@
   delete globalThis.ISLM;
   delete globalThis.LAB_CONTENT;
     function renderAll() {
-      renderExecutiveBanner();renderHeroPanels();renderInsightCards();renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();renderIslm();renderDataTableAndInspector();
+      renderExecutiveBanner();renderHeroPanels();renderInsightCards();renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();renderIslm();renderDataTableAndInspector();M.renderComparisonDashboard?.();
     }
 
     window.addEventListener('DOMContentLoaded',()=>{
