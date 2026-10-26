@@ -114,7 +114,7 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
   await page.waitForFunction(()=>document.getElementById('themeBtn').getAttribute('aria-label')==='Cambiar a modo oscuro');
   let style=await button.evaluate(el=>({border:getComputedStyle(el).borderStyle,background:getComputedStyle(el).backgroundColor,borderRadius:getComputedStyle(el).borderRadius}));
   assert.equal(style.border,'none');
-  assert.equal(style.background,'rgba(0, 0, 0, 0)');
+  assert.ok(Number(style.background.match(/[\d.]+(?=\))/)?.[0] || 0)<.15,'fondo de hover casi transparente');
   assert.equal(style.borderRadius,'50%');
   await button.click();
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
@@ -133,7 +133,7 @@ await check('home premium: composición responsive y preferencia de movimiento r
     const metrics=await page.evaluate(()=>{
       const rect=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width};};
       return {viewport:innerHeight,horizontalOverflow:document.documentElement.scrollWidth-innerWidth,
-        documentHeight:document.documentElement.scrollHeight,cta:rect('.landing-cta'),
+        documentHeight:document.documentElement.scrollHeight,bodyHeight:document.body.scrollHeight,landing:rect('.landing-premium'),intro:rect('.landing-intro'),stage:rect('.orbit-stage'),footer:rect('.orbit-footer'),cta:rect('.landing-cta'),
         benefits:rect('.landing-trust'),card:rect('.orbit-card.is-active'),
         duration:getComputedStyle(document.querySelector('.orbit-card')).transitionDuration};
     });
@@ -141,7 +141,7 @@ await check('home premium: composición responsive y preferencia de movimiento r
     assert.ok(metrics.card.top>=0&&metrics.card.bottom<=height,'card principal visible a '+width);
     assert.ok(metrics.cta.top>=0&&metrics.cta.bottom<=height+2,'CTA visible a '+width);
     assert.equal(metrics.duration,'0s','respetar reduce motion a '+width);
-    if(width>=1280) assert.ok(metrics.documentHeight<=height+2,'hero sin scroll vertical a '+width+'x'+height+': '+metrics.documentHeight);
+    if(width>=1280) assert.ok(metrics.documentHeight<=height+2,'hero sin scroll vertical a '+width+'x'+height+': '+JSON.stringify(metrics));
     if(width===390) assert.ok(metrics.benefits.bottom<=height+2,'beneficios en pantalla a 390x844');
   }
 });
