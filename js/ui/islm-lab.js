@@ -584,7 +584,32 @@
     controls:ISLM_INPUTS, diagrams:['islmPanelISLM','islmPanelMF','islmPanelMoney','islmPanelCross'],
     get content() { return content(); },
     // Read-only snapshots for consumers and numerical rendering checks.
-    snapshot: () => ({ config:{regime:islm.regime,mobility:islm.mobility,instrument:islm.instrument}, params:{...islm.params}, u:{...islm.u}, E0:islm.model.solve(islm.model.baseline), E1:islm.model.solve(islm.u,'impact'), E2:islm.model.solve(islm.u), model:islm.model })
+    snapshot: () => ({ config:{country:state.country,regime:islm.regime,mobility:islm.mobility,instrument:islm.instrument}, params:{...islm.params}, u:{...islm.u}, mTouched:islm.mTouched, E0:islm.model.solve(islm.model.baseline), E1:islm.model.solve(islm.u,'impact'), E2:islm.model.solve(islm.u), model:islm.model }),
+    restore: (saved = {}) => {
+      const cfg = saved?.config && typeof saved.config === 'object' ? saved.config : saved;
+      if (cfg?.country && COUNTRIES[cfg.country] && state.country !== cfg.country) {
+        const countryEl = document.getElementById('countrySelect');
+        if (countryEl) { countryEl.value = cfg.country; countryEl.dispatchEvent(new Event('change')); }
+        else { state.country = cfg.country; islmSyncCountry(); }
+      }
+      if (cfg?.regime && ['closed', 'flex', 'fixed'].includes(cfg.regime)) islm.regime = cfg.regime;
+      if (cfg?.mobility && ['low', 'high', 'perfect'].includes(cfg.mobility)) islm.mobility = cfg.mobility;
+      if (cfg?.instrument && ['money', 'rate'].includes(cfg.instrument)) islm.instrument = cfg.instrument;
+      if (saved?.params && typeof saved.params === 'object') {
+        Object.entries(saved.params).forEach(([k, v]) => {
+          if (k in ISLM.DEFAULT_PARAMS && Number.isFinite(Number(v))) islm.params[k] = Number(v);
+        });
+        if (typeof saved.mTouched === 'boolean') islm.mTouched = saved.mTouched;
+      }
+      islmBuildModel();
+      if (saved?.u && typeof saved.u === 'object') {
+        Object.entries(saved.u).forEach(([k, v]) => {
+          if (k in islm.model.baseline && Number.isFinite(Number(v))) islm.u[k] = Number(v);
+        });
+        ISLM_INPUTS.filter(d => d.group !== 'param' && islmDisabledReason(d)).forEach(d => { islm.u[d.key] = islm.model.baseline[d.key]; });
+      }
+      renderIslm();
+    }
   };
   Object.assign(M, { drawIslmPanels, islmBuildModel, islmCalibrationData, islmDisabledReason, islmFmtKF, islmLinePair, islmNarrative, islmRegimeText, islmShiftText, islmSyncCountry, renderIslm, renderIslmClasses, renderIslmInputs, renderIslmMultipliers, renderIslmResults, setupIslm, syncIslmControls });
 })();

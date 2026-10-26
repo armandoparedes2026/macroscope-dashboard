@@ -1,0 +1,971 @@
+/*
+ * Sistema visual unificado para las Siete Experiencias de Macroscope y secciones transversales
+ * (Aprendizaje guiado, Análisis histórico, Indicadores macroeconómicos, Exploración/Panorama,
+ * Comparación, Simulación/Laboratorio, Modelos y tendencias, Observatorio del Perú, Fuentes y Ayuda).
+ * Universo cromático: Blanco frío, Azul hielo, Azul cobalto y Azul marino profundo (Claro / Oscuro).
+ */
+
+/* Barra transversal de navegación entre las 7 experiencias + secciones transversales */
+.ms-exp-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  border-radius: 18px;
+  background: var(--ms-glass-surface);
+  border: 1px solid var(--ms-glass-stroke);
+  box-shadow: var(--ms-glass-shadow);
+  backdrop-filter: blur(18px);
+}
+.ms-exp-ribbon-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.ms-exp-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 6px 9px;
+  border-radius: 12px;
+  font: 700 11px/1.2 var(--font-body);
+  color: var(--text-muted);
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+.ms-exp-pill:hover {
+  background: var(--ms-pill-bg);
+  color: var(--primary);
+  border-color: var(--ms-glass-stroke);
+}
+.ms-exp-pill[aria-current="page"],
+.ms-exp-pill.is-active {
+  background: var(--ms-pill-active);
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(24, 100, 234, 0.24);
+}
+.ms-exp-pill-num {
+  font: 800 10px/1 var(--font-mono);
+  opacity: 0.78;
+}
+
+/* Contenedor común para las nuevas experiencias premium */
+.ms-exp-view {
+  --exp-bg: #eef6ff;
+  --exp-card: rgba(255, 255, 255, 0.90);
+  --exp-card-solid: #ffffff;
+  --exp-soft: #eaf3ff;
+  --exp-stroke: #dbe9fb;
+  --exp-ink: #0c2352;
+  --exp-muted: #4b6794;
+  --exp-blue: #1864ea;
+  --exp-cobalt: #297bf4;
+  --exp-shadow: 0 14px 36px rgba(38, 98, 190, 0.07), 0 3px 10px rgba(28, 76, 152, 0.035);
+  color: var(--exp-ink);
+  font-family: var(--font-body);
+  position: relative;
+  isolation: isolate;
+  padding: clamp(14px, 2.2vw, 28px);
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at 94% 3%, rgba(92, 162, 255, 0.16), transparent 42%),
+    radial-gradient(ellipse at 3% 56%, rgba(186, 220, 255, 0.25), transparent 45%),
+    linear-gradient(180deg, #f3f8ff 0%, #eaf3ff 52%, #f5faff 100%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: var(--exp-shadow);
+  min-width: 0;
+}
+:root[data-theme="dark"] .ms-exp-view {
+  --exp-bg: #07162e;
+  --exp-card: rgba(15, 34, 65, 0.91);
+  --exp-card-solid: #112648;
+  --exp-soft: #16325c;
+  --exp-stroke: #294873;
+  --exp-ink: #ecf4ff;
+  --exp-muted: #abc4e8;
+  --exp-blue: #6da8ff;
+  --exp-cobalt: #3c89ff;
+  --exp-shadow: 0 18px 42px rgba(2, 8, 22, 0.36), 0 3px 10px rgba(2, 8, 22, 0.22);
+  background:
+    radial-gradient(ellipse at 94% 3%, rgba(38, 98, 192, 0.24), transparent 42%),
+    radial-gradient(ellipse at 4% 58%, rgba(22, 66, 134, 0.22), transparent 45%),
+    linear-gradient(180deg, #091b36 0%, #07152b 100%);
+  border-color: #24426b;
+}
+
+.ms-exp-view a:focus-visible,
+.ms-exp-view button:focus-visible,
+.ms-exp-view select:focus-visible,
+.ms-exp-view input:focus-visible,
+.ms-exp-view summary:focus-visible,
+.ms-exp-ribbon a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Encabezado Hero de cada experiencia */
+.ms-exp-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.ms-exp-hero-copy {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  flex: 1 1 420px;
+}
+.ms-exp-icon {
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #ffffff, #e2f0ff);
+  color: #1f6feb;
+  border: 1px solid #ffffff;
+  box-shadow: 0 10px 26px rgba(42, 108, 212, 0.13);
+}
+:root[data-theme="dark"] .ms-exp-icon {
+  background: linear-gradient(145deg, #1b3a6b, #132a4f);
+  color: #7ab2ff;
+  border-color: #31558a;
+}
+.ms-exp-icon svg {
+  width: 30px;
+  height: 30px;
+}
+.ms-exp-eyebrow {
+  font: 800 10px/1.3 var(--font-body);
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--exp-blue);
+  margin-bottom: 3px;
+}
+.ms-exp-hero h1 {
+  margin: 0 0 4px;
+  font: 800 clamp(24px, 2.3vw, 35px)/1.14 var(--font-heading);
+  letter-spacing: -0.9px;
+  color: var(--exp-ink);
+}
+.ms-exp-hero p {
+  margin: 0;
+  font: 500 clamp(12px, 1vw, 14.5px)/1.48 var(--font-body);
+  color: var(--exp-muted);
+  max-width: 780px;
+}
+.ms-exp-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ms-btn-primary,
+.ms-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 18px;
+  border-radius: 15px;
+  font: 700 12.5px/1.2 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.ms-btn-primary {
+  background: linear-gradient(115deg, #4b9aff, #1762e6);
+  color: #ffffff;
+  border: 1px solid rgba(55, 125, 240, 0.4);
+  box-shadow: 0 8px 20px rgba(25, 100, 232, 0.22);
+}
+.ms-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(25, 100, 232, 0.30);
+}
+.ms-btn-secondary {
+  background: var(--exp-card);
+  color: var(--exp-ink);
+  border: 1px solid var(--exp-stroke);
+  box-shadow: 0 4px 12px rgba(34, 90, 175, 0.06);
+}
+.ms-btn-secondary:hover {
+  background: var(--exp-soft);
+  color: var(--exp-blue);
+}
+
+/* Barra de filtros y controles superiores */
+.ms-filter-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 12px;
+  align-items: end;
+  padding: 12px 15px;
+  margin-bottom: 14px;
+  border-radius: 20px;
+  background: var(--exp-card);
+  border: 1px solid var(--exp-stroke);
+  box-shadow: var(--exp-shadow);
+  backdrop-filter: blur(18px);
+}
+.ms-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.ms-filter-field label,
+.ms-filter-label {
+  font: 700 10.5px/1.2 var(--font-body);
+  color: var(--exp-muted);
+}
+.ms-filter-field select,
+.ms-filter-field input[type="search"],
+.ms-filter-field input[type="text"] {
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--exp-stroke);
+  background: var(--exp-card-solid);
+  color: var(--exp-ink);
+  font: 600 12.5px/1.2 var(--font-body);
+  width: 100%;
+  min-width: 0;
+}
+.ms-seg-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--exp-soft);
+  border: 1px solid var(--exp-stroke);
+}
+.ms-seg-btn {
+  flex: 1 1 auto;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--exp-muted);
+  font: 700 11.5px/1.2 var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.ms-seg-btn[aria-pressed="true"],
+.ms-seg-btn[aria-selected="true"],
+.ms-seg-btn.is-active {
+  background: linear-gradient(115deg, #4b9aff, #1762e6);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(24, 100, 234, 0.25);
+}
+
+/* Superficies y paneles de vidrio */
+.ms-panel {
+  background: var(--exp-card);
+  border: 1px solid var(--exp-stroke);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: var(--exp-shadow);
+  backdrop-filter: blur(16px);
+  min-width: 0;
+}
+.ms-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.ms-panel-head h2,
+.ms-panel-head h3 {
+  margin: 0 0 3px;
+  font: 800 16.5px/1.25 var(--font-heading);
+  color: var(--exp-ink);
+  letter-spacing: -0.3px;
+}
+.ms-panel-head p {
+  margin: 0;
+  font: 500 11.5px/1.45 var(--font-body);
+  color: var(--exp-muted);
+}
+.ms-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font: 700 10.5px/1.2 var(--font-body);
+  background: var(--exp-soft);
+  color: var(--exp-blue);
+  border: 1px solid var(--exp-stroke);
+  white-space: nowrap;
+}
+.ms-badge.demo {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-color: currentColor;
+}
+.ms-badge.live {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+/* ==========================================================================
+   MÓDULO 01 — APRENDIZAJE GUIADO (#aprendizaje, Ref 6.png)
+   ========================================================================== */
+.ap-workspace {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.85fr) minmax(0, 2.05fr) minmax(270px, 0.95fr);
+  gap: 14px;
+  align-items: start;
+}
+.ap-route-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--exp-soft);
+  border: 1px solid var(--exp-stroke);
+  margin-bottom: 14px;
+}
+.ap-progress-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(110, 155, 225, 0.22);
+  overflow: hidden;
+  margin: 8px 0 6px;
+}
+.ap-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4b9aff, #1762e6);
+  transition: width 0.3s ease;
+}
+.ap-lesson-list {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+.ap-lesson-btn {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--exp-stroke);
+  background: var(--exp-card-solid);
+  color: var(--exp-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s, background 0.2s;
+}
+.ap-lesson-btn:hover {
+  border-color: var(--exp-cobalt);
+  transform: translateY(-1px);
+}
+.ap-lesson-btn.is-active {
+  background: var(--exp-soft);
+  border-color: var(--exp-blue);
+  box-shadow: inset 0 0 0 1px var(--exp-blue);
+}
+.ap-lesson-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font: 800 11px/1 var(--font-mono);
+  background: var(--exp-soft);
+  color: var(--exp-blue);
+}
+.ap-lesson-btn.is-done .ap-lesson-step {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.ap-lesson-btn strong {
+  display: block;
+  font: 700 12px/1.3 var(--font-body);
+}
+.ap-lesson-btn small {
+  display: block;
+  font: 500 10.5px/1.3 var(--font-body);
+  color: var(--exp-muted);
+}
+.ap-sim-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(230px, 0.95fr);
+  gap: 14px;
+  margin-top: 12px;
+}
+.ap-diagram-box {
+  border: 1px solid var(--exp-stroke);
+  border-radius: 16px;
+  padding: 14px;
+  background: var(--exp-card-solid);
+}
+.ap-canvas-wrap {
+  width: 100%;
+  height: 270px;
+  position: relative;
+}
+.ap-canvas-wrap svg,
+.ap-canvas-wrap canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.ap-controls-box {
+  border: 1px solid var(--exp-stroke);
+  border-radius: 16px;
+  padding: 14px;
+  background: var(--exp-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ap-slider-group {
+  display: grid;
+  gap: 4px;
+}
+.ap-slider-head {
+  display: flex;
+  justify-content: space-between;
+  font: 700 11.5px/1.2 var(--font-body);
+}
+.ap-slider-head output {
+  font: 800 11.5px/1.2 var(--font-mono);
+  color: var(--exp-blue);
+}
+.ap-controls-box input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--exp-blue);
+  cursor: pointer;
+}
+.ap-quiz-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.ap-quiz-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 82px;
+  padding: 12px 14px;
+  border-radius: 15px;
+  border: 1.5px solid var(--exp-stroke);
+  background: var(--exp-card-solid);
+  color: var(--exp-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.ap-quiz-option[aria-checked="true"],
+.ap-quiz-option.is-selected {
+  border-color: var(--exp-blue);
+  background: var(--exp-soft);
+  box-shadow: 0 0 0 2px rgba(24, 100, 234, 0.16);
+}
+.ap-quiz-option strong {
+  font: 800 12.5px/1.3 var(--font-heading);
+}
+.ap-quiz-option span {
+  font: 500 11px/1.4 var(--font-body);
+  color: var(--exp-muted);
+}
+.ap-feedback {
+  padding: 12px 14px;
+  border-radius: 14px;
+  margin-top: 10px;
+  font: 600 12px/1.5 var(--font-body);
+  border: 1px solid var(--exp-stroke);
+  background: var(--exp-soft);
+}
+.ap-feedback.is-correct {
+  background: var(--success-soft);
+  color: var(--success);
+  border-color: currentColor;
+}
+.ap-feedback.is-wrong {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-color: currentColor;
+}
+.ap-donut-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 10px 0;
+}
+.ap-donut-svg {
+  width: 88px;
+  height: 88px;
+  flex: 0 0 88px;
+}
+.ap-chain {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.ap-chain-chip {
+  padding: 5px 10px;
+  border-radius: 9px;
+  background: var(--exp-card-solid);
+  border: 1px solid var(--exp-stroke);
+  font: 800 11px/1.2 var(--font-mono);
+  color: var(--exp-blue);
+}
+.ap-concept-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ==========================================================================
+   MÓDULO 02 — ANÁLISIS HISTÓRICO (#historico)
+   ========================================================================== */
+.hi-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.hi-kpi-card {
+  background: var(--exp-card);
+  border: 1px solid var(--exp-stroke);
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: var(--exp-shadow);
+}
+.hi-kpi-card small {
+  display: block;
+  font: 700 10.5px/1.3 var(--font-body);
+  color: var(--exp-muted);
+}
+.hi-kpi-card strong {
+  display: block;
+  font: 800 clamp(20px, 1.9vw, 27px)/1.2 var(--font-heading);
+  color: var(--exp-ink);
+  margin: 4px 0;
+}
+.hi-kpi-card span {
+  font: 600 11px/1.35 var(--font-body);
+  color: var(--exp-blue);
+}
+.hi-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(300px, 0.95fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.hi-chart-box {
+  height: 320px;
+  position: relative;
+  min-width: 0;
+}
+.hi-chart-box canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+.hi-milestones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.hi-milestone-card {
+  padding: 10px 12px;
+  border-radius: 13px;
+  background: var(--exp-soft);
+  border: 1px solid var(--exp-stroke);
+  font-size: 11.5px;
+}
+.hi-milestone-card strong {
+  display: block;
+  color: var(--exp-blue);
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+.hi-subperiod-bars {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--exp-soft);
+  border: 1px solid var(--exp-stroke);
+}
+
+/* ==========================================================================
+   MÓDULO 03 — INDICADORES MACROECONÓMICOS (#indicadores)
+   ========================================================================== */
+.ind-cat-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.ind-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.ind-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 12px;
+}
+.ind-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 15px;
+  border-radius: 18px;
+  border: 1.5px solid var(--exp-stroke);
+  background: var(--exp-card);
+  color: var(--exp-ink);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--exp-shadow);
+  transition: transform 0.2s, border-color 0.2s;
+  min-height: 175px;
+}
+.ind-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--exp-cobalt);
+}
+.ind-card.is-selected {
+  border-color: var(--exp-blue);
+  background: var(--exp-soft);
+  box-shadow: inset 0 0 0 1px var(--exp-blue), var(--exp-shadow);
+}
+.ind-card-val {
+  font: 800 24px/1.15 var(--font-heading);
+  color: var(--exp-ink);
+}
+.ind-sheet-chart {
+  height: 210px;
+  position: relative;
+  margin: 12px 0;
+}
+.ind-sheet-chart.is-expanded {
+  height: 340px;
+}
+.ind-sheet-chart canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+.ind-meta-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--exp-soft);
+  border: 1px solid var(--exp-stroke);
+  font-size: 11.5px;
+}
+.ind-meta-list div strong {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--exp-muted);
+}
+
+/* ==========================================================================
+   MÓDULO 07 — MODELOS Y TENDENCIAS (#modelos)
+   ========================================================================== */
+.mod-cards-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.mod-card-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 108px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1.5px solid var(--exp-stroke);
+  background: var(--exp-card);
+  color: var(--exp-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.mod-card-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--exp-cobalt);
+}
+.mod-card-btn.is-active {
+  border-color: var(--exp-blue);
+  background: var(--exp-soft);
+  box-shadow: inset 0 0 0 1px var(--exp-blue);
+}
+.mod-workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.45fr) minmax(270px, 0.9fr);
+  gap: 14px;
+  align-items: start;
+}
+.mod-diagram-box {
+  height: 290px;
+  position: relative;
+  border-radius: 16px;
+  border: 1px solid var(--exp-stroke);
+  background: var(--exp-card-solid);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.mod-diagram-box svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.mod-equation-box {
+  font: 600 11.5px/1.55 var(--font-mono);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--exp-soft);
+  border: 1px solid var(--exp-stroke);
+  margin: 8px 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   SECCIÓN TRANSVERSAL — OBSERVATORIO DEL PERÚ (#observatorio, Ref 4.png)
+   ========================================================================== */
+.obs-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.obs-kpi-card {
+  background: var(--exp-card);
+  border: 1px solid var(--exp-stroke);
+  border-radius: 17px;
+  padding: 12px 13px;
+  box-shadow: var(--exp-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.obs-kpi-card strong {
+  font: 800 clamp(20px, 1.7vw, 27px)/1.15 var(--font-heading);
+  color: var(--exp-ink);
+}
+.obs-analytics-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(280px, 0.88fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.obs-chart-wrap {
+  height: 205px;
+  position: relative;
+}
+.obs-chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+.obs-reading-panel {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
+.obs-bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ==========================================================================
+   SECCIÓN TRANSVERSAL — BIBLIOTECA DE FUENTES (#fuentes, Ref 7.png)
+   ========================================================================== */
+.fuentes-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.95fr);
+  gap: 16px;
+  align-items: start;
+  min-width: 0;
+}
+.fuentes-workspace > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.fuentes-side-sheet {
+  position: sticky;
+  top: 82px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.fuentes-collections-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.fuentes-collection-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 54px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.fuentes-collection-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+/* Guardado local de escenarios y resumen en Simulación (#tab-simulator, Ref 5.png) */
+.sim-saved-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  margin-top: 10px;
+}
+.sim-saved-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Reglas adaptables (Tablet y Móvil: 1280px, 1024px, 768px, 390px, 360px) */
+@media (max-width: 1280px) {
+  .ap-workspace {
+    grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.5fr);
+  }
+  .ap-workspace > aside:last-child {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .mod-cards-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .mod-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .mod-workspace > aside:last-child {
+    grid-column: 1 / -1;
+  }
+  .obs-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .obs-analytics-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .obs-reading-panel {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+  .obs-bottom-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .ap-workspace,
+  .ap-sim-grid,
+  .hi-main-grid,
+  .ind-workspace,
+  .mod-workspace,
+  .fuentes-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ap-workspace > aside:last-child {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hi-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fuentes-side-sheet {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .ms-exp-view {
+    padding: 12px;
+    border-radius: 18px;
+  }
+  .ms-exp-ribbon {
+    padding: 8px;
+  }
+  .ms-exp-pill {
+    flex: 1 1 calc(50% - 6px);
+    justify-content: flex-start;
+  }
+  .ap-quiz-options,
+  .mod-cards-row,
+  .obs-kpi-grid,
+  .obs-analytics-grid,
+  .hi-kpi-grid,
+  .fuentes-collections-grid,
+  .source-grid,
+  .source-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ind-meta-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

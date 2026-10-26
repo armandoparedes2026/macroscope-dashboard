@@ -1,190 +1,108 @@
 # MacroScope — Laboratorio Interactivo de Economía Aplicada
 
-Plataforma para aprender, experimentar y analizar economía aplicada: un laboratorio IS–LM–BP / Mundell–Fleming con escenarios guiados en tres niveles, estadísticas oficiales (Banco Mundial WDI y BCRP) y comparaciones internacionales que explicitan sus límites. Distingue siempre la simulación teórica de la evidencia empírica.
+Plataforma interactiva para aprender, explorar, comparar y simular economía aplicada. Integra **siete experiencias completas** conectadas desde la portada orbital de 7 tarjetas, estadísticas oficiales verificadas (**Banco Mundial WDI** y **BCRP**), el **Observatorio del Perú**, la **Biblioteca de fuentes** y cinco modelos económicos con separación explícita entre evidencia empírica observada y simulación teórica.
 
 ## Abrir el proyecto
 
-Abre [`index.html`](index.html) en un navegador moderno. No requiere un proceso de compilación ni servidor de aplicaciones. Para publicar el sitio más adelante, `index.html` está preparado como punto de entrada para alojamiento estático.
+Abre [`index.html`](index.html) en un navegador moderno. No requiere un proceso de compilación ni servidor de aplicaciones (`file://` totalmente soportado mediante scripts clásicos con `defer`). Para publicar el sitio en alojamiento estático o Vercel, `index.html` actúa directamente como punto de entrada.
 
-## Funciones
+## Las Siete Experiencias de MacroScope y Secciones Transversales
 
-- Panorama económico premium con seis indicadores, cuatro enfoques temáticos, visualizaciones interactivas y procedencia visible por indicador.
-- Comparación entre países y América Latina y el Caribe.
-- **Comparación de economías** (`#comparacion`): panel independiente con cuatro países simultáneos, seis indicadores, gráficos históricos, ranking, mapa de orientación, lectura económica, relaciones entre variables, mercado laboral y exportación CSV.
-- Gráficas de series históricas y comparaciones internacionales.
-- Carrusel de lecturas económicas y visualización adaptable.
-- Referencias cambiarias con Open ER API.
-- Simulador **IS–LM–BP / Mundell–Fleming ampliado** con cuatro diagramas enlazados (ver abajo).
-- Tabla histórica con exportación CSV e inspector de las consultas API.
-- Tema claro/oscuro.
+| # | Experiencia / Sección | Ruta principal | Rutas compatibles | Descripción |
+|---|---|---|---|---|
+| 00 | **Portada orbital** | `#inicio` | — | Escenario 3D interactivo con las 7 tarjetas orbitales, rueda, teclado y arrastre táctil/mouse. |
+| 01 | **Aprendizaje guiado** | `#aprendizaje` | — | Rutas pedagógicas por lecciones, niveles (introductorio, intermedio, avanzado), simulador embebido, predicción calificada con el motor IS–LM–BP y progreso persistente en `localStorage`. |
+| 02 | **Análisis histórico** | `#historico` | — | Series de tiempo largas (WDI y BCRP), comparación de subperiodos A/B, variaciones, índice base 100, media móvil de 3 periodos, hitos documentados y exportación CSV con procedencia. |
+| 03 | **Indicadores macroeconómicos** | `#indicadores` | — | Catálogo categorizado en 7 áreas temáticas, buscador por código/concepto, fichas analíticas con definición, fórmula, gráfico ampliable y distinción explícita entre series oficiales (WDI/BCRP) y fichas demostrativas. |
+| 04 | **Exploración macroeconómica** | `#exploracion` | `#panorama` | Tablero ejecutivo e interactivo con 8 KPIs oficiales, evolución del PBI (nivel 2015=100 y variación %), inflación, lectura económica y matriz de trazabilidad API. |
+| 05 | **Comparación de economías** | `#comparacion` | — | Contraste simultáneo de hasta 4 economías con datos anuales WDI, modo indicadores/ranking/regiones, mapa interactivo MapLibre + respaldo SVG Natural Earth, dispersión crecimiento-inflación, mercado laboral y exportación CSV. |
+| 06 | **Simulación de escenarios** | `#simulacion` | `#laboratorio` | Laboratorio **IS–LM–BP / Mundell–Fleming** en 4 mercados enlazados, regímenes cambiarios, movilidad de capital, trilema de Mundell, comparación A/B y guardado local de escenarios. |
+| 07 | **Modelos y tendencias** | `#modelos` | — | Biblioteca visual de 5 modelos: **IS–LM–BP**, **Oferta y Demanda Agregada (OA–DA)** y **Oferta y Demanda microeconómica** con motores matemáticos puros, más esquemas conceptuales de **Curva de Phillips** y **Crecimiento de Solow–Swan**, contrastados con tendencias empíricas WDI. |
+| PE | **Observatorio del Perú** | `#observatorio` | — | Seguimiento macroeconómico nacional especializado con series oficiales del BCRP e INEI/OIT (inflación y rango meta 1%–3%, tasa de referencia, RIN, tipo de cambio, PBI trimestral y calendario de publicaciones). |
+| DB | **Biblioteca de fuentes** | `#fuentes` | — | Directorio académico filtrable por curso, alcance y tipo de acceso, con **Ficha de la fuente** lateral, colecciones rápidas y citación APA 7 verificada. |
+| ? | **Ayuda y glosario** | `#ayuda` | — | Guía de uso paso a paso, glosario económico interactivo con búsqueda instantánea y preguntas frecuentes metodológicas. |
 
-## Simulador IS–LM–BP / Mundell–Fleming
+El mapeo detallado de las siete referencias visuales de `docs/ux/referencias/1.png` … `7.png` está documentado en [`docs/ux/referencias/MAPEO-REFERENCIAS.md`](docs/ux/referencias/MAPEO-REFERENCIAS.md).
 
-La pestaña **Modelo IS–LM y divisas** explica cómo se ajusta una economía a corto plazo, con precios fijos, ante decisiones de política y shocks externos.
+## Simulador IS–LM–BP / Mundell–Fleming y Biblioteca de Modelos
 
-**Cuatro diagramas enlazados**, que muestran el mismo equilibrio:
+La experiencia **Simulación de escenarios** (`#simulacion` / `#laboratorio`) explica cómo se ajusta una economía a corto plazo, con precios fijos, ante decisiones de política y shocks externos en **cuatro diagramas enlazados**:
 
-1. **IS–LM–BP** en (Y, i): equilibrio de bienes, dinero y balanza de pagos.
-2. **Mundell–Fleming** en (Y, e): IS* y LM* (o LM–BP con movilidad imperfecta, y ē con tipo de cambio fijo).
-3. **Mercado de dinero** en (M/P, i): demanda L(Y) y oferta Mˢ.
-4. **Cruz keynesiana** en (Y, DA): demanda agregada y recta de 45°.
+1. **IS–LM–BP** en $(Y, i)$: equilibrio de bienes, dinero y balanza de pagos.
+2. **Mundell–Fleming** en $(Y, e)$: $IS^*$ y $LM^*$ (o LM–BP con movilidad imperfecta, y $\bar{e}$ con tipo de cambio fijo).
+3. **Mercado de dinero** en $(M/P, i)$: demanda $L(Y, i)$ y oferta $M^s/P$.
+4. **Cruz keynesiana** en $(Y, DA)$: demanda agregada y recta de 45°.
 
-En cada diagrama, la línea discontinua es la situación inicial (E₀), la línea continua el nuevo equilibrio (E₂) y el punto hueco el impacto antes del ajuste externo (E₁).
+En **Modelos y tendencias** (`#modelos`), además del modelo IS–LM–BP, se incorporan dos motores matemáticos puros adicionales en [`js/services/models-engine.js`](js/services/models-engine.js):
 
-**Tipos de economía:**
+- **Oferta y Demanda Agregada (OA–DA)**: resuelve el equilibrio de corto plazo ($E_1$, con expectativas de precios predeterminadas) y de medio plazo ($E_2$, con convergencia al producto potencial $Y_n$ y ajuste de expectativas $P^e = P$).
+- **Oferta y Demanda de Mercado**: resuelve cantidad y precio de equilibrio ($Q^*, P_d, P_s$), excedente del consumidor, excedente del productor, recaudación tributaria e ineficiencia (pérdida irrecuperable de bienestar) ante desplazamientos e impuestos por unidad.
+- **Curva de Phillips** y **Modelo de Solow–Swan**: se presentan honestamente con la insignia **Esquema conceptual**, mostrando sus ecuaciones estructurales, supuestos y desplazamientos geométricos sin fingir estimaciones econométricas no verificadas.
 
-- **Régimen:** cerrada, abierta con tipo de cambio flexible o abierta con tipo de cambio fijo.
-- **Movilidad de capital:** nula (BP vertical), baja (BP más inclinada que la LM), alta (BP más plana) o perfecta (Mundell–Fleming clásico).
-- **Instrumento monetario:** oferta monetaria (LM clásica) o tasa de interés de política (LM horizontal). Las combinaciones imposibles según el **trilema de Mundell** se bloquean y se explican.
+## Fuentes, integridad de datos y limitaciones
 
-**Qué controla la economía:**
+- **Banco Mundial (World Development Indicators)**: `https://api.worldbank.org/v2/`
+- **BCRP (BCRPData API y series oficiales)**: `https://estadisticas.bcrp.gob.pe/estadisticas/series/ayuda/api`
+- **Tipos de cambio indicativos**: `https://open.er-api.com/v6/latest/USD`
+- **Cartografía**: [OpenFreeMap](https://openfreemap.org/) + [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) con respaldo vectorial local de [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/) (`data/geo/ne_110m_admin_0_countries.geojson`).
 
-- **Instrumentos (controlables):** G, T, y M o la tasa de política (o ē con tipo de cambio fijo).
-- **Shocks (no controlables):** i*, prima de riesgo ρ, ingreso mundial Y*, términos de intercambio y confianza privada.
-- **Endógenas:** Y, i, e (o M y reservas con tipo de cambio fijo), C, I, NX y flujos de capital.
-- **Parámetros estructurales:** c, t, b, h, m, n y movilidad de capital.
+Reglas estrictas de integridad estadística:
+- **Preservación de nulos**: ningún dato ausente (`null` o `n.d.`) se convierte jamás a `0` ni se interpola linealmente en gráficos, tablas, promedios móviles o cadenas de crecimiento acumulado.
+- **Trazabilidad por observación**: cada celda e indicador distingue entre consulta en vivo (`API en línea`), `respaldo local` verificado con fecha de extracción y `Demostrativo · No oficial` (en fichas metodológicas de referencia).
+- **Alcance geográfico en el Observatorio del Perú**: todas las series corresponden al agregado nacional o Lima Metropolitana según definición oficial del BCRP/INEI; no se extrapolan ni inventan cifras departamentales.
 
-La clasificación se actualiza con el régimen.
-
-**Calibración con datos:**
-
-- La propensión a importar se deriva de las exportaciones (% del PBI, WDI).
-- Las exportaciones netas iniciales igualan el saldo en cuenta corriente observado, financiado con flujos de capital autónomos.
-- La tasa inicial es la meta de inflación del banco central más una tasa real neutral **supuesta** (Perú 1,5 %, Chile 1 %, Colombia 2 %, México 2,5 %, Brasil 5 %, EE. UU. 1 %).
-- La tasa internacional de referencia es del 3 %. El equilibrio inicial se normaliza en Y = 100 y e = 100.
-
-**Resultados en pantalla:** la tabla de resultados (E₀, E₁ y E₂), los multiplicadores efectivos del régimen elegido, una explicación paso a paso del mecanismo de transmisión y la tabla clásica de eficacia de políticas.
-
-El modelo está en [`js/islm-model.js`](js/islm-model.js): son funciones puras, probadas en `tests/islm-model.test.mjs` contra los resultados de libro de texto (por ejemplo, la ineficacia fiscal con flotación y movilidad perfecta, y la monetaria con tipo de cambio fijo).
-
-**Limitaciones:**
-
-- Precios fijos y expectativas estáticas.
-- Economía pequeña, lo que no se cumple bien para EE. UU.
-- No recoge la flotación administrada del BCRP ni el efecto hoja de balance de la dolarización; ambos se mencionan en la interfaz cuando corresponde.
-
-## Fuentes y limitaciones
-
-- Banco Mundial (World Development Indicators): https://api.worldbank.org/v2/
-- BCRP (series oficiales y API): https://estadisticas.bcrp.gob.pe/estadisticas/series/ayuda/api
-- Tipos de cambio indicativos: https://open.er-api.com/v6/latest/USD
-- Cartografía del mapa interactivo de comparación: [OpenFreeMap](https://openfreemap.org/) (estilos Positron y Dark, teselas de OpenStreetMap; servicio público sin clave) y [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/).
-- Fronteras simplificadas de países: [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/), 1:110m, dominio público; copia local de sus 177 geometrías, conservando solo los atributos ISO3 y nombre para minimizar la transferencia (`data/geo/ne_110m_admin_0_countries.geojson`).
-
-### Panorama macroeconómico: cobertura de datos
-
-Al seleccionar **Perú**, el encabezado del Panorama combina series del BCRP de distinta frecuencia: crecimiento interanual del PBI trimestral (`PN02507AQ`), inflación interanual del IPC de Lima (`PN01273PM`), tipo de cambio interbancario mensual (`PN01207PM`), balanza comercial FOB (`PN38723BM`) como **suma móvil de 12 meses**, y expectativas empresariales a tres meses (`PD38045AM`). El desempleo es la estimación anual nacional modelada por la OIT que difunde WDI (`SL.UEM.TOTL.ZS`), **no** la tasa urbana del INEI.
-
-El rediseño basado en la imagen de Panorama mantiene seis tarjetas iniciales, con dos más ampliables (**tasa de referencia** y **reservas internacionales**) y filtros por frecuencia/fuente. Organiza un gráfico amplio del PBI, un gráfico del IPC, una lectura económica y tres paneles inferiores. La gráfica principal de PBI puede alternar entre crecimiento interanual trimestral y un índice mensual desestacionalizado del BCRP (`PN01773AM`), **rebasado a promedio 2015=100 mediante un cálculo explícito**. El vínculo a `#panorama` de la tarjeta **03/07 — Indicadores macroeconómicos** de la portada se conserva; los cambios visuales a la portada se desarrollan en otra rama.
-
-El BCRP se consulta desde el proxy `/api/bcrp` de Vercel, por lo que abrir `index.html` como `file://` permite ver el diseño, pero no garantiza datos BCRP en vivo. Para otros países, las seis tarjetas emplean series anuales WDI y muestran sus fechas y unidades; no se extrapolan series peruanas. Si faltan datos, el indicador muestra «N/D» o identifica el respaldo histórico; la interfaz no sustituye ausencias por cifras ficticias. Cada tarjeta muestra el proveedor, frecuencia, período y vínculo a la fuente. El estado de conexión distingue cargas completas y parciales.
-
-La correspondencia entre códigos y conceptos, junto con las advertencias de comparabilidad, está documentada en [fuentes BCRP](docs/fuentes-bcrp.md). La implementación está separada en `js/services/panorama-data.js` (cálculos), `panorama-client.js` (consultas) y `js/ui/panorama-premium.js` (interacción y gráficos), con estilos encapsulados en `css/panorama.css` para no alterar la portada que se trabaja en otra rama.
-
-Los indicadores **WDI** son anuales, mientras que las series del **BCRP** son mensuales o trimestrales; ninguna constituye una cotización intradía. Si falla WDI, las vistas anuales pueden mostrar **datos históricos locales de respaldo**. La procedencia se registra **por celda**: en la tabla, los valores de respaldo aparecen en cursiva con `*`, y el CSV exportado incluye una columna `<indicador>_fuente` (`wdi` o `respaldo`). Si no se puede consultar BCRP, el Panorama muestra «N/D» para las series afectadas, sin generar un valor de reemplazo.
-
-En la vista **Comparación de economías**, la fuente principal es igualmente WDI y la actualización utiliza el servicio existente. Puedes seleccionar hasta cuatro países, el periodo (últimos 5/10/20 años o todo el historial), el grupo temático y el indicador activo. Las modalidades **Indicadores**, **Ranking** y **Regiones** comparten las mismas observaciones. La referencia de América Latina y el Caribe es el agregado oficial WDI `LCN`, que no debe interpretarse como un promedio simple de los países seleccionados. El **mapa interactivo** permite ampliar, desplazar y pulsar economías: los polígonos de los países seleccionados se colorean de acuerdo con los valores del indicador en el último año común y los marcadores de color diferencian cada economía. La posición de los marcadores es referencial; el color por país representa magnitud relativa entre seleccionados y **no** valor absoluto comparable entre indicadores diferentes. Si el proveedor cartográfico o WebGL no está disponible, se conserva el mapa SVG de respaldo. El diagrama de dispersión sirve para explorar relaciones, pero no establece causalidad.
-
-El gráfico histórico permite observar valores originales, índices base 100 para indicadores de nivel y variación acumulada cuando se analiza el crecimiento anual del PBI. Si faltan años consecutivos en una serie de crecimiento, no se interpola ni se calcula una acumulación falsa. Rankings y tarjetas muestran los valores anuales sin transformar. La tabla presenta el último año **común** de cada indicador, evitando comparar cifras de años distintos. Las celdas ausentes se muestran sin inventar ceros. El reporte CSV contiene país ISO3, código WDI, año, valor, unidad y procedencia de cada observación; no incluye las transformaciones visuales.
-
-Los valores de respaldo se transcribieron del WDI, pero **todavía no se han contrastado de nuevo con el API**; algunos datos de 2024 pueden ser estimaciones preliminares. Antes de usarlos en un análisis formal, compáralos con el API del Banco Mundial y anota la fecha de extracción.
-
-Notas metodológicas:
-
-- **Inflación** (`FP.CPI.TOTL.ZG`): variación del IPC *promedio anual*. No equivale a la variación diciembre–diciembre con la que los bancos centrales evalúan su meta. La lectura "En meta / Sobre meta / Bajo meta" usa la meta de cada banco central: BCRP 2 % ± 1, BCCh 3 % ± 1, BanRep 3 % ± 1, Banxico 3 % ± 1, BCB 3 % ± 1,5 y Fed 2 % (con ± 1 pp solo como banda de referencia). Para América Latina y el Caribe, que no tiene meta, se usan umbrales genéricos.
-- **Desempleo** (`SL.UEM.TOTL.ZS`): estimación *modelada de la OIT* a nivel nacional. No es comparable con la tasa de Lima Metropolitana que publica el INEI.
-
-Los resultados del simulador IS–LM–BP son **didácticos**, no pronósticos econométricos validados ni asesoramiento financiero. Los tipos de cambio de referencia no equivalen a cotizaciones bancarias de compra/venta.
-
-## Tecnología
-
-HTML, CSS y JavaScript modularizados. Chart.js 4.4.1 se carga desde jsDelivr con `defer` y verificación de integridad (SRI); si no carga, se usa un renderizador de gráficos alternativo. MapLibre GL JS 5.12.0 se carga desde jsDelivr y renderiza teselas OpenFreeMap cuando existe WebGL y conexión; Natural Earth se sirve localmente. Las tipografías se solicitan a Google Fonts.
-
-## Estructura
+## Estructura del proyecto
 
 ```text
 macroscope-dashboard/
-??? index.html                  # Estructura HTML y guardia m?nima de tema antes del pintado
-??? css/                        # tokens, base, layout, componentes e IS?LM (orden de cascada)
-??? js/
-?   ??? config/                 # pa?ses, indicadores, metas, supuestos y estado compartido
-?   ??? data/fallback-wdi.js     # respaldo anual y cambiario con fechas de extracci?n disponibles
-?   ??? services/               # WDI (paginaci?n/cach?/reintentos), BCRP y FX
-?   ??? ui/                     # formato, gr?ficos, panorama/datos y laboratorio IS?LM
-?   ??? app.js                  # arranque y enlaces entre vistas
-?   ??? islm-model.js           # modelo puro (contrato conservado)
-?   ??? lab-content.js          # escenarios y contenido puro de la auditor?a
-??? api/bcrp.js                 # proxy del servidor; no se carga como script del navegador
-??? tests/                      # smoke, unitarias, e2e, comparaci?n visual y fixtures reales
-??? docs/arquitectura.md         # dependencias, orden de carga y l?mites DOM/Node
-??? docs/evidence/fase-modularizacion/
-??? package.json
-??? .github/workflows/validate.yml
+├── index.html                          # Punto de entrada (< 500 líneas) con las 7 experiencias y guardia de tema
+├── css/
+│   ├── tokens.css                      # Sistema de diseño armonizado (Blanco frío / Azul hielo / Cobalto / Azul marino)
+│   ├── base.css                        # Reset, tipografía y accesibilidad (:focus-visible)
+│   ├── layout.css                      # Topbar, navegación y contenedores adaptables
+│   ├── components.css                  # Tarjetas, tablas, controles e inspector
+│   ├── islm.css                        # Laboratorio IS–LM–BP de 4 paneles
+│   ├── students.css                    # Directorio de fuentes y glosario de ayuda
+│   ├── landing.css                     # Portada orbital de 7 tarjetas e ilustraciones SVG 3D
+│   ├── panorama.css                    # Módulo 04: Exploración macroeconómica (Panorama)
+│   ├── comparison.css                  # Módulo 05: Comparación de economías
+│   └── experiences.css                 # Módulos 01, 02, 03, 07, Observatorio del Perú y Ficha de la fuente
+├── js/
+│   ├── islm-model.js                   # Motor matemático puro IS–LM–BP / Mundell–Fleming
+│   ├── lab-content.js                  # Escenarios guiados, calificador de predicciones y glosario
+│   ├── config/                         # countries.js, indicators.js, state.js
+│   ├── data/                           # fallback-wdi.js, sources-catalog.js
+│   ├── services/
+│   │   ├── wdi.js                      # Cliente WDI con paginación, caché y preservación de null
+│   │   ├── bcrp-client.js              # Normalizador de series BCRP
+│   │   ├── panorama-data.js            # Cálculos de Panorama (PBI 2015=100, balanza 12M)
+│   │   ├── panorama-client.js          # Cliente BCRP para Panorama
+│   │   ├── compare.js                  # Transformaciones puras de comparación (base 100, acumulado, PPA)
+│   │   ├── comparison-dashboard-data.js# Constructor de ranking, lecturas y tabla comparativa
+│   │   ├── comparison-map-data.js      # Polígonos ISO3 y escalas de color del mapa
+│   │   ├── fx.js                       # Tipos de cambio referenciales
+│   │   └── models-engine.js            # Motores OA–DA, Oferta-Demanda, análisis histórico y catálogo de indicadores
+│   ├── ui/
+│   │   ├── format.js, charts.js, overview.js, panorama-premium.js
+│   │   ├── islm-lab.js, comparison-dashboard.js, student-views.js
+│   │   ├── experiences.js              # Controladores UI de las 7 experiencias y Observatorio del Perú
+│   │   └── landing.js                  # Carrusel orbital 3D de la portada
+│   └── app.js                          # Arranque e integración de todas las vistas
+├── api/bcrp.js                         # Función serverless proxy para BCRPData en Vercel
+├── tests/                              # Suite smoke, 10 suites unitarias (72 tests) y suite E2E Playwright
+└── docs/
+    ├── arquitectura.md                 # Arquitectura, orden de carga y pureza de módulos
+    ├── INFORME-HARMONIA-FINAL.md       # Informe ejecutivo, matriz de las 7 experiencias y auditoría
+    └── ux/referencias/                 # Referencias visuales 1.png...7.png y MAPEO-REFERENCIAS.md
 ```
-
-Los scripts del navegador son cl?sicos con `defer` y comparten `globalThis.MacroScope`; no requieren bundler ni m?dulos ES y funcionan abriendo `index.html` por `file://`. La decisi?n y los contratos est?n documentados en [arquitectura](docs/arquitectura.md).
-
-## Desarrollo seguro con Git y worktrees
-
-Mantén `main` como versión estable y trabaja las modificaciones en ramas independientes. Por ejemplo:
-
-```bash
-git clone https://github.com/armandoparedes2026/macroscope-dashboard.git
-cd macroscope-dashboard
-git worktree add ../macroscope-ui -b feature/ui-premium
-git worktree add ../macroscope-data -b feature/datos-wdi
-```
-
-Puedes asignar un worktree a Codex y el otro a Claude Code. Revisa los cambios antes de integrar cada rama mediante un pull request. No edites los mismos archivos simultáneamente desde dos agentes.
 
 ## Pruebas
 
+En Windows PowerShell con ejecución de scripts restringida, utiliza `npm.cmd`:
+
 ```bash
-npm install                                  # instala Playwright
-npx playwright install chromium              # solo la primera vez
-npm test                                     # smoke + todas las unitarias + e2e
-npm run test:unit                            # modelo, BCRP, contenido y WDI
-npm run test:smoke                           # sintaxis y referencias locales
-node tests/visual-modularization.mjs after    # comparaci?n con la referencia versionada
+npm.cmd run test:smoke   # Verifica sintaxis JS, 34 IDs, referencias bidireccionales, SRI y < 500 líneas en index.html
+npm.cmd run test:unit    # Ejecuta 72 pruebas unitarias en Node (IS-LM-BP, OA-DA, Micro SD, Histórico, WDI, BCRP, Comparador, Fuentes)
+npm.cmd run test:e2e     # Ejecuta la suite integral Playwright en Chromium (offline/fixtures, 7 experiencias, A1-A13, capturas)
+npm.cmd test             # Ejecuta smoke + unit + e2e en secuencia
 ```
-
-En PowerShell con scripts deshabilitados, usa `npm.cmd` en lugar de `npm`.
-
-- `tests/smoke.mjs` comprueba los controles principales, la sintaxis de todos los `.js` del proyecto (excepto dependencias y metadatos Git), los scripts cl?sicos con `defer`, las referencias locales en ambos sentidos, el SRI de Chart.js y el l?mite de 500 l?neas del HTML tras integrar Panorama y Comparación.
-- `tests/islm-model.test.mjs` valida los resultados cl?sicos, reg?menes, trilema, calibraci?n y curvas del modelo.
-- `tests/lab-content.test.mjs` verifica escenarios y predicciones del laboratorio contra el modelo.
-- `tests/bcrp.test.mjs` comprueba normalizaci?n de respuestas reales y contratos del proxy.
-- `tests/panorama-data.test.mjs` valida seis indicadores, faltantes, frecuencias, sumas móviles, procedencia y selección internacional.
-- `tests/e2e.mjs` también verifica interacción, cambios de país, diseño móvil y fallos parciales del BCRP en el nuevo Panorama.
-- `tests/wdi.test.mjs` importa el servicio cl?sico en Node sin DOM y valida paginaci?n con fixtures reales, nulos, ?ltimo a?o disponible, errores oficiales, cach? y actualizaci?n forzada. La procedencia de los fixtures est? en `tests/fixtures/wdi-source.json`.
-- `tests/e2e.mjs` abre `file://` en Chromium con red controlada y verifica respaldo, procedencia por celda y CSV, indicadores, accesibilidad, simulador, temas, m?vil, carrusel, paginaci?n, reintentos y BCRP. Las capturas de este test se guardan en `docs/evidence/fase-modularizacion/e2e-hero-*.png`.
-- `tests/visual-modularization.mjs` compara p?gina completa de Panorama, IS?LM y Datos, en temas claro/oscuro a 1440 y 390 px, con fechas fijas y APIs bloqueadas. Conserva las capturas originales en `before/`; usa `before` ?nicamente para crear una nueva referencia deliberada. El umbral y los resultados est?n en [la evidencia](docs/evidence/fase-modularizacion/README.md).
-
-GitHub Actions ejecuta `npm test` en cada push a `main` y en los pull requests. Estas pruebas usan fixtures y no garantizan disponibilidad de las APIs reales.
-
-## Estado del repositorio
-
-El `macroscope-dashboard.zip` subido inicialmente se eliminó del árbol de trabajo; sigue disponible en el historial de Git (commit `7bbf414`).
-
-## Despliegue de producción en Vercel (CS_CORP)
-
-El proyecto Vercel **`macroscope-dashboard`** ya está creado sin conexión Git directa, para mantener las cuentas GitHub independientes.
-
-- **Sitio:** https://macroscope-dashboard-cs-corp.vercel.app
-- **Equipo Vercel:** `cs-corp`
-- **ID de equipo:** `team_2SUUXoaYVzUfyptfKrG51Of9`
-- **ID de proyecto:** `prj_ynewA8npY6iYShQpYA6vYe13wZzg`
-- **Rama de producción:** `main`
-
-### Activación de GitHub Actions
-
-Queda **un único secreto** por configurar, sin compartirlo por chat ni añadirlo a archivos del repositorio:
-
-1. Accede a https://vercel.com/account/tokens y crea un token de Vercel con acceso a **CS_CORP**.
-2. En https://github.com/armandoparedes2026/macroscope-dashboard/settings/secrets/actions elige **New repository secret**.
-3. Nombre exacto: `VERCEL_TOKEN`. Pega el token en **Secret** y guarda.
-4. Abre https://github.com/armandoparedes2026/macroscope-dashboard/actions/workflows/vercel-deploy.yml y pulsa **Run workflow** sobre `main`. Cuando esa ejecución termine satisfactoriamente, los siguientes `push` a `main` desencadenarán automáticamente despliegues de producción.
-
-La automatización usa `.github/workflows/vercel-deploy.yml` y el `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` públicos. **No guardes un token de acceso en `index.html`, `README.md`, YAML, commits ni archivos `.env` versionados.**
-
-> El primer despliegue se realizó directamente en Vercel. Los siguientes despliegues automáticos requieren el secreto configurado y una ejecución satisfactoria del workflow. El sitio puede exigir autenticación según las protecciones de Vercel.

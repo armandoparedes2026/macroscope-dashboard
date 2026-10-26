@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="css/landing.css">
 <link rel="stylesheet" href="css/panorama.css">
 <link rel="stylesheet" href="css/comparison.css">
+<link rel="stylesheet" href="css/experiences.css">
 <script defer src="js/islm-model.js"></script>
 <script defer src="js/lab-content.js"></script>
 <script defer src="js/config/countries.js"></script>
@@ -41,6 +42,7 @@
 <script defer src="js/services/panorama-data.js"></script>
 <script defer src="js/services/panorama-client.js"></script>
 <script defer src="js/services/fx.js"></script>
+<script defer src="js/services/models-engine.js"></script>
 <script defer src="js/ui/format.js"></script>
 <script defer src="js/ui/charts.js"></script>
 <script defer src="js/ui/overview.js"></script>
@@ -48,6 +50,7 @@
 <script defer src="js/ui/islm-lab.js"></script>
 <script defer src="js/ui/student-views.js"></script>
 <script defer src="js/ui/comparison-dashboard.js"></script>
+<script defer src="js/ui/experiences.js"></script>
 <script defer src="js/ui/landing.js"></script>
 <script defer src="js/app.js"></script>
 </head>
@@ -122,7 +125,7 @@
 <circle cx="46" cy="29" r="4.5" fill="#b4d5ff" opacity=".33"/><circle cx="46" cy="29" r="2.5" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="217" cy="27" r="4.5" fill="#b4d5ff" opacity=".33"/><circle cx="217" cy="27" r="2.5" fill="#468dff" stroke="#fff" stroke-width="1.5"/>
 <path d="M25 36Q66 10 91 34M169 34Q209 8 238 32" fill="none" stroke="#98c5ff" stroke-dasharray="2 6" stroke-width="1.4" opacity=".65"/>
 </g></svg>
- <a class="orbit-card-open" href="#laboratorio" aria-label="Abrir Aprendizaje guiado">Explorar módulo <span aria-hidden="true">↗</span></a>
+ <a class="orbit-card-open" href="#aprendizaje" aria-label="Abrir Aprendizaje guiado">Explorar módulo <span aria-hidden="true">↗</span></a>
  </div></article>
 <article class="orbit-card" data-home-slide="1" aria-label="Análisis histórico">
  <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg></span>
@@ -145,7 +148,7 @@
 <circle cx="104" cy="70" r="4.8" fill="#b4d5ff" opacity=".33"/><circle cx="104" cy="70" r="2.8" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="187" cy="44" r="4.8" fill="#b4d5ff" opacity=".33"/><circle cx="187" cy="44" r="2.8" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="246" cy="19" r="6" fill="#b4d5ff" opacity=".33"/><circle cx="246" cy="19" r="4" fill="#468dff" stroke="#fff" stroke-width="1.5"/>
 <g stroke="#83b0f7" stroke-dasharray="2 4" opacity=".63"><path d="M104 70V112M187 44V113"/></g>
 </g></svg>
- <a class="orbit-card-open" href="#panorama" aria-label="Abrir Análisis histórico">Explorar módulo <span aria-hidden="true">↗</span></a>
+ <a class="orbit-card-open" href="#historico" aria-label="Abrir Análisis histórico">Explorar módulo <span aria-hidden="true">↗</span></a>
  </div></article>
 <article class="orbit-card" data-home-slide="2" aria-label="Indicadores macroeconómicos">
  <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19v-5M10 19V8M15 19v-9M20 19V4"/></svg></span>
@@ -166,7 +169,7 @@
 <g class="ms-indicator-bars"><g class="ms-prism" filter="url(#msDepth2)"><rect x="38" y="78" width="22" height="31" rx="1.5" fill="url(#msBlue2)" opacity=".78" stroke="#7aaff7" stroke-opacity=".48"/><path d="M60 78l7 -4.34V104.66l-7 4.34Z" fill="url(#msSide2)"/><path d="M38 78l7 -4.34h22l-7 4.34Z" fill="url(#msIce2)" stroke="#fff" stroke-opacity=".75" stroke-width=".8"/><path d="M40 81V105" stroke="#fff" stroke-opacity=".55" stroke-width="1.15"/></g><g class="ms-prism" filter="url(#msDepth2)"><rect x="88" y="64" width="24" height="45" rx="1.5" fill="url(#msBlue2)" opacity=".78" stroke="#7aaff7" stroke-opacity=".48"/><path d="M112 64l8 -4.96V104.04l-8 4.96Z" fill="url(#msSide2)"/><path d="M88 64l8 -4.96h24l-8 4.96Z" fill="url(#msIce2)" stroke="#fff" stroke-opacity=".75" stroke-width=".8"/><path d="M90 67V105" stroke="#fff" stroke-opacity=".55" stroke-width="1.15"/></g><g class="ms-prism" filter="url(#msDepth2)"><rect x="142" y="46" width="25" height="63" rx="1.5" fill="url(#msBlue2)" opacity=".78" stroke="#7aaff7" stroke-opacity=".48"/><path d="M167 46l9 -5.58V103.42l-9 5.58Z" fill="url(#msSide2)"/><path d="M142 46l9 -5.58h25l-9 5.58Z" fill="url(#msIce2)" stroke="#fff" stroke-opacity=".75" stroke-width=".8"/><path d="M144 49V105" stroke="#fff" stroke-opacity=".55" stroke-width="1.15"/></g><g class="ms-prism" filter="url(#msDepth2)"><rect x="196" y="21" width="28" height="88" rx="1.5" fill="url(#msBlue2)" opacity=".78" stroke="#7aaff7" stroke-opacity=".48"/><path d="M224 21l9 -5.58V103.42l-9 5.58Z" fill="url(#msSide2)"/><path d="M196 21l9 -5.58h28l-9 5.58Z" fill="url(#msIce2)" stroke="#fff" stroke-opacity=".75" stroke-width=".8"/><path d="M198 24V105" stroke="#fff" stroke-opacity=".55" stroke-width="1.15"/></g></g>
 <g class="ms-indicator-sparks" fill="none" stroke="#69a6f7" stroke-width="1.4"><path d="M45 60Q109 22 173 35" stroke-dasharray="3 6" opacity=".55"/><path d="M198 14l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></g>
 </g></svg>
- <a class="orbit-card-open" href="#panorama" aria-label="Abrir Indicadores macroeconómicos">Explorar módulo <span aria-hidden="true">↗</span></a>
+ <a class="orbit-card-open" href="#indicadores" aria-label="Abrir Indicadores macroeconómicos">Explorar módulo <span aria-hidden="true">↗</span></a>
  </div></article>
 <article class="orbit-card" data-home-slide="3" aria-label="Exploración macroeconómica">
  <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="4" height="9" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16" y="8" width="4" height="12" rx="1"/></svg></span>
@@ -188,7 +191,7 @@
 <path class="ms-exploration-curve" d="M17 83Q40 67 68 66T117 38T164 56T217 17" fill="none" stroke="url(#msLine3)" stroke-width="2.5" stroke-linecap="round" filter="url(#msShimmer3)"/>
 <circle cx="17" cy="83" r="4.5" fill="#b4d5ff" opacity=".33"/><circle cx="17" cy="83" r="2.5" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="68" cy="66" r="5" fill="#b4d5ff" opacity=".33"/><circle cx="68" cy="66" r="3" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="117" cy="38" r="5" fill="#b4d5ff" opacity=".33"/><circle cx="117" cy="38" r="3" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="164" cy="56" r="5" fill="#b4d5ff" opacity=".33"/><circle cx="164" cy="56" r="3" fill="#468dff" stroke="#fff" stroke-width="1.5"/><circle cx="217" cy="17" r="5.5" fill="#b4d5ff" opacity=".33"/><circle cx="217" cy="17" r="3.5" fill="#468dff" stroke="#fff" stroke-width="1.5"/>
 </g></svg>
- <a class="orbit-card-open" href="#panorama" aria-label="Abrir Exploración macroeconómica">Explorar módulo <span aria-hidden="true">↗</span></a>
+ <a class="orbit-card-open" href="#exploracion" aria-label="Abrir Exploración macroeconómica">Explorar módulo <span aria-hidden="true">↗</span></a>
  </div></article>
 <article class="orbit-card" data-home-slide="4" aria-label="Comparación de economías">
  <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c6 5 6 13 0 18M12 3c-6 5-6 13 0 18"/></svg></span>
@@ -237,7 +240,7 @@
 <path class="ms-decision-marker" d="M113 12v105" stroke="#4189f2" stroke-width="1.5" stroke-dasharray="3 5" opacity=".82"/>
 <circle cx="113" cy="68" r="8.5" fill="#e8f4ff" stroke="#4289f3" stroke-width="1.6"/><circle cx="113" cy="68" r="3.8" fill="#347cf0" stroke="#fff" stroke-width="1.2"/>
 </g></svg>
- <a class="orbit-card-open" href="#laboratorio" aria-label="Abrir Simulación de escenarios">Explorar módulo <span aria-hidden="true">↗</span></a>
+ <a class="orbit-card-open" href="#simulacion" aria-label="Abrir Simulación de escenarios">Explorar módulo <span aria-hidden="true">↗</span></a>
  </div></article>
 <article class="orbit-card" data-home-slide="6" aria-label="Modelos y tendencias">
  <div class="orbit-card-inner"><span class="orbit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="18" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="20" cy="17" r="2"/><path d="m6 16 5-9m3 0 5 8M7 18h11"/></svg></span>
@@ -262,7 +265,7 @@
 <path class="ms-projection-line" d="M15 28Q68 7 107 26T194 25T251 18" stroke="#8fbaff" stroke-width="1.5" stroke-dasharray="3 6" opacity=".65" fill="none"/>
 <circle cx="107" cy="26" r="4.6" fill="#b4d5ff" opacity=".33"/><circle cx="107" cy="26" r="2.6" fill="#468dff" stroke="#fff" stroke-width="1.5"/>
 </g></svg>
- <a class="orbit-card-open" href="#laboratorio" aria-label="Abrir Modelos y tendencias">Explorar módulo <span aria-hidden="true">↗</span></a>
+ <a class="orbit-card-open" href="#modelos" aria-label="Abrir Modelos y tendencias">Explorar módulo <span aria-hidden="true">↗</span></a>
  </div></article>
    </div>
    <button class="orbit-arrow orbit-prev" id="homePrev" type="button" aria-label="Módulo anterior"><span aria-hidden="true">‹</span></button>
@@ -292,9 +295,14 @@
      <footer class="cd-source-footer"><span id="cd-status" role="status" aria-live="polite">Preparando datos anuales…</span><a href="docs/fuentes-wdi.md">Fuentes, cobertura y limitaciones WDI ↗</a></footer>
     </div>
    </section>
+   <section class="view exp-section" id="aprendizaje" data-view="aprendizaje" hidden tabindex="-1" aria-label="Aprendizaje guiado"></section>
+   <section class="view exp-section" id="historico" data-view="historico" hidden tabindex="-1" aria-label="Análisis histórico"></section>
+   <section class="view exp-section" id="indicadores" data-view="indicadores" hidden tabindex="-1" aria-label="Indicadores macroeconómicos"></section>
+   <section class="view exp-section" id="modelos" data-view="modelos" hidden tabindex="-1" aria-label="Modelos y tendencias"></section>
+   <section class="view exp-section" id="observatorio" data-view="observatorio" hidden tabindex="-1" aria-label="Observatorio del Perú"></section>
    <section class="view" id="fuentes" data-view="fuentes" hidden tabindex="-1"><header class="view-heading"><div class="eyebrow">DIRECTORIO ACADÉMICO</div><h1>Buscar fuentes</h1><p>Elige una base para tu curso y comprueba su metodología antes de usarla.</p><a class="control-action" href="#ayuda">Cómo citar una fuente</a></header>
      <form id="sourceFilters" class="source-filters" role="search"><label>Curso<select id="sourceCourse" class="field-select"></select></label><label>Alcance<select id="sourceScope" class="field-select"></select></label><label>Acceso<select id="sourceAccess" class="field-select"></select></label><label>Buscar<input id="sourceQuery" type="search" placeholder="Tema, fuente u organismo"></label><button type="reset" class="control-action">Limpiar filtros</button></form>
-     <p id="sourceCount" role="status" aria-live="polite"></p><div class="source-grid" id="sourceResults"></div><p id="sourceChecked" class="data-note"></p></section>
+     <p id="sourceCount" role="status" aria-live="polite"></p><div class="fuentes-workspace"><div class="source-grid" id="sourceResults"></div><aside class="ms-panel fuentes-side-sheet" id="sourceDetailSheet" aria-label="Ficha de la fuente"></aside></div><p id="sourceChecked" class="data-note"></p></section>
    <section class="view" id="ayuda" data-view="ayuda" hidden tabindex="-1"><header class="view-heading"><div class="eyebrow">GUÍA DE APRENDIZAJE</div><h1>Ayuda</h1><p>Empieza por un camino y consulta los términos que necesites.</p><a class="control-action primary" href="#laboratorio">Empezar a aprender</a></header>
      <section aria-labelledby="howTitle"><h2 id="howTitle">Cómo usar MacroScope</h2><div class="path-grid help-paths"><article class="surface help-card"><h3>Aprender</h3><ol><li>Elige un escenario y lee sus supuestos.</li><li>Predice el cambio de las variables.</li><li>Ejecuta y contrasta tu respuesta con el modelo.</li></ol></article><article class="surface help-card"><h3>Explorar datos</h3><ol><li>Elige el país y el indicador.</li><li>Compara años, unidades y economías.</li><li>Consulta la procedencia y copia la cita.</li></ol></article><article class="surface help-card"><h3>Buscar fuentes</h3><ol><li>Filtra por curso, alcance o acceso.</li><li>Lee la descripción y los avisos.</li><li>Abre la fuente y revisa su metodología.</li></ol></article></div></section>
      <section aria-labelledby="glossaryTitle"><h2 id="glossaryTitle">Glosario económico</h2><label for="glossarySearch">Buscar un término o una definición</label><input id="glossarySearch" class="glossary-search" type="search" placeholder="Por ejemplo: IS, inflación, trilema"><p id="glossaryCount" role="status" aria-live="polite"></p><div id="helpGlossary" class="help-glossary"></div></section>

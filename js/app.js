@@ -23,7 +23,7 @@
   delete globalThis.ISLM;
   delete globalThis.LAB_CONTENT;
     function renderAll() {
-      renderExecutiveBanner();renderHeroPanels();renderInsightCards();renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();renderIslm();renderDataTableAndInspector();M.renderPanorama?.();M.renderComparisonDashboard?.();
+      renderExecutiveBanner();renderHeroPanels();renderInsightCards();renderKpiCards();renderDecisionMatrix();renderCharts();renderFxGrid();renderIslm();renderDataTableAndInspector();M.renderPanorama?.();M.renderComparisonDashboard?.();M.renderAllExperiences?.();
     }
 
     window.addEventListener('DOMContentLoaded',()=>{
@@ -43,6 +43,7 @@
       document.getElementById('exportCsvBtn').addEventListener('click',exportCsv);
       document.getElementById('tableSearchInput').addEventListener('input',e=>{state.tableFilter=e.target.value;renderDataTableAndInspector();});
       setupIslm();
+      M.setupExperiences?.();
       M.setupStudentViews();
       M.setupPanorama?.();
       document.getElementById('themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
@@ -56,8 +57,6 @@
         new ResizeObserver(()=>document.documentElement.style.setProperty('--topbar-h',`${topbar.offsetHeight}px`)).observe(topbar);
       }
     });
-
-
 
   Object.assign(M, { renderAll });
 })();
