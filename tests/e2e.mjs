@@ -174,8 +174,27 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
   await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
   assert.equal(await page.locator('.orbit-illustration').count(),7);
   assert.equal(await page.locator('.orbit-illustration filter').count(),14);
-  assert.equal(await page.locator('.orbit-illustration .premium-3d-bar').count() >= 24,true);
-  assert.equal(await page.locator('.orbit-illustration .premium-chart-points').count(),7);
+  const semantics=[
+    ['learning','.ms-book-leaf-left','.ms-book-leaf-right'],
+    ['history','.ms-history-line','.ms-history-grid'],
+    ['indicators','.ms-map-ghost','.ms-indicator-bars'],
+    ['exploration','.ms-explore-bars','.ms-exploration-curve'],
+    ['comparison','.ms-map-network','.ms-map-nodes'],
+    ['simulation','.ms-decision-curves','.ms-decision-marker'],
+    ['trends','.ms-wave-ribbons','.ms-projection-line']
+  ];
+  const kinds=await page.locator('.orbit-illustration').evaluateAll(nodes=>nodes.map(n=>n.dataset.chartKind));
+  assert.deepEqual(kinds,semantics.map(row=>row[0]),'cada tarjeta debe tener su propio concepto gráfico');
+  for(const [type,primary,secondary] of semantics){
+    const card=page.locator('.orbit-illustration[data-chart-kind="'+type+'"]');
+    assert.equal(await card.locator(primary).count(),1,type+' gráfico principal');
+    assert.equal(await card.locator(secondary).count(),1,type+' contexto propio');
+  }
+  assert.equal(await page.locator('.orbit-illustration .ms-prism').count(),9,
+    'solo indicadores (4) y exploración (5) incluyen barras 3D');
+  assert.equal(await page.locator('.orbit-illustration[data-chart-kind="comparison"] .ms-prism').count(),0);
+  assert.equal(await page.locator('.orbit-illustration[data-chart-kind="learning"] .ms-prism').count(),0);
+  assert.equal(await page.locator('.orbit-illustration[data-chart-kind="simulation"] .ms-prism').count(),0);
   const defsValid=await page.locator('.orbit-illustration').evaluateAll(nodes=>{
     const gradientIds=nodes.flatMap(svg=>[...svg.querySelectorAll('linearGradient,radialGradient')]
       .map(node=>node.id));
@@ -197,6 +216,33 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
   assert.equal(await button.getAttribute('aria-label'),'Cambiar a modo claro');
   await button.click();
   await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+});
+
+
+await check('home premium: los siete artes son específicos, legibles y conservan referencias SVG accesibles',async page=>{
+  for(const [width,height] of [[390,844],[1440,900]]){
+    await page.setViewportSize({width,height});
+    await openOffline(page);
+    await page.evaluate(()=>{location.hash='inicio';});
+    await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
+    const semantics=await page.locator('.orbit-illustration.module-art').evaluateAll(svgs=>
+      svgs.map(svg=>({
+        kind:svg.dataset.chartKind,
+        title:svg.getAttribute('aria-label'),
+        uniqueDefs:[...svg.querySelectorAll('linearGradient,radialGradient,filter')].map(x=>x.id),
+        nonEmpty:svg.querySelectorAll('path,rect,ellipse,circle').length>=5
+      }))
+    );
+    assert.equal(semantics.length,7);
+    assert.ok(semantics.every(x=>x.title&&x.nonEmpty));
+    const allIds=semantics.flatMap(x=>x.uniqueDefs);
+    assert.equal(allIds.length,new Set(allIds).size,'no debe haber ID SVG duplicado');
+    const active=page.locator('.orbit-card.is-active');
+    const box=await active.locator('.orbit-illustration').boundingBox();
+    const parent=await active.boundingBox();
+    assert.ok(box.height>=70&&box.y>parent.y+parent.height*.42,
+      'el gráfico debe estar en el tercio inferior a '+width);
+  }
 });
 
 await check('home premium: composición responsive y preferencia de movimiento reducido',async page=>{
