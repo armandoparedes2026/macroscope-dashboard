@@ -60,22 +60,46 @@
   }
 
   function makeSparkSvg(values = [], width = 110, height = 32) {
-    const clean = values.filter(Number.isFinite).slice(-16);
-    if (clean.length < 2) {
+    const slice = (values || []).slice(-16);
+    const finite = slice.filter(Number.isFinite);
+    if (!finite.length || slice.length < 2) {
       return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true"></svg>`;
     }
-    const min = Math.min(...clean);
-    const max = Math.max(...clean);
+    const min = Math.min(...finite);
+    const max = Math.max(...finite);
     const span = max - min || 1;
-    const pts = clean.map((v, i) => [
-      3 + ((width - 6) * i) / (clean.length - 1),
-      height - 4 - ((height - 9) * (v - min)) / span
-    ]);
-    const dLine = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-    const dFill = `${dLine} L${pts.at(-1)[0].toFixed(1)},${height} L${pts[0][0].toFixed(1)},${height} Z`;
-    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">
-      <path d="${dFill}" fill="rgba(40,123,241,0.14)"/>
-      <path d="${dLine}" fill="none" stroke="#1864ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    const segments = [];
+    let current = [];
+    slice.forEach((v, i) => {
+      if (Number.isFinite(v)) {
+        const x = 3 + ((width - 6) * i) / Math.max(1, slice.length - 1);
+        const y = height - 4 - ((height - 9) * (v - min)) / span;
+        current.push([x, y]);
+      } else if (current.length) {
+        segments.push(current);
+        current = [];
+      }
+    });
+    if (current.length) segments.push(current);
+    const dLine = segments
+      .filter(seg => seg.length >= 2)
+      .map(seg => seg.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' '))
+      .join(' ');
+    const dFill = segments
+      .filter(seg => seg.length >= 2)
+      .map(seg => {
+        const line = seg.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+        return `${line} L${seg.at(-1)[0].toFixed(1)},${height} L${seg[0][0].toFixed(1)},${height} Z`;
+      })
+      .join(' ');
+    const dots = segments
+      .filter(seg => seg.length === 1)
+      .map(([[x, y]]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="#1864ea"/>`)
+      .join('');
+    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true" data-segments="${segments.length}">
+      ${dFill ? `<path d="${dFill}" fill="rgba(40,123,241,0.14)"/>` : ''}
+      ${dLine ? `<path d="${dLine}" fill="none" stroke="#1864ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+      ${dots}
     </svg>`;
   }
 
@@ -211,12 +235,50 @@
   }
 
   function renderLearningEquilibriumSvg(model, inputPatch) {
-    const E0 = model.solve(model.baseline, 'final');
-    const E1 = model.solve({ ...model.baseline, ...inputPatch }, 'final');
-    const dY = Number.isFinite(E1.Y - E0.Y) ? E1.Y - E0.Y : 0;
-    const di = Number.isFinite(E1.i - E0.i) ? E1.i - E0.i : 0;
-    const shiftX = Math.max(-45, Math.min(45, dY * 2.2));
-    const shiftLM = Math.max(-35, Math.min(35, (Number.isFinite(inputPatch.Mpct) ? inputPatch.Mpct : 0) * 1.8));
+    const u0 = model.baseline;
+    const u1 = { ...u0, ...inputPatch };
+    const E0 = model.solve(u0, 'final');
+    const E1 = model.solve(u1, 'final');
+    const is0 = model.curves.IS(u0, 100);
+    const is1 = model.curves.IS(u1, Number.isFinite(E1.e) ? E1.e : 100);
+    const lm0 = model.curves.LM(u0, model.M0);
+    const lm1 = model.curves.LM(u1, Number.isFinite(E1.M) ? E1.M : model.M0);
+
+    const xMin = Math.min(82, E0.Y - 12, E1.Y - 12);
+    const xMax = Math.max(118, E0.Y + 12, E1.Y + 12);
+    const evalLineY = (line, x) => (Math.abs(line.b) > 1e-6 ? (line.c - line.a * x) / line.b : E0.i);
+    const sampleY = [
+      E0.i,
+      E1.i,
+      evalLineY(is0, xMin),
+      evalLineY(is0, xMax),
+      evalLineY(is1, xMin),
+      evalLineY(is1, xMax),
+      evalLineY(lm0, xMin),
+      evalLineY(lm0, xMax),
+      evalLineY(lm1, xMin),
+      evalLineY(lm1, xMax)
+    ].filter(Number.isFinite);
+    const yMin = Math.min(...sampleY) - 0.8;
+    const yMax = Math.max(...sampleY) + 0.8;
+    const xL = 52;
+    const xR = 426;
+    const yT = 22;
+    const yB = 204;
+    const mapX = x => xL + ((x - xMin) / Math.max(1e-6, xMax - xMin)) * (xR - xL);
+    const mapY = y => yB - ((y - yMin) / Math.max(1e-6, yMax - yMin)) * (yB - yT);
+    const lineCoords = line => ({
+      x1: mapX(xMin).toFixed(2),
+      y1: mapY(evalLineY(line, xMin)).toFixed(2),
+      x2: mapX(xMax).toFixed(2),
+      y2: mapY(evalLineY(line, xMax)).toFixed(2)
+    });
+    const L_is0 = lineCoords(is0);
+    const L_is1 = lineCoords(is1);
+    const L_lm0 = lineCoords(lm0);
+    const L_lm1 = lineCoords(lm1);
+    const pE0 = { cx: mapX(E0.Y).toFixed(2), cy: mapY(E0.i).toFixed(2) };
+    const pE1 = { cx: mapX(E1.Y).toFixed(2), cy: mapY(E1.i).toFixed(2) };
 
     return `<svg viewBox="0 0 460 250" role="img" aria-label="Equilibrio interactivo del mercado de bienes y dinero IS-LM">
       <defs>
@@ -235,29 +297,22 @@
         <line x1="338" y1="16" x2="338" y2="212"/>
       </g>
       <!-- Curva LM inicial y desplazada -->
-      <line x1="95" y1="186" x2="375" y2="42" stroke="#e05263" stroke-width="2.4" stroke-linecap="round"/>
-      ${
-        Math.abs(shiftLM) > 1
-          ? `<line x1="${95 + shiftLM}" y1="186" x2="${375 + shiftLM}" y2="42" stroke="#e05263" stroke-width="2" stroke-dasharray="6 4"/>`
-          : ''
-      }
-      <text x="360" y="36" fill="#d43f52" font-size="11" font-weight="800">LM</text>
-      <!-- Curva IS inicial -->
-      <line x1="95" y1="44" x2="365" y2="184" stroke="#1864ea" stroke-width="2.5" stroke-linecap="round"/>
-      <text x="348" y="196" fill="#1864ea" font-size="11" font-weight="800">IS₀</text>
-      <!-- Curva IS simulada -->
-      <line x1="${95 + shiftX}" y1="44" x2="${365 + shiftX}" y2="184" stroke="#3b8cff" stroke-width="2.3" stroke-dasharray="6 4" stroke-linecap="round"/>
-      <text x="${Math.min(412, 370 + shiftX)}" y="182" fill="#297bf4" font-size="11" font-weight="800">IS₁</text>
+      <line data-curve="lm0" x1="${L_lm0.x1}" y1="${L_lm0.y1}" x2="${L_lm0.x2}" y2="${L_lm0.y2}" stroke="#e05263" stroke-width="2.4" stroke-linecap="round"/>
+      <line data-curve="lm1" x1="${L_lm1.x1}" y1="${L_lm1.y1}" x2="${L_lm1.x2}" y2="${L_lm1.y2}" stroke="#e05263" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="392" y="36" fill="#d43f52" font-size="11" font-weight="800">LM</text>
+      <!-- Curva IS inicial y simulada -->
+      <line data-curve="is0" x1="${L_is0.x1}" y1="${L_is0.y1}" x2="${L_is0.x2}" y2="${L_is0.y2}" stroke="#1864ea" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="392" y="198" fill="#1864ea" font-size="11" font-weight="800">IS₀</text>
+      <line data-curve="is1" x1="${L_is1.x1}" y1="${L_is1.y1}" x2="${L_is1.x2}" y2="${L_is1.y2}" stroke="#3b8cff" stroke-width="2.3" stroke-dasharray="6 4" stroke-linecap="round"/>
+      <text x="355" y="198" fill="#297bf4" font-size="11" font-weight="800">IS₁</text>
       <!-- Punto E0 -->
-      <line x1="232" y1="114" x2="232" y2="212" stroke="#8aa8d6" stroke-dasharray="3 3"/>
-      <line x1="44" y1="114" x2="232" y2="114" stroke="#8aa8d6" stroke-dasharray="3 3"/>
-      <circle cx="232" cy="114" r="5" fill="#1864ea" stroke="#ffffff" stroke-width="2"/>
-      <rect x="192" y="86" width="38" height="20" rx="6" fill="#ffffff" stroke="#c8defa"/>
-      <text x="211" y="100" text-anchor="middle" fill="#0c2352" font-size="10.5" font-weight="800">E₀</text>
+      <line x1="${pE0.cx}" y1="${pE0.cy}" x2="${pE0.cx}" y2="212" stroke="#8aa8d6" stroke-dasharray="3 3"/>
+      <line x1="44" y1="${pE0.cy}" x2="${pE0.cx}" y2="${pE0.cy}" stroke="#8aa8d6" stroke-dasharray="3 3"/>
+      <circle data-point="E0" cx="${pE0.cx}" cy="${pE0.cy}" r="5" fill="#1864ea" stroke="#ffffff" stroke-width="2"/>
       <!-- Punto E1 -->
-      <circle cx="${232 + shiftX * 0.55}" cy="${114 - di * 14}" r="6" fill="#e0485a" stroke="#ffffff" stroke-width="2"/>
-      <rect x="${240 + shiftX * 0.55}" y="${84 - di * 14}" width="108" height="22" rx="7" fill="#ffffff" stroke="#bcd6fa"/>
-      <text x="${294 + shiftX * 0.55}" y="${99 - di * 14}" text-anchor="middle" fill="#0c2352" font-size="10" font-weight="800">E₁ (Y:${E1.Y.toFixed(1)}, i:${E1.i.toFixed(1)}%)</text>
+      <circle data-point="E1" cx="${pE1.cx}" cy="${pE1.cy}" r="6" fill="#e0485a" stroke="#ffffff" stroke-width="2"/>
+      <rect x="${Math.min(315, Math.max(52, Number(pE1.cx) - 54)).toFixed(1)}" y="${Math.max(22, Number(pE1.cy) - 30).toFixed(1)}" width="112" height="22" rx="7" fill="#ffffff" stroke="#bcd6fa"/>
+      <text x="${Math.min(371, Math.max(108, Number(pE1.cx))).toFixed(1)}" y="${Math.max(37, Number(pE1.cy) - 15).toFixed(1)}" text-anchor="middle" fill="#0c2352" font-size="10" font-weight="800">E₁ (Y:${E1.Y.toFixed(1)}, i:${E1.i.toFixed(1)}%)</text>
       <text x="239" y="234" text-anchor="middle" fill="#4b6794" font-size="11" font-weight="700">Producción de equilibrio (Y, base = 100)</text>
       <text x="18" y="114" text-anchor="middle" transform="rotate(-90 18 114)" fill="#4b6794" font-size="11" font-weight="700">Tasa de interés i (%)</text>
     </svg>`;
@@ -709,7 +764,8 @@
       endPeriod: historyState.endPeriod,
       splitPeriod: historyState.splitPeriod,
       mode: historyState.mode,
-      isRate: activeInd.isRate
+      isRate: activeInd.isRate,
+      frequency: activeInd.frequency
     });
     const sum = analysis.summary;
     const countries = Object.entries(M.COUNTRIES || {});
@@ -966,6 +1022,7 @@
               backgroundColor: historyState.mode === 'variation' ? 'rgba(40,123,241,0.65)' : 'rgba(40,123,241,0.15)',
               borderWidth: 2.4,
               fill: historyState.mode !== 'variation',
+              spanGaps: false,
               tension: 0.22,
               pointRadius: 2
             },
@@ -978,6 +1035,7 @@
                     borderColor: '#007a70',
                     borderDash: [5, 4],
                     borderWidth: 1.8,
+                    spanGaps: false,
                     fill: false,
                     pointRadius: 0
                   }
@@ -1093,9 +1151,10 @@
     if (selected) indicatorsState.selectedId = selected.id;
     const resolvedSelected = M.resolveIndicatorSeries(selected, indicatorsState.country);
     const finiteSelected = resolvedSelected.series.filter(p => Number.isFinite(p.value));
-    const latestPoint = finiteSelected.at(-1) || null;
-    const prevPoint = finiteSelected.length >= 2 ? finiteSelected.at(-2) : null;
-    const latestDelta = latestPoint && prevPoint ? latestPoint.value - prevPoint.value : null;
+    const { latest: latestPoint, delta: latestDelta } = M.getLatestObservationSummary(
+      resolvedSelected.series,
+      selected.frequency
+    );
 
     // Comparación básica entre economías para la ficha analítica
     const peerCodes = ['PER', 'CHL', 'COL', 'MEX', 'BRA', 'USA'];
@@ -1175,10 +1234,7 @@
             ${filtered
               .map(item => {
                 const res = M.resolveIndicatorSeries(item, indicatorsState.country);
-                const fin = res.series.filter(p => Number.isFinite(p.value));
-                const last = fin.at(-1);
-                const prev = fin.length >= 2 ? fin.at(-2) : null;
-                const d = last && prev ? last.value - prev.value : null;
+                const { latest: last, delta: d } = M.getLatestObservationSummary(res.series, item.frequency);
                 const isSel = item.id === selected.id;
                 return `<button type="button" class="ind-card${isSel ? ' is-selected' : ''}" data-ind-card="${esc(
                   item.id
@@ -1198,7 +1254,7 @@
                         d !== null ? ` (${d >= 0 ? '+' : ''}${fmtNum(d, 1)})` : ''
                       }</small>
                     </div>
-                    ${makeSparkSvg(fin.map(p => p.value))}
+                    ${makeSparkSvg(res.series.map(p => p.value))}
                   </div>
                 </button>`;
               })
@@ -1213,8 +1269,12 @@
                 <h2 id="indSheetTitle">${esc(selected.title)}</h2>
                 <p>${esc(selected.provider)} · Serie <strong>${esc(selected.code)}</strong></p>
               </div>
-              <span class="ms-badge ${selected.isDemo ? 'demo' : 'live'}">${
-                selected.isDemo ? 'Demostrativo · No oficial' : 'Serie Oficial Verificada'
+              <span class="ms-badge ${selected.isDemo || resolvedSelected.status === 'unavailable' ? 'demo' : 'live'}">${
+                selected.isDemo
+                  ? 'Demostrativo · No oficial'
+                  : resolvedSelected.status === 'unavailable'
+                    ? 'Serie Oficial · Sin dato local (requiere proxy)'
+                    : 'Serie Oficial Verificada'
               }</span>
             </div>
 
@@ -1277,21 +1337,22 @@
       </div>
     `;
 
-    // Render sheet chart
+    // Render sheet chart (preserving null observations as discontinuities with spanGaps: false)
     indicatorSheetChart?.destroy();
     const canvas = host.querySelector('#indDetailChart');
     if (canvas && typeof globalThis.Chart === 'function' && finiteSelected.length) {
       indicatorSheetChart = new globalThis.Chart(canvas, {
         type: 'line',
         data: {
-          labels: finiteSelected.map(p => p.date),
+          labels: resolvedSelected.series.map(p => p.date),
           datasets: [
             {
               label: selected.title,
-              data: finiteSelected.map(p => p.value),
+              data: resolvedSelected.series.map(p => p.value),
               borderColor: selected.isDemo ? '#b37400' : '#1864ea',
               backgroundColor: selected.isDemo ? 'rgba(179,116,0,0.14)' : 'rgba(24,100,234,0.15)',
               borderWidth: 2.3,
+              spanGaps: false,
               fill: true,
               tension: 0.24,
               pointRadius: 2
@@ -1373,44 +1434,91 @@
   function renderModelDiagramSvg(modelMeta) {
     if (modelMeta.id === 'asad') {
       const engine = M.createAsAdModel();
-      const { E0, E1, E2 } = engine.curves({ dG: modelsState.asadG, dM: modelsState.asadM, dz: modelsState.asadZ });
-      const dx = Math.max(-45, Math.min(45, E1.demandShift * 2.5));
-      const dy = Math.max(-35, Math.min(35, modelsState.asadZ * 5));
+      const { E0, E1, E2, ad0, ad1, as0, as1, as2, lras } = engine.curves({
+        dG: modelsState.asadG,
+        dM: modelsState.asadM,
+        dz: modelsState.asadZ
+      });
+      const allPts = [...ad0, ...ad1, ...as0, ...as1, ...(as2 || []), E0, E1, E2];
+      const xMin = Math.min(75, ...allPts.map(p => p.x ?? p.Y));
+      const xMax = Math.max(125, ...allPts.map(p => p.x ?? p.Y));
+      const yMin = Math.min(70, ...allPts.map(p => p.y ?? p.P)) - 4;
+      const yMax = Math.max(130, ...allPts.map(p => p.y ?? p.P)) + 4;
+      const xL = 55;
+      const xR = 395;
+      const yT = 22;
+      const yB = 192;
+      const mapX = x => xL + ((x - xMin) / Math.max(1e-6, xMax - xMin)) * (xR - xL);
+      const mapY = y => yB - ((y - yMin) / Math.max(1e-6, yMax - yMin)) * (yB - yT);
+      const seg = (pts, name, stroke, width, dash = '') =>
+        `<line data-curve="${name}" x1="${mapX(pts[0].x).toFixed(2)}" y1="${mapY(pts[0].y).toFixed(2)}" x2="${mapX(
+          pts[1].x
+        ).toFixed(2)}" y2="${mapY(pts[1].y).toFixed(2)}" stroke="${stroke}" stroke-width="${width}"${
+          dash ? ` stroke-dasharray="${dash}"` : ''
+        }/>`;
+      const showAs2 = as2 && Math.abs(E2.Pe - E1.Pe) > 1e-3;
+      const lrasX = mapX(lras[0].x).toFixed(2);
       return `<svg viewBox="0 0 440 245" role="img" aria-label="Diagrama Oferta y Demanda Agregada OA-DA">
         <rect x="40" y="15" width="375" height="190" rx="10" fill="#f7fbff" stroke="#d5e5fb"/>
         <!-- OALP vertical -->
-        <line x1="228" y1="20" x2="228" y2="200" stroke="#0f6d48" stroke-width="2.2" stroke-dasharray="4 4"/>
-        <text x="234" y="32" fill="#0f6d48" font-size="10.5" font-weight="800">OALP (Yn=100)</text>
+        <line data-curve="lras" x1="${lrasX}" y1="${yT}" x2="${lrasX}" y2="${yB}" stroke="#0f6d48" stroke-width="2.2" stroke-dasharray="4 4"/>
+        <text x="${(Number(lrasX) + 5).toFixed(1)}" y="32" fill="#0f6d48" font-size="10.5" font-weight="800">OALP (Yn=${E1.Yn.toFixed(0)})</text>
         <!-- DA0 y DA1 -->
-        <line x1="95" y1="42" x2="360" y2="178" stroke="#1864ea" stroke-width="2.4"/>
-        <line x1="${95 + dx}" y1="42" x2="${360 + dx}" y2="178" stroke="#297bf4" stroke-width="2.2" stroke-dasharray="6 4"/>
-        <text x="364" y="182" fill="#1864ea" font-size="10.5" font-weight="800">DA₀</text>
-        <text x="${Math.min(395, 364 + dx)}" y="168" fill="#297bf4" font-size="10.5" font-weight="800">DA₁</text>
-        <!-- OACP0 y OACP1 -->
-        <line x1="95" y1="176" x2="360" y2="44" stroke="#d43f52" stroke-width="2.4"/>
-        <line x1="95" y1="${176 - dy}" x2="360" y2="${44 - dy}" stroke="#e86b79" stroke-width="2.1" stroke-dasharray="6 4"/>
-        <text x="364" y="46" fill="#d43f52" font-size="10.5" font-weight="800">OACP₀</text>
+        ${seg(ad0, 'ad0', '#1864ea', '2.4')}
+        ${seg(ad1, 'ad1', '#297bf4', '2.2', '6 4')}
+        <text x="${mapX(ad0[1].x).toFixed(1)}" y="${Math.min(198, mapY(ad0[1].y) + 12).toFixed(1)}" fill="#1864ea" font-size="10.5" font-weight="800">DA₀</text>
+        <text x="${mapX(ad1[1].x).toFixed(1)}" y="${Math.max(30, mapY(ad1[1].y) - 6).toFixed(1)}" fill="#297bf4" font-size="10.5" font-weight="800">DA₁</text>
+        <!-- OACP0, OACP1 y OACP2 (ajuste medio plazo) -->
+        ${seg(as0, 'as0', '#d43f52', '2.4')}
+        ${seg(as1, 'as1', '#e86b79', '2.1', '6 4')}
+        ${showAs2 ? seg(as2, 'as2', '#8a3ab9', '1.9', '3 3') : ''}
+        <text x="${mapX(as0[1].x).toFixed(1)}" y="${Math.max(30, mapY(as0[1].y) - 4).toFixed(1)}" fill="#d43f52" font-size="10.5" font-weight="800">OACP₀</text>
         <!-- Equilibrios E0, E1, E2 -->
-        <circle cx="228" cy="110" r="5" fill="#1864ea" stroke="#fff" stroke-width="1.8"/>
-        <circle cx="${228 + (E1.Y - 100) * 3}" cy="${110 - (E1.P - 100) * 3}" r="6" fill="#d43f52" stroke="#fff" stroke-width="2"/>
-        <circle cx="228" cy="${110 - (E2.P - 100) * 3}" r="5" fill="#0f6d48" stroke="#fff" stroke-width="1.8"/>
+        <circle data-point="E0" cx="${mapX(E0.Y).toFixed(2)}" cy="${mapY(E0.P).toFixed(2)}" r="5" fill="#1864ea" stroke="#fff" stroke-width="1.8"/>
+        <circle data-point="E1" cx="${mapX(E1.Y).toFixed(2)}" cy="${mapY(E1.P).toFixed(2)}" r="6" fill="#d43f52" stroke="#fff" stroke-width="2"/>
+        <circle data-point="E2" cx="${mapX(E2.Y).toFixed(2)}" cy="${mapY(E2.P).toFixed(2)}" r="5" fill="#0f6d48" stroke="#fff" stroke-width="1.8"/>
         <text x="239" y="228" text-anchor="middle" fill="#4b6794" font-size="11" font-weight="700">Producción real (Y) · E₁=(Y:${E1.Y.toFixed(1)}, P:${E1.P.toFixed(1)}) · E₂=(Y:${E2.Y.toFixed(1)}, P:${E2.P.toFixed(1)})</text>
       </svg>`;
     }
     if (modelMeta.id === 'micro-sd') {
       const engine = M.createSupplyDemandModel();
-      const E1 = engine.solve({ dD: modelsState.sdDemand, dS: modelsState.sdSupply, tau: modelsState.sdTax });
-      const dx = Math.max(-40, Math.min(40, modelsState.sdDemand * 1.1));
-      const dy = Math.max(-35, Math.min(35, (modelsState.sdSupply + modelsState.sdTax) * 1.1));
+      const { E0, E1, d0, d1, s0, s1 } = engine.curves({
+        dD: modelsState.sdDemand,
+        dS: modelsState.sdSupply,
+        tau: modelsState.sdTax
+      });
+      const allPts = [...d0, ...d1, ...s0, ...s1, { x: E0.Q, y: E0.Pd }, { x: E1.Q, y: E1.Pd }, { x: E1.Q, y: E1.Ps }];
+      const xMin = Math.min(20, ...allPts.map(p => p.x));
+      const xMax = Math.max(180, ...allPts.map(p => p.x));
+      const yMin = Math.min(0, ...allPts.map(p => p.y)) - 6;
+      const yMax = Math.max(200, ...allPts.map(p => p.y)) + 6;
+      const xL = 55;
+      const xR = 395;
+      const yT = 22;
+      const yB = 192;
+      const mapX = x => xL + ((x - xMin) / Math.max(1e-6, xMax - xMin)) * (xR - xL);
+      const mapY = y => yB - ((y - yMin) / Math.max(1e-6, yMax - yMin)) * (yB - yT);
+      const seg = (pts, name, stroke, width, dash = '') =>
+        `<line data-curve="${name}" x1="${mapX(pts[0].x).toFixed(2)}" y1="${mapY(pts[0].y).toFixed(2)}" x2="${mapX(
+          pts[1].x
+        ).toFixed(2)}" y2="${mapY(pts[1].y).toFixed(2)}" stroke="${stroke}" stroke-width="${width}"${
+          dash ? ` stroke-dasharray="${dash}"` : ''
+        }/>`;
       return `<svg viewBox="0 0 440 245" role="img" aria-label="Diagrama de Oferta y Demanda de Mercado">
         <rect x="40" y="15" width="375" height="190" rx="10" fill="#f7fbff" stroke="#d5e5fb"/>
-        <line x1="95" y1="40" x2="355" y2="180" stroke="#1864ea" stroke-width="2.4"/>
-        <line x1="${95 + dx}" y1="40" x2="${355 + dx}" y2="180" stroke="#297bf4" stroke-width="2.2" stroke-dasharray="6 4"/>
-        <text x="360" y="184" fill="#1864ea" font-size="10.5" font-weight="800">Demanda D</text>
-        <line x1="95" y1="180" x2="355" y2="40" stroke="#0f6d48" stroke-width="2.4"/>
-        <line x1="95" y1="${180 - dy}" x2="355" y2="${40 - dy}" stroke="#28a878" stroke-width="2.2" stroke-dasharray="6 4"/>
-        <text x="358" y="44" fill="#0f6d48" font-size="10.5" font-weight="800">Oferta S</text>
-        <circle cx="${225 + (E1.Q - 100) * 1.1}" cy="${110 - (E1.Pd - 100) * 1.1}" r="6" fill="#d43f52" stroke="#fff" stroke-width="2"/>
+        ${seg(d0, 'd0', '#1864ea', '2.4')}
+        ${seg(d1, 'd1', '#297bf4', '2.2', '6 4')}
+        <text x="${mapX(d0[1].x).toFixed(1)}" y="${Math.min(198, mapY(d0[1].y) + 12).toFixed(1)}" fill="#1864ea" font-size="10.5" font-weight="800">Demanda D</text>
+        ${seg(s0, 's0', '#0f6d48', '2.4')}
+        ${seg(s1, 's1', '#28a878', '2.2', '6 4')}
+        <text x="${mapX(s0[1].x).toFixed(1)}" y="${Math.max(30, mapY(s0[1].y) - 4).toFixed(1)}" fill="#0f6d48" font-size="10.5" font-weight="800">Oferta S</text>
+        <circle data-point="E0" cx="${mapX(E0.Q).toFixed(2)}" cy="${mapY(E0.Pd).toFixed(2)}" r="5" fill="#1864ea" stroke="#fff" stroke-width="1.8"/>
+        <circle data-point="E1" cx="${mapX(E1.Q).toFixed(2)}" cy="${mapY(E1.Pd).toFixed(2)}" r="6" fill="#d43f52" stroke="#fff" stroke-width="2"/>
+        ${
+          modelsState.sdTax > 0
+            ? `<circle data-point="Ps" cx="${mapX(E1.Q).toFixed(2)}" cy="${mapY(E1.Ps).toFixed(2)}" r="4.5" fill="#0f6d48" stroke="#fff" stroke-width="1.6"/>`
+            : ''
+        }
         <text x="235" y="228" text-anchor="middle" fill="#4b6794" font-size="11" font-weight="700">Cantidad Q*=${E1.Q.toFixed(1)} · Precio consumidor Pd=${E1.Pd.toFixed(1)} · Excedente Cons.=${E1.consumerSurplus.toFixed(0)}</text>
       </svg>`;
     }
@@ -1641,14 +1749,15 @@
       modelsTrendChart = new globalThis.Chart(canvas, {
         type: 'line',
         data: {
-          labels: empPoints.map(p => p.date),
+          labels: empResolved.series.map(p => p.date),
           datasets: [
             {
               label: `${empInd.title} (${empInd.unit})`,
-              data: empPoints.map(p => p.value),
+              data: empResolved.series.map(p => p.value),
               borderColor: '#1864ea',
               backgroundColor: 'rgba(24,100,234,0.14)',
               borderWidth: 2.2,
+              spanGaps: false,
               fill: true,
               tension: 0.24,
               pointRadius: 2
@@ -1715,15 +1824,33 @@
     const rin = M.resolveIndicatorSeries(M.INDICATORS_CATALOG.find(i => i.id === 'PN00027MM'), 'PER');
     const fx = M.resolveIndicatorSeries(M.INDICATORS_CATALOG.find(i => i.id === 'PN01207PM'), 'PER');
     const gdpQ = M.resolveIndicatorSeries(M.INDICATORS_CATALOG.find(i => i.id === 'PN02507AQ'), 'PER');
+    const gdpA = M.resolveIndicatorSeries(M.INDICATORS_CATALOG.find(i => i.id === 'NY.GDP.MKTP.KD.ZG'), 'PER');
     const unemp = M.resolveIndicatorSeries(M.INDICATORS_CATALOG.find(i => i.id === 'SL.UEM.TOTL.ZS'), 'PER');
+    const useLiveQuarterlyGdp = gdpQ.status === 'live';
+
+    const { latest: ipcLast } = M.getLatestObservationSummary(ipc.series, 'Mensual');
+    const ipcReadingSummary = ipcLast
+      ? ipcLast.value > 3
+        ? `En ${ipcLast.date}, la inflación interanual (${fmtNum(ipcLast.value, 2)}%) se ubica por encima del rango meta del BCRP (1% – 3%), acompañada de una sólida posición de reservas internacionales.`
+        : ipcLast.value < 1
+          ? `En ${ipcLast.date}, la inflación interanual (${fmtNum(ipcLast.value, 2)}%) se ubica por debajo del rango meta del BCRP (1% – 3%), acompañada de una sólida posición de reservas internacionales.`
+          : `En ${ipcLast.date}, la inflación interanual (${fmtNum(ipcLast.value, 2)}%) se ubica dentro del rango meta del BCRP (1% – 3%), acompañada de una sólida posición de reservas internacionales.`
+      : 'Seguimiento de inflación frente al rango meta del BCRP (1% – 3%) y posición de reservas internacionales.';
 
     const kpis = [
-      { id: 'ipc', title: 'Inflación interanual (IPC)', sub: 'Var. % 12 meses · Meta BCRP 1%-3%', unit: '%', data: ipc },
-      { id: 'rate', title: 'Tasa de referencia BCRP', sub: 'Política monetaria · BCRP', unit: '%', data: rate },
-      { id: 'rin', title: 'Reservas internacionales netas', sub: 'Millones de US$ · BCRP', unit: 'mill. US$', data: rin, dec: 0 },
-      { id: 'fx', title: 'Tipo de cambio interbancario', sub: 'S/ por US$ (venta promedio)', unit: 'S/', data: fx, dec: 3 },
-      { id: 'gdp', title: 'PBI real trimestral', sub: 'Var. % interanual · BCRP', unit: '%', data: gdpQ },
-      { id: 'unemp', title: 'Desempleo nacional (OIT)', sub: '% de la PEA · WDI / OIT anual', unit: '%', data: unemp }
+      { id: 'ipc', title: 'Inflación interanual (IPC)', sub: 'Var. % 12 meses · Meta BCRP 1%-3%', unit: '%', freq: 'Mensual', data: ipc },
+      { id: 'rate', title: 'Tasa de referencia BCRP', sub: 'Política monetaria · BCRP', unit: '%', freq: 'Mensual', data: rate },
+      { id: 'rin', title: 'Reservas internacionales netas', sub: 'Millones de US$ · BCRP', unit: 'mill. US$', freq: 'Mensual', data: rin, dec: 0 },
+      { id: 'fx', title: 'Tipo de cambio interbancario', sub: 'S/ por US$ (venta promedio)', unit: 'S/', freq: 'Mensual', data: fx, dec: 3 },
+      {
+        id: 'gdp',
+        title: useLiveQuarterlyGdp ? 'PBI real trimestral' : 'Crecimiento del PBI real',
+        sub: useLiveQuarterlyGdp ? 'Var. % interanual · BCRP' : 'Var. % anual · WDI (Banco Mundial)',
+        unit: '%',
+        freq: useLiveQuarterlyGdp ? 'Trimestral' : 'Anual',
+        data: useLiveQuarterlyGdp ? gdpQ : gdpA
+      },
+      { id: 'unemp', title: 'Desempleo nacional (OIT)', sub: '% de la PEA · WDI / OIT anual', unit: '%', freq: 'Anual', data: unemp }
     ];
 
     host.innerHTML = `
@@ -1773,9 +1900,7 @@
         <div class="obs-kpi-grid" aria-label="Seis indicadores principales del Perú">
           ${kpis
             .map(k => {
-              const last = k.data.series.at(-1);
-              const prev = k.data.series.length >= 2 ? k.data.series.at(-2) : null;
-              const d = last && prev ? last.value - prev.value : null;
+              const { latest: last, delta: d } = M.getLatestObservationSummary(k.data.series, k.freq);
               return `<article class="obs-kpi-card">
                 <small style="font-weight:800;color:var(--exp-ink);font-size:11.5px">${esc(k.title)}</small>
                 <small style="color:var(--exp-muted);font-size:10px">${esc(k.sub)}</small>
@@ -1822,7 +1947,7 @@
               </div>
             </div>
             <div style="padding:12px;border-radius:14px;background:var(--exp-soft);border:1px solid var(--exp-stroke);margin-bottom:12px;font-size:12px;font-weight:700;color:var(--exp-blue)">
-              La inflación interanual se ubica dentro del rango meta del BCRP (1% – 3%), acompañada de una sólida posición de reservas internacionales.
+              ${esc(ipcReadingSummary)}
             </div>
             <div style="display:grid;gap:10px;font-size:11.5px;line-height:1.5">
               <div><strong>1. Inflación y meta explícita:</strong> El BCRP conduce la política monetaria para mantener la inflación interanual en 2% ± 1 p.p. (${esc(
@@ -1881,7 +2006,7 @@
               ${kpis
                 .slice(0, 5)
                 .map(k => {
-                  const last = k.data.series.at(-1);
+                  const { latest: last } = M.getLatestObservationSummary(k.data.series, k.freq);
                   return `<div style="display:flex;justify-content:space-between;padding:6px 8px;border-bottom:1px solid var(--exp-stroke)">
                     <span><strong>${esc(k.title)}</strong></span>
                     <span>${last ? fmtNum(last.value, k.dec ?? 2) + ' ' + esc(k.unit) : 'N/D'} (${esc(last?.date || '')})</span>
@@ -1907,6 +2032,7 @@
             borderColor: color,
             backgroundColor: type === 'bar' ? 'rgba(40,123,241,0.62)' : 'rgba(24,100,234,0.14)',
             borderWidth: 2.2,
+            spanGaps: false,
             fill: type === 'line',
             tension: 0.22,
             pointRadius: 2
@@ -1952,11 +2078,22 @@
      ========================================================================== */
   const SAVED_SCENARIOS_KEY = 'macroscope_saved_scenarios_v1';
 
+  function isValidSavedScenario(item) {
+    if (!item || typeof item !== 'object' || typeof item.name !== 'string') return false;
+    const cfg = item.config && typeof item.config === 'object' ? item.config : item;
+    if (!['closed', 'flex', 'fixed'].includes(cfg.regime)) return false;
+    if (!['low', 'high', 'perfect'].includes(cfg.mobility)) return false;
+    if (!['money', 'rate'].includes(cfg.instrument)) return false;
+    if (!item.params || typeof item.params !== 'object' || Array.isArray(item.params)) return false;
+    if (!item.u || typeof item.u !== 'object' || Array.isArray(item.u)) return false;
+    return true;
+  }
+
   function loadSavedScenarios() {
     try {
       const raw = localStorage.getItem(SAVED_SCENARIOS_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
+      return Array.isArray(parsed) ? parsed.filter(isValidSavedScenario) : [];
     } catch (_) {
       return [];
     }
@@ -1964,7 +2101,7 @@
 
   function saveScenarioList(list) {
     try {
-      localStorage.setItem(SAVED_SCENARIOS_KEY, JSON.stringify(list));
+      localStorage.setItem(SAVED_SCENARIOS_KEY, JSON.stringify((list || []).filter(isValidSavedScenario)));
     } catch (_) {}
   }
 
@@ -2003,7 +2140,9 @@
                     `<div class="ms-badge" style="gap:8px;padding:6px 12px">
                       <button type="button" class="control-action" data-load-sim="${idx}">Cargar: ${esc(
                         item.name
-                      )} (${esc(item.regime)} · Y=${esc(item.Y)})</button>
+                      )} (${esc(item.config?.country || item.country || 'PER')} · ${esc(
+                        item.config?.regime || item.regime
+                      )} · Y=${esc(item.Y)})</button>
                       <button type="button" class="control-action" data-del-sim="${idx}" aria-label="Eliminar escenario ${esc(
                         item.name
                       )}">✕</button>
@@ -2018,14 +2157,25 @@
     panel.querySelector('#simSaveCurrentBtn')?.addEventListener('click', () => {
       const snap = M.labs?.islm?.snapshot?.();
       if (!snap) return;
-      const E2 = snap.model.solve(snap.u, 'final');
+      const country = snap.config?.country || M.state?.country || 'PER';
+      const E2 = snap.E2 || snap.model.solve(snap.u, 'final');
       const list = loadSavedScenarios();
-      const name = `Escenario #${list.length + 1} (${snap.config.country})`;
+      const name = `Escenario #${list.length + 1} (${country})`;
       list.push({
         name,
+        country,
         regime: snap.config.regime,
         mobility: snap.config.mobility,
         instrument: snap.config.instrument,
+        config: {
+          country,
+          regime: snap.config.regime,
+          mobility: snap.config.mobility,
+          instrument: snap.config.instrument
+        },
+        params: { ...snap.params },
+        u: { ...snap.u },
+        mTouched: Boolean(snap.mTouched),
         Y: E2.Y.toFixed(1),
         i: E2.i.toFixed(1)
       });
@@ -2039,16 +2189,7 @@
         const idx = Number(btn.dataset.loadSim);
         const item = loadSavedScenarios()[idx];
         if (!item) return;
-        const regEl = document.getElementById('islmRegime');
-        const mobEl = document.getElementById('islmMobility');
-        if (regEl && item.regime) {
-          regEl.value = item.regime;
-          regEl.dispatchEvent(new Event('change'));
-        }
-        if (mobEl && item.mobility) {
-          mobEl.value = item.mobility;
-          mobEl.dispatchEvent(new Event('change'));
-        }
+        M.labs?.islm?.restore?.(item);
         M.showToast?.(`Cargado: ${item.name}`);
       });
     });

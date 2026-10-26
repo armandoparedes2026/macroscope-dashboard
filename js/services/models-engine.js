@@ -69,8 +69,9 @@
       const ad1 = yRange.map(y => ({ x: y, y: 100 + (100 + E1.demandShift - y) / p.gamma }));
       const as0 = yRange.map(y => ({ x: y, y: 100 + p.lambda * (y - 100) }));
       const as1 = yRange.map(y => ({ x: y, y: E1.Pe + p.lambda * (y - E1.Yn) + u.dz }));
+      const as2 = yRange.map(y => ({ x: y, y: E2.Pe + p.lambda * (y - E2.Yn) + u.dz }));
       const lras = [{ x: E1.Yn, y: 75 }, { x: E1.Yn, y: 125 }];
-      return { E0, E1, E2, ad0, ad1, as0, as1, lras };
+      return { E0, E1, E2, ad0, ad1, as0, as1, as2, lras };
     }
 
     function explain(input = {}) {
@@ -190,13 +191,50 @@
     }
   ];
 
+  function areConsecutivePeriods(d1, d2, frequencyHint = '') {
+    if (typeof d1 !== 'string' || typeof d2 !== 'string') return false;
+    if (/^\d{4}$/.test(d1) && /^\d{4}$/.test(d2)) {
+      return Number(d2) - Number(d1) === 1;
+    }
+    if (/^\d{4}-\d{2}/.test(d1) && /^\d{4}-\d{2}/.test(d2)) {
+      const y1 = Number(d1.slice(0, 4));
+      const m1 = Number(d1.slice(5, 7));
+      const y2 = Number(d2.slice(0, 4));
+      const m2 = Number(d2.slice(5, 7));
+      if (!Number.isFinite(y1) || !Number.isFinite(m1) || !Number.isFinite(y2) || !Number.isFinite(m2)) return false;
+      const diffMonths = y2 * 12 + m2 - (y1 * 12 + m1);
+      const fq = String(frequencyHint).toLowerCase();
+      const step = fq.includes('trim') || fq.includes('quart') ? 3 : 1;
+      return diffMonths === step;
+    }
+    return false;
+  }
+
+  function getLatestObservationSummary(series = [], frequencyHint = '') {
+    const pts = (series || []).filter(p => p && typeof p.date === 'string');
+    const latestIdx = pts.findLastIndex(p => Number.isFinite(p.value));
+    if (latestIdx < 0) return { latest: null, prev: null, delta: null };
+    const latest = pts[latestIdx];
+    const prevCandidate = latestIdx > 0 ? pts[latestIdx - 1] : null;
+    const isConsecutive =
+      Boolean(prevCandidate) &&
+      Number.isFinite(prevCandidate.value) &&
+      areConsecutivePeriods(prevCandidate.date, latest.date, frequencyHint);
+    return {
+      latest,
+      prev: isConsecutive ? prevCandidate : null,
+      delta: isConsecutive ? latest.value - prevCandidate.value : null
+    };
+  }
+
   function buildHistoricalAnalysis({
     series = [],
     startPeriod = null,
     endPeriod = null,
     splitPeriod = null,
     mode = 'raw',
-    isRate = false
+    isRate = false,
+    frequency = ''
   } = {}) {
     const sorted = [...series]
       .filter(p => p && typeof p.date === 'string')
@@ -213,10 +251,15 @@
 
     const rows = filtered.map((point, idx) => {
       const val = Number.isFinite(point.value) ? point.value : null;
-      const prev = idx > 0 && Number.isFinite(filtered[idx - 1].value) ? filtered[idx - 1].value : null;
+      const prevPoint = idx > 0 ? filtered[idx - 1] : null;
+      const hasConsecutivePrev =
+        Boolean(prevPoint) &&
+        Number.isFinite(prevPoint.value) &&
+        areConsecutivePeriods(prevPoint.date, point.date, frequency);
+      const prev = hasConsecutivePrev ? prevPoint.value : null;
       const diff = val !== null && prev !== null ? val - prev : null;
       const pctChange =
-        val !== null && prev !== null && prev !== 0
+        val !== null && prev !== null && (isRate || prev !== 0)
           ? isRate
             ? val - prev
             : ((val - prev) / Math.abs(prev)) * 100
@@ -226,17 +269,20 @@
         !isRate && val !== null && baseVal !== null && baseVal > 0
           ? (val / baseVal) * 100
           : null;
-      // Promedio móvil de 3 observaciones consecutivas reales (sin interpolar huecos)
+      // Promedio móvil de 3 observaciones consecutivas reales (sin interpolar huecos ni saltar periodos)
       const window3 = idx >= 2 ? filtered.slice(idx - 2, idx + 1) : [];
       const ma3 =
-        window3.length === 3 && window3.every(w => Number.isFinite(w.value))
+        window3.length === 3 &&
+        window3.every(w => Number.isFinite(w.value)) &&
+        areConsecutivePeriods(window3[0].date, window3[1].date, frequency) &&
+        areConsecutivePeriods(window3[1].date, window3[2].date, frequency)
           ? window3.reduce((s, w) => s + w.value, 0) / 3
           : null;
 
       let displayValue = val;
       if (mode === 'variation') displayValue = pctChange;
       else if (mode === 'base100') displayValue = base100;
-      else if (mode === 'trend') displayValue = ma3 ?? val;
+      else if (mode === 'trend') displayValue = ma3;
 
       return {
         date: point.date,
@@ -608,101 +654,184 @@
     }
   ];
 
-  // Snapshot local verificado de las 4 series principales del BCRP (de tests/fixtures/bcrp-normalized.json)
-  // para garantizar que cuando la app se abre por file:// sin proxy en vivo se identifique explícitamente
-  // como respaldo histórico local BCRP sin inventar cifras.
+  // Snapshot local verificado de las 4 series principales del BCRP (copia íntegra y exacta de tests/fixtures/bcrp-normalized.json)
+  // con metadato fetchedAt = 2026-10-18T06:42:40.009Z y observaciones completas (incluyendo nulos en 2026-10-01).
+  // Series no contenidas en este respaldo verificado (como PN02507AQ) devuelven unavailable cuando no hay proxy en vivo.
   const BCRP_LOCAL_SNAPSHOT = {
     PD04722MM: {
+      source: 'BCRP',
       code: 'PD04722MM',
-      title: 'Tasa de Referencia de la Política Monetaria',
-      frequency: 'monthly',
+      title: 'Tasas de interés del Banco Central de Reserva - Tasa de Referencia de la Política Monetaria',
       unit: '%',
-      extractedAt: '2026-04-17',
+      frequency: 'monthly',
+      fetchedAt: '2026-10-18T06:42:40.009Z',
       observations: [
-        { date: '2024-01-01', value: 6.5 },
-        { date: '2024-03-01', value: 6.25 },
-        { date: '2024-06-01', value: 5.75 },
-        { date: '2024-09-01', value: 5.25 },
-        { date: '2024-12-01', value: 5.0 },
-        { date: '2025-03-01', value: 4.75 },
-        { date: '2025-06-01', value: 4.5 },
-        { date: '2025-09-01', value: 4.25 },
-        { date: '2025-12-01', value: 4.25 },
-        { date: '2026-03-01', value: 4.0 }
+        { period: 'Ene.2024', date: '2024-01-01', value: 6.5 },
+        { period: 'Feb.2024', date: '2024-02-01', value: 6.25 },
+        { period: 'Mar.2024', date: '2024-03-01', value: 6.25 },
+        { period: 'Abr.2024', date: '2024-04-01', value: 6 },
+        { period: 'May.2024', date: '2024-05-01', value: 5.75 },
+        { period: 'Jun.2024', date: '2024-06-01', value: 5.75 },
+        { period: 'Jul.2024', date: '2024-07-01', value: 5.75 },
+        { period: 'Ago.2024', date: '2024-08-01', value: 5.5 },
+        { period: 'Sep.2024', date: '2024-09-01', value: 5.25 },
+        { period: 'Oct.2024', date: '2024-10-01', value: 5.25 },
+        { period: 'Nov.2024', date: '2024-11-01', value: 5 },
+        { period: 'Dic.2024', date: '2024-12-01', value: 5 },
+        { period: 'Ene.2025', date: '2025-01-01', value: 4.75 },
+        { period: 'Feb.2025', date: '2025-02-01', value: 4.75 },
+        { period: 'Mar.2025', date: '2025-03-01', value: 4.75 },
+        { period: 'Abr.2025', date: '2025-04-01', value: 4.75 },
+        { period: 'May.2025', date: '2025-05-01', value: 4.5 },
+        { period: 'Jun.2025', date: '2025-06-01', value: 4.5 },
+        { period: 'Jul.2025', date: '2025-07-01', value: 4.5 },
+        { period: 'Ago.2025', date: '2025-08-01', value: 4.5 },
+        { period: 'Sep.2025', date: '2025-09-01', value: 4.25 },
+        { period: 'Oct.2025', date: '2025-10-01', value: 4.25 },
+        { period: 'Nov.2025', date: '2025-11-01', value: 4.25 },
+        { period: 'Dic.2025', date: '2025-12-01', value: 4.25 },
+        { period: 'Ene.2026', date: '2026-01-01', value: 4.25 },
+        { period: 'Feb.2026', date: '2026-02-01', value: 4.25 },
+        { period: 'Mar.2026', date: '2026-03-01', value: 4.25 },
+        { period: 'Abr.2026', date: '2026-04-01', value: 4.25 },
+        { period: 'May.2026', date: '2026-05-01', value: 4.25 },
+        { period: 'Jun.2026', date: '2026-06-01', value: 4.25 },
+        { period: 'Jul.2026', date: '2026-07-01', value: 4.25 },
+        { period: 'Ago.2026', date: '2026-08-01', value: 4.25 },
+        { period: 'Sep.2026', date: '2026-09-01', value: 4.25 },
+        { period: 'Oct.2026', date: '2026-10-01', value: 4.25 }
       ]
     },
     PN01273PM: {
+      source: 'BCRP',
       code: 'PN01273PM',
-      title: 'IPC Lima Metropolitana (var. % 12 meses)',
+      title: 'Índice de precios Lima Metropolitana (var% 12 meses) - IPC',
+      unit: '% en 12 meses',
       frequency: 'monthly',
-      unit: '%',
-      extractedAt: '2026-04-17',
+      fetchedAt: '2026-10-18T06:42:40.009Z',
       observations: [
-        { date: '2024-01-01', value: 3.02 },
-        { date: '2024-03-01', value: 3.05 },
-        { date: '2024-06-01', value: 2.29 },
-        { date: '2024-09-01', value: 1.78 },
-        { date: '2024-12-01', value: 1.97 },
-        { date: '2025-03-01', value: 1.28 },
-        { date: '2025-06-01', value: 1.69 },
-        { date: '2025-09-01', value: 1.74 },
-        { date: '2025-12-01', value: 1.51 },
-        { date: '2026-03-01', value: 2.13 }
+        { period: 'Ene.2024', date: '2024-01-01', value: 3.02392174826855 },
+        { period: 'Feb.2024', date: '2024-02-01', value: 3.29406696032184 },
+        { period: 'Mar.2024', date: '2024-03-01', value: 3.04504592593905 },
+        { period: 'Abr.2024', date: '2024-04-01', value: 2.42207617792805 },
+        { period: 'May.2024', date: '2024-05-01', value: 2.00493835958688 },
+        { period: 'Jun.2024', date: '2024-06-01', value: 2.28538225698791 },
+        { period: 'Jul.2024', date: '2024-07-01', value: 2.1276637869709 },
+        { period: 'Ago.2024', date: '2024-08-01', value: 2.03409700303861 },
+        { period: 'Sep.2024', date: '2024-09-01', value: 1.77501053596859 },
+        { period: 'Oct.2024', date: '2024-10-01', value: 2.00918040984485 },
+        { period: 'Nov.2024', date: '2024-11-01', value: 2.27199072148831 },
+        { period: 'Dic.2024', date: '2024-12-01', value: 1.96630270142824 },
+        { period: 'Ene.2025', date: '2025-01-01', value: 1.85158283440667 },
+        { period: 'Feb.2025', date: '2025-02-01', value: 1.4773290589483 },
+        { period: 'Mar.2025', date: '2025-03-01', value: 1.27718026977924 },
+        { period: 'Abr.2025', date: '2025-04-01', value: 1.65183401740204 },
+        { period: 'May.2025', date: '2025-05-01', value: 1.68666289219268 },
+        { period: 'Jun.2025', date: '2025-06-01', value: 1.69370904576716 },
+        { period: 'Jul.2025', date: '2025-07-01', value: 1.6888009685144 },
+        { period: 'Ago.2025', date: '2025-08-01', value: 1.10633077531991 },
+        { period: 'Sep.2025', date: '2025-09-01', value: 1.35839342135424 },
+        { period: 'Oct.2025', date: '2025-10-01', value: 1.35177475650182 },
+        { period: 'Nov.2025', date: '2025-11-01', value: 1.36861256988846 },
+        { period: 'Dic.2025', date: '2025-12-01', value: 1.50879973918667 },
+        { period: 'Ene.2026', date: '2026-01-01', value: 1.70091694832201 },
+        { period: 'Feb.2026', date: '2026-02-01', value: 2.21416625767848 },
+        { period: 'Mar.2026', date: '2026-03-01', value: 3.80454581291585 },
+        { period: 'Abr.2026', date: '2026-04-01', value: 4.01414363472928 },
+        { period: 'May.2026', date: '2026-05-01', value: 3.90505240621645 },
+        { period: 'Jun.2026', date: '2026-06-01', value: 4.00890965651766 },
+        { period: 'Jul.2026', date: '2026-07-01', value: 4.06515256208199 },
+        { period: 'Ago.2026', date: '2026-08-01', value: 4.43780929778608 },
+        { period: 'Sep.2026', date: '2026-09-01', value: 4.54865469481509 },
+        { period: 'Oct.2026', date: '2026-10-01', value: null }
       ]
     },
     PN01207PM: {
+      source: 'BCRP',
       code: 'PN01207PM',
-      title: 'Tipo de cambio interbancario promedio venta',
-      frequency: 'monthly',
+      title: 'Tipo de cambio - promedio del periodo (S/ por US$) - Interbancario - Promedio',
       unit: 'S/ por US$',
-      extractedAt: '2026-04-17',
+      frequency: 'monthly',
+      fetchedAt: '2026-10-18T06:42:40.009Z',
       observations: [
-        { date: '2024-01-01', value: 3.742 },
-        { date: '2024-03-01', value: 3.715 },
-        { date: '2024-06-01', value: 3.778 },
-        { date: '2024-09-01', value: 3.765 },
-        { date: '2024-12-01', value: 3.739 },
-        { date: '2025-03-01', value: 3.661 },
-        { date: '2025-06-01', value: 3.611 },
-        { date: '2025-09-01', value: 3.511 },
-        { date: '2025-12-01', value: 3.368 },
-        { date: '2026-03-01', value: 3.437 }
+        { period: 'Ene.2024', date: '2024-01-01', value: 3.74074285714286 },
+        { period: 'Feb.2024', date: '2024-02-01', value: 3.8279380952381 },
+        { period: 'Mar.2024', date: '2024-03-01', value: 3.70898947368421 },
+        { period: 'Abr.2024', date: '2024-04-01', value: 3.71503181818182 },
+        { period: 'May.2024', date: '2024-05-01', value: 3.73172727272727 },
+        { period: 'Jun.2024', date: '2024-06-01', value: 3.7867052631579 },
+        { period: 'Jul.2024', date: '2024-07-01', value: 3.764135 },
+        { period: 'Ago.2024', date: '2024-08-01', value: 3.74185 },
+        { period: 'Sep.2024', date: '2024-09-01', value: 3.7689619047619 },
+        { period: 'Oct.2024', date: '2024-10-01', value: 3.75436363636364 },
+        { period: 'Nov.2024', date: '2024-11-01', value: 3.779135 },
+        { period: 'Dic.2024', date: '2024-12-01', value: 3.73553684210526 },
+        { period: 'Ene.2025', date: '2025-01-01', value: 3.74692272727273 },
+        { period: 'Feb.2025', date: '2025-02-01', value: 3.69685 },
+        { period: 'Mar.2025', date: '2025-03-01', value: 3.65248571428571 },
+        { period: 'Abr.2025', date: '2025-04-01', value: 3.70003 },
+        { period: 'May.2025', date: '2025-05-01', value: 3.65991428571429 },
+        { period: 'Jun.2025', date: '2025-06-01', value: 3.60219523809524 },
+        { period: 'Jul.2025', date: '2025-07-01', value: 3.556945 },
+        { period: 'Ago.2025', date: '2025-08-01', value: 3.542385 },
+        { period: 'Sep.2025', date: '2025-09-01', value: 3.50180454545455 },
+        { period: 'Oct.2025', date: '2025-10-01', value: 3.41322727272727 },
+        { period: 'Nov.2025', date: '2025-11-01', value: 3.37263 },
+        { period: 'Dic.2025', date: '2025-12-01', value: 3.36686315789474 },
+        { period: 'Ene.2026', date: '2026-01-01', value: 3.356115 },
+        { period: 'Feb.2026', date: '2026-02-01', value: 3.35664 },
+        { period: 'Mar.2026', date: '2026-03-01', value: 3.44835909090909 },
+        { period: 'Abr.2026', date: '2026-04-01', value: 3.44349 },
+        { period: 'May.2026', date: '2026-05-01', value: 3.435275 },
+        { period: 'Jun.2026', date: '2026-06-01', value: 3.40596190476191 },
+        { period: 'Jul.2026', date: '2026-07-01', value: 3.40022631578947 },
+        { period: 'Ago.2026', date: '2026-08-01', value: 3.36295 },
+        { period: 'Sep.2026', date: '2026-09-01', value: 3.37910454545455 },
+        { period: 'Oct.2026', date: '2026-10-01', value: null }
       ]
     },
     PN00027MM: {
+      source: 'BCRP',
       code: 'PN00027MM',
-      title: 'Reservas Internacionales Netas (RIN)',
-      frequency: 'monthly',
+      title: 'Cuentas monetarias del Banco Central de Reserva del Perú - Reservas Internacionales Netas (millones US$)',
       unit: 'millones US$',
-      extractedAt: '2026-04-17',
+      frequency: 'monthly',
+      fetchedAt: '2026-10-18T06:42:40.009Z',
       observations: [
-        { date: '2024-01-01', value: 73420 },
-        { date: '2024-03-01', value: 74910 },
-        { date: '2024-06-01', value: 73950 },
-        { date: '2024-09-01', value: 78150 },
-        { date: '2024-12-01', value: 78986 },
-        { date: '2025-03-01', value: 81240 },
-        { date: '2025-06-01', value: 84120 },
-        { date: '2025-09-01', value: 87949 },
-        { date: '2025-12-01', value: 92099 },
-        { date: '2026-03-01', value: 97014 }
-      ]
-    },
-    PN02507AQ: {
-      code: 'PN02507AQ',
-      title: 'PBI real trimestral (var. % interanual)',
-      frequency: 'quarterly',
-      unit: '%',
-      extractedAt: '2026-04-17',
-      observations: [
-        { date: '2024-03-01', value: 1.4 },
-        { date: '2024-06-01', value: 3.6 },
-        { date: '2024-09-01', value: 3.8 },
-        { date: '2024-12-01', value: 4.2 },
-        { date: '2025-03-01', value: 3.9 },
-        { date: '2025-06-01', value: 2.8 },
-        { date: '2025-09-01', value: 3.8 },
-        { date: '2025-12-01', value: 3.3 }
+        { period: 'Ene.2024', date: '2024-01-01', value: 73327.465328 },
+        { period: 'Feb.2024', date: '2024-02-01', value: 73943.03284 },
+        { period: 'Mar.2024', date: '2024-03-01', value: 73827.928392 },
+        { period: 'Abr.2024', date: '2024-04-01', value: 74511.669888 },
+        { period: 'May.2024', date: '2024-05-01', value: 73920.00259 },
+        { period: 'Jun.2024', date: '2024-06-01', value: 71415.400974 },
+        { period: 'Jul.2024', date: '2024-07-01', value: 74277.82892 },
+        { period: 'Ago.2024', date: '2024-08-01', value: 80771.266552 },
+        { period: 'Sep.2024', date: '2024-09-01', value: 80364.80297 },
+        { period: 'Oct.2024', date: '2024-10-01', value: 83309.078434 },
+        { period: 'Nov.2024', date: '2024-11-01', value: 83227.783653 },
+        { period: 'Dic.2024', date: '2024-12-01', value: 78986.65285 },
+        { period: 'Ene.2025', date: '2025-01-01', value: 81595.881992 },
+        { period: 'Feb.2025', date: '2025-02-01', value: 83660.872809 },
+        { period: 'Mar.2025', date: '2025-03-01', value: 81016.103395 },
+        { period: 'Abr.2025', date: '2025-04-01', value: 84469.44329 },
+        { period: 'May.2025', date: '2025-05-01', value: 85957.392664 },
+        { period: 'Jun.2025', date: '2025-06-01', value: 85263.330184 },
+        { period: 'Jul.2025', date: '2025-07-01', value: 87480.018817 },
+        { period: 'Ago.2025', date: '2025-08-01', value: 87752.818921 },
+        { period: 'Sep.2025', date: '2025-09-01', value: 85148.225305 },
+        { period: 'Oct.2025', date: '2025-10-01', value: 89960.76524 },
+        { period: 'Nov.2025', date: '2025-11-01', value: 90898.183584 },
+        { period: 'Dic.2025', date: '2025-12-01', value: 90214.4843 },
+        { period: 'Ene.2026', date: '2026-01-01', value: 95072.127701 },
+        { period: 'Feb.2026', date: '2026-02-01', value: 97294.87359 },
+        { period: 'Mar.2026', date: '2026-03-01', value: 94716.378355 },
+        { period: 'Abr.2026', date: '2026-04-01', value: 97020.329087 },
+        { period: 'May.2026', date: '2026-05-01', value: 98436.178976 },
+        { period: 'Jun.2026', date: '2026-06-01', value: 95553.176142 },
+        { period: 'Jul.2026', date: '2026-07-01', value: 97034.428461 },
+        { period: 'Ago.2026', date: '2026-08-01', value: 96517.905835 },
+        { period: 'Sep.2026', date: '2026-09-01', value: 92179.513534 },
+        { period: 'Oct.2026', date: '2026-10-01', value: null }
       ]
     }
   };
@@ -715,7 +844,8 @@
     if (indicator.isDemo) {
       return {
         isDemo: true,
-        series: indicator.demoSeries.map(d => ({ ...d, source: 'demo' })),
+        series: indicator.demoSeries.map(d => ({ ...d, value: Number.isFinite(d.value) ? d.value : null, source: 'demo' })),
+        extractedAt: null,
         provenance: 'Demostrativo · Serie sintética ilustrativa',
         status: 'demo'
       };
@@ -724,16 +854,37 @@
     if (indicator.providerKey === 'BCRP') {
       const liveRow = bcrpLive[indicator.code];
       const fallbackRow = BCRP_LOCAL_SNAPSHOT[indicator.code];
-      const activeRow = liveRow?.observations?.length ? liveRow : fallbackRow;
       const isLive = Boolean(liveRow?.observations?.length);
-      const pts = (activeRow?.observations || [])
-        .filter(p => Number.isFinite(p.value))
-        .map(p => ({ date: p.date.slice(0, 7), value: p.value, source: isLive ? 'bcrp' : 'respaldo_bcrp' }));
+      const activeRow = isLive ? liveRow : fallbackRow;
+      if (!activeRow || !Array.isArray(activeRow.observations)) {
+        return {
+          isDemo: false,
+          series: [],
+          extractedAt: null,
+          provenance: 'BCRP · Sin respaldo local para esta serie (requiere conexión al proxy /api/bcrp)',
+          status: 'unavailable'
+        };
+      }
+      const extractedAt = activeRow.fetchedAt || activeRow.extractedAt || null;
+      const pts = activeRow.observations
+        .filter(p => p && typeof p.date === 'string' && /^\d{4}-\d{2}/.test(p.date))
+        .map(p => ({
+          date: p.date.slice(0, 7),
+          period: p.period || p.date.slice(0, 7),
+          value: Number.isFinite(p.value) ? p.value : null,
+          source: isLive ? 'bcrp' : 'respaldo_bcrp'
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+      const hasFinite = pts.some(p => Number.isFinite(p.value));
+      const dateLabel = extractedAt ? extractedAt.slice(0, 10) : 'no registrada';
       return {
         isDemo: false,
         series: pts,
-        provenance: isLive ? 'BCRP · API Oficial en línea' : 'BCRP · Respaldo histórico oficial (2026-04-17)',
-        status: isLive ? 'live' : 'fallback'
+        extractedAt,
+        provenance: isLive
+          ? `BCRP · API Oficial en línea (extracción ${dateLabel})`
+          : `BCRP · Respaldo local verificado (extracción ${dateLabel})`,
+        status: hasFinite ? (isLive ? 'live' : 'fallback') : 'unavailable'
       };
     }
 
@@ -747,9 +898,13 @@
     }));
     const latestFinite = pts.findLast(p => Number.isFinite(p.value));
     const isLive = latestFinite?.source === 'wdi';
+    const extractedAt = isLive
+      ? M.wdiFetchedAt?.[indicator.code] || null
+      : M.FALLBACK_EXTRACTED_AT?.[indicator.code] || null;
     return {
       isDemo: false,
       series: pts,
+      extractedAt,
       provenance: isLive ? 'Banco Mundial (WDI) · API en línea' : 'Banco Mundial (WDI) · Respaldo local verificado',
       status: latestFinite ? (isLive ? 'live' : 'fallback') : 'unavailable'
     };
@@ -895,6 +1050,8 @@
     createAsAdModel,
     createSupplyDemandModel,
     HISTORICAL_MILESTONES,
+    areConsecutivePeriods,
+    getLatestObservationSummary,
     buildHistoricalAnalysis,
     INDICATOR_CATEGORIES,
     INDICATORS_CATALOG,

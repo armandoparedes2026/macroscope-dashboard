@@ -1136,14 +1136,52 @@ await check('módulo 03 indicadores macroeconómicos: catálogo categorizado, fi
   assert.match(await page.textContent('#indDetailSheet'),/Demostrativo · No oficial/);
   await page.click('[data-ind-cat="prices"]');
   assert.match(await page.textContent('#indDetailSheet'),/Serie Oficial Verificada/);
+  await page.click('[data-ind-card="PN01273PM"]');
+  assert.match(await page.textContent('#indDetailSheet'),/2026-10-18/);
+  assert.match(await page.textContent('#indDetailSheet'),/2026-09/);
+  await page.click('[data-ind-cat="activity"]');
+  await page.click('[data-ind-card="PN02507AQ"]');
+  assert.match(await page.textContent('#indDetailSheet'),/Sin dato local/);
 });
 
-await check('módulo 06 y 07 simulación y modelos: guardado de escenarios y biblioteca con 5 modelos',async page=>{
+await check('módulo 06 y 07 simulación y modelos: persistencia completa de escenarios y coherencia geométrica SVG',async page=>{
   await openOffline(page);
   await page.evaluate(()=>{location.hash='simulacion';});
   await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
+  await page.evaluate(()=>localStorage.removeItem('macroscope_saved_scenarios_v1'));
+  await page.selectOption('#islmCountry','CHL');
+  await page.selectOption('#islmRegime','fixed');
+  await page.selectOption('#islmMobility','perfect');
+  await page.evaluate(()=>{
+    const g=document.getElementById('islm-G');g.value='24';g.dispatchEvent(new Event('input',{bubbles:true}));
+    const eb=document.getElementById('islm-ebar');eb.value='110';eb.dispatchEvent(new Event('input',{bubbles:true}));
+    const c=document.getElementById('islm-p-c');c.value='0.8';c.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  const savedSnap=await page.evaluate(()=>{
+    const s=MacroScope.labs.islm.snapshot();
+    return {config:s.config,params:s.params,u:s.u,E2:s.E2};
+  });
+  assert.equal(savedSnap.config.country,'CHL');
   await page.click('#simSaveCurrentBtn');
-  assert.ok(await page.locator('[data-load-sim]').count()>=1);
+  assert.equal(await page.locator('[data-load-sim]').count(),1);
+
+  // Cambiar economía, régimen, movilidad, parámetros y choques y comprobar que al cargar se restaura todo
+  await page.selectOption('#islmCountry','PER');
+  await page.click('#islmResetBtn');
+  const resetSnap=await page.evaluate(()=>MacroScope.labs.islm.snapshot());
+  assert.equal(resetSnap.config.country,'PER');
+  assert.equal(resetSnap.config.regime,'flex');
+  assert.equal(resetSnap.E2.Y,100);
+
+  await page.click('[data-load-sim="0"]');
+  const restoredSnap=await page.evaluate(()=>{
+    const s=MacroScope.labs.islm.snapshot();
+    return {config:s.config,params:s.params,u:s.u,E2:s.E2};
+  });
+  assert.deepEqual(restoredSnap.config,savedSnap.config);
+  assert.deepEqual(restoredSnap.params,savedSnap.params);
+  assert.deepEqual(restoredSnap.u,savedSnap.u);
+  assert.deepEqual(restoredSnap.E2,savedSnap.E2);
 
   await page.evaluate(()=>{location.hash='modelos';});
   await page.waitForFunction(()=>!document.querySelector('#modelos').hidden);
@@ -1154,6 +1192,50 @@ await check('módulo 06 y 07 simulación y modelos: guardado de escenarios y bib
     assert.equal(await page.getAttribute(`[data-mod-select="${modId}"]`,'aria-selected'),'true');
     assert.equal(await page.locator('#modSvgContainer svg').count(),1);
   }
+
+  // Verificar coherencia matemática de intersección de curvas y puntos de equilibrio en el SVG de OA-DA y Oferta-Demanda
+  await page.click('[data-mod-select="asad"]');
+  await page.evaluate(()=>{
+    const g=document.getElementById('modAsadG');g.value='4';g.dispatchEvent(new Event('change',{bubbles:true}));
+    const z=document.getElementById('modAsadZ');z.value='2';z.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  const asadCheck=await page.evaluate(()=>{
+    const svg=document.querySelector('#modSvgContainer svg');
+    const line=name=>{const el=svg.querySelector(`[data-curve="${name}"]`);return {x1:+el.getAttribute('x1'),y1:+el.getAttribute('y1'),x2:+el.getAttribute('x2'),y2:+el.getAttribute('y2')};};
+    const pt=name=>{const el=svg.querySelector(`[data-point="${name}"]`);return {cx:+el.getAttribute('cx'),cy:+el.getAttribute('cy')};};
+    const intersect=(a,b)=>{
+      const d=(a.x1-a.x2)*(b.y1-b.y2)-(a.y1-a.y2)*(b.x1-b.x2);
+      const x=((a.x1*a.y2-a.y1*a.x2)*(b.x1-b.x2)-(a.x1-a.x2)*(b.x1*b.y2-b.y1*b.x2))/d;
+      const y=((a.x1*a.y2-a.y1*a.x2)*(b.y1-b.y2)-(a.y1-a.y2)*(b.x1*b.y2-b.y1*b.x2))/d;
+      return {x,y};
+    };
+    const i1=intersect(line('ad1'),line('as1'));
+    const i2=intersect(line('ad1'),line('as2'));
+    const e1=pt('E1'),e2=pt('E2');
+    return Math.hypot(i1.x-e1.cx,i1.y-e1.cy)<0.2 && Math.hypot(i2.x-e2.cx,i2.y-e2.cy)<0.2;
+  });
+  assert.equal(asadCheck,true,'E1 y E2 en el SVG de OA-DA deben coincidir con las intersecciones de DA1/OACP1 y DA1/OACP2');
+
+  await page.click('[data-mod-select="micro-sd"]');
+  await page.evaluate(()=>{
+    const d=document.getElementById('modSdD');d.value='30';d.dispatchEvent(new Event('change',{bubbles:true}));
+    const t=document.getElementById('modSdTax');t.value='20';t.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  const sdCheck=await page.evaluate(()=>{
+    const svg=document.querySelector('#modSvgContainer svg');
+    const line=name=>{const el=svg.querySelector(`[data-curve="${name}"]`);return {x1:+el.getAttribute('x1'),y1:+el.getAttribute('y1'),x2:+el.getAttribute('x2'),y2:+el.getAttribute('y2')};};
+    const pt=name=>{const el=svg.querySelector(`[data-point="${name}"]`);return {cx:+el.getAttribute('cx'),cy:+el.getAttribute('cy')};};
+    const intersect=(a,b)=>{
+      const d=(a.x1-a.x2)*(b.y1-b.y2)-(a.y1-a.y2)*(b.x1-b.x2);
+      const x=((a.x1*a.y2-a.y1*a.x2)*(b.x1-b.x2)-(a.x1-a.x2)*(b.x1*b.y2-b.y1*b.x2))/d;
+      const y=((a.x1*a.y2-a.y1*a.x2)*(b.y1-b.y2)-(a.y1-a.y2)*(b.x1*b.y2-b.y1*b.x2))/d;
+      return {x,y};
+    };
+    const i1=intersect(line('d1'),line('s1'));
+    const e1=pt('E1');
+    return Math.hypot(i1.x-e1.cx,i1.y-e1.cy)<0.2;
+  });
+  assert.equal(sdCheck,true,'E1 en el SVG de Oferta-Demanda debe coincidir con la intersección de D1 y S1');
 });
 
 await check('observatorio del Perú y ficha de la fuente: series nacionales BCRP y colecciones académicas',async page=>{
