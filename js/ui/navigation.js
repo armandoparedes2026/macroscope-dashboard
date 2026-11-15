@@ -75,15 +75,44 @@
   function setupReferenceLayout() {
     const lab = document.getElementById('tab-simulator');
     const heading = lab.querySelector('.page-heading');
-    heading.classList.add('platform-hero');
-    heading.innerHTML = `<div class="platform-hero-copy"><span class="platform-hero-icon">${icon('flask')}</span><div><h1>Laboratorio IS–LM–BP</h1><p>Experimenta con políticas y shocks bajo supuestos explícitos. Comprende cada mecanismo de transmisión.</p></div></div><button type="button" class="platform-primary" id="labHeroSave">Guardar escenario <span aria-hidden="true">→</span></button>`;
+    heading.classList.add('platform-hero', 'lab-hero');
+    heading.innerHTML = `<div class="platform-hero-copy"><span class="platform-hero-icon">${icon('flask')}</span><div><span class="lab-hero-eyebrow">SIMULACIÓN TEÓRICA · CORTO PLAZO (P = 1)</span><h1>Laboratorio IS–LM–BP</h1><p>Experimenta con políticas y shocks bajo supuestos explícitos. Comprende cada mecanismo de transmisión.</p></div></div><button type="button" class="platform-primary" id="labHeroSave">Guardar escenario <span aria-hidden="true">→</span></button>`;
     heading.querySelector('button').addEventListener('click', () => { document.getElementById('simSaveCurrentBtn')?.click(); document.getElementById('simSavedScenariosPanel')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
-    const filters = document.createElement('div'); filters.className = 'lab-context-bar'; filters.setAttribute('aria-label', 'Contexto del escenario');
+
+    const filters = document.createElement('div');
+    filters.className = 'lab-context-bar';
+    filters.setAttribute('aria-label', 'Contexto del escenario');
+    const selectsRow = document.createElement('div');
+    selectsRow.className = 'lab-context-selects';
+    const fieldIcons = { islmCountry: 'globe', islmRegime: 'compare', islmMobility: 'chart', islmInstrument: 'database', islmLevel: 'book' };
     for (const [id, title] of [['islmCountry', 'Economía'], ['islmRegime', 'Régimen cambiario'], ['islmMobility', 'Movilidad de capitales'], ['islmInstrument', 'Instrumento monetario'], ['islmLevel', 'Nivel de aprendizaje']]) {
       const select = document.getElementById(id);
-      const label = document.createElement('label'); label.htmlFor = id; label.textContent = title; label.append(select); filters.append(label);
+      const label = document.createElement('label');
+      label.htmlFor = id;
+      label.className = 'lab-ctx-field';
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'lab-ctx-title';
+      titleSpan.innerHTML = `${icon(fieldIcons[id] || 'grid')}<span>${esc(title)}</span>`;
+      label.append(titleSpan, select);
+      selectsRow.append(label);
     }
+    const policyBar = document.createElement('div');
+    policyBar.className = 'lab-policy-bar';
+    policyBar.innerHTML = `
+      <div class="lab-meta-pills" aria-label="Metadatos del modelo">
+        <span class="lab-meta-pill"><strong>Modelo:</strong> IS–LM–BP · Mundell–Fleming</span>
+        <span class="lab-meta-pill"><strong>Horizonte:</strong> Corto plazo (P = 1)</span>
+        <span class="lab-meta-pill is-scenario" id="labActiveScenarioPill"><strong>Escenario:</strong> Equilibrio base (E₀)</span>
+      </div>
+      <div class="lab-policy-tabs" role="group" aria-label="Navegación de políticas">
+        <button type="button" class="lab-policy-tab" data-policy-tab="fiscal" aria-pressed="true">Política fiscal</button>
+        <button type="button" class="lab-policy-tab" data-policy-tab="monetary" aria-pressed="false">Política monetaria</button>
+        <button type="button" class="lab-policy-tab" data-policy-tab="external" aria-pressed="false">Shock externo</button>
+        <button type="button" class="lab-policy-tab" data-policy-tab="mobility" aria-pressed="false">Movilidad de capitales</button>
+      </div>`;
+    filters.append(selectsRow, policyBar);
     heading.after(filters);
+
     for (const [id, labels] of [
       ['islmRegime', { closed: 'Economía cerrada', flex: 'Flexible', fixed: 'Fijo' }],
       ['islmMobility', { none: 'Nula', low: 'Baja', high: 'Alta', perfect: 'Perfecta' }],
@@ -92,11 +121,74 @@
       const select = document.getElementById(id);
       [...select.options].forEach(option => { if (labels[option.value]) option.textContent = labels[option.value]; });
     }
+
     const layout = lab.querySelector('.islm-layout');
     const main = layout.querySelector('.islm-main');
+    const diagramsCard = main.querySelector('[aria-label="Diagramas del modelo"]');
+    const grid = diagramsCard.querySelector('.islm-grid');
+    // Place the 2x2 diagram grid at the top of the center column so it aligns with Parameters and Reading.
+    diagramsCard.prepend(grid);
+    const panelIcons = ['chart', 'globe', 'database', 'model'];
+    grid.querySelectorAll('.islm-panel figcaption').forEach((cap, idx) => {
+      const strong = cap.querySelector('strong');
+      const span = cap.querySelector('span');
+      const copy = document.createElement('div');
+      copy.className = 'lab-panel-heading';
+      if (strong) copy.append(strong);
+      if (span) copy.append(span);
+      const badge = document.createElement('span');
+      badge.className = 'lab-panel-icon';
+      badge.setAttribute('aria-hidden', 'true');
+      badge.innerHTML = icon(panelIcons[idx] || 'chart');
+      cap.prepend(badge, copy);
+    });
+
     const reading = main.querySelector('[aria-label="Mecanismo de transmisión"]');
     reading.classList.add('lab-reading');
-    const readingTitle = reading.querySelector('h3'); readingTitle.textContent = 'Lectura del mecanismo';
+    const readingTop = reading.querySelector('.card-top');
+    const readingTitle = readingTop.querySelector('h3');
+    readingTitle.textContent = 'Lectura del mecanismo';
+    const whyTrigger = document.createElement('button');
+    whyTrigger.type = 'button';
+    whyTrigger.className = 'control-action lab-why-btn';
+    whyTrigger.id = 'islmWhyTrigger';
+    whyTrigger.innerHTML = '¿Por qué se mueve? <span aria-hidden="true">↗</span>';
+    whyTrigger.addEventListener('click', () => document.getElementById('islmWhy')?.click());
+    readingTop.append(whyTrigger);
+
+    const readingHighlight = document.createElement('div');
+    readingHighlight.className = 'lab-reading-highlight';
+    readingHighlight.id = 'islmReadingHighlight';
+    const narrative = document.getElementById('islmNarrative');
+    narrative.before(readingHighlight);
+    const keyIdea = document.createElement('div');
+    keyIdea.className = 'lab-key-idea';
+    keyIdea.id = 'islmKeyIdea';
+    narrative.after(keyIdea);
+
+    const resultsCard = main.querySelector('[aria-label="Resultados del modelo"]');
+    resultsCard.classList.add('lab-results-section');
+    const resultsTop = resultsCard.querySelector('.card-top');
+    resultsTop.querySelector('h3').textContent = 'Resultados del escenario';
+    resultsTop.querySelector('p').textContent = 'Comparación del equilibrio inicial (E₀) frente al simulado (E₂) · precios fijos (P = 1).';
+    const resultsLegend = document.createElement('div');
+    resultsLegend.className = 'lab-results-legend';
+    resultsLegend.innerHTML = `<span class="lab-legend-item is-base"><i aria-hidden="true"></i>Escenario base (E₀)</span><span class="lab-legend-item is-sim"><i aria-hidden="true"></i>Escenario simulado (E₂)</span><span class="lab-delta-pill" id="islmScenarioDeltaBadge">Sin cambios</span>`;
+    resultsTop.append(resultsLegend);
+    const scenarioCards = document.createElement('div');
+    scenarioCards.className = 'lab-scenario-cards';
+    scenarioCards.id = 'islmScenarioCards';
+    scenarioCards.setAttribute('aria-label', 'Tarjetas comparativas E0 a E2');
+    resultsTop.after(scenarioCards);
+    const fullTableDetails = document.createElement('details');
+    fullTableDetails.className = 'lab-assumptions lab-full-results';
+    fullTableDetails.id = 'islmFullTableDetails';
+    fullTableDetails.innerHTML = '<summary>Tabla analítica completa (E₀, E₁, E₂) y multiplicadores <span aria-hidden="true">⌄</span></summary>';
+    const multEl = document.getElementById('islmMultipliers');
+    const tableWrap = resultsCard.querySelector('.data-table-wrap');
+    resultsCard.append(fullTableDetails);
+    fullTableDetails.append(multEl, tableWrap);
+
     lab.querySelector('.islm-controls .card-top h3').textContent = 'Parámetros';
     lab.querySelector('.islm-controls > summary').textContent = 'Configurar y experimentar';
     const learning = lab.querySelector('.islm-learning'); layout.after(learning);
@@ -105,18 +197,48 @@
     // Selects have moved into the context bar; remove their empty wrappers.
     lab.querySelectorAll('.islm-controls .islm-select, .islm-controls .islm-selects').forEach(el => el.remove());
     const controls = lab.querySelector('.islm-controls');
-    const assumptions = document.createElement('details'); assumptions.className = 'lab-assumptions';
-    assumptions.innerHTML = '<summary>Régimen y supuestos del modelo</summary>';
-    assumptions.append(document.getElementById('islmTrilemma')); controls.append(assumptions);
     const presets = document.createElement('details'); presets.className = 'lab-assumptions';
     presets.innerHTML = '<summary>Escenarios rápidos</summary>';
     presets.append(document.getElementById('islmPresets')); controls.append(presets);
+    const assumptions = document.createElement('details'); assumptions.className = 'lab-assumptions';
+    assumptions.innerHTML = '<summary>Régimen y supuestos del modelo</summary>';
+    assumptions.append(document.getElementById('islmTrilemma')); controls.append(assumptions);
     controls.querySelector('.sim-section-heading')?.remove();
     controls.querySelector('p.data-note')?.remove();
     const layers = document.getElementById('islmLayers');
     const options = document.createElement('details'); options.className = 'lab-diagram-options';
-    options.innerHTML = '<summary>Capas, glosario y comparación A/B <span aria-hidden="true">⌄</span></summary>';
-    layers.before(options); options.append(layers);
+    options.innerHTML = '<summary><span>Capas, glosario y comparación A/B</span> <span aria-hidden="true">⌄</span></summary>';
+    layers.before(options);
+    const chartCardTop = diagramsCard.querySelector(':scope > .card-top');
+    const shiftsEl = document.getElementById('islmShifts');
+    const abStatusEl = document.getElementById('islmABStatus');
+    const regimeBadge = document.getElementById('islmRegimeBadge');
+    if (regimeBadge) options.querySelector('summary > span')?.append(' · ', regimeBadge);
+    options.append(layers);
+    if (shiftsEl) options.append(shiftsEl);
+    if (abStatusEl) options.append(abStatusEl);
+    if (chartCardTop) options.append(chartCardTop);
+
+    policyBar.addEventListener('click', e => {
+      const btn = e.target.closest('[data-policy-tab]');
+      if (!btn) return;
+      const tab = btn.dataset.policyTab;
+      policyBar.querySelectorAll('[data-policy-tab]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      controls.dataset.activePolicy = tab;
+      controls.querySelectorAll('.islm-control').forEach(row => {
+        row.classList.toggle('is-group-highlighted', row.dataset.policyGroup === tab);
+      });
+      const extDetails = document.getElementById('islmExternalInputs')?.closest('details');
+      if ((tab === 'external' || tab === 'monetary' || tab === 'mobility') && extDetails && !extDetails.open) {
+        extDetails.open = true;
+      }
+      if (tab === 'mobility') {
+        document.getElementById('islmMobility')?.focus({ preventScroll: true });
+      } else {
+        const firstInput = controls.querySelector(`.islm-control[data-policy-group="${tab}"] input:not(:disabled)`);
+        firstInput?.focus({ preventScroll: true });
+      }
+    });
     for (const [id, title, subtitle, symbol] of [
       ['fuentes', 'Biblioteca de fuentes', 'Organismos, bases de datos, APIs y metodología para investigar con evidencia.', 'database'],
       ['ayuda', 'Ayuda y metodología', 'Encuentra tu recorrido, comprende las fuentes y consulta los conceptos económicos.', 'info']

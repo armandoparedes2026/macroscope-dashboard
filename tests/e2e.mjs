@@ -920,18 +920,26 @@ await check('panorama: un indicador activo para tarjetas, evolución y comparado
   assert.equal(await page.inputValue('#compareIndicator'),'FP.CPI.TOTL.ZG');
 });
 await check('laboratorio: contexto, diagramas, lectura lateral y parámetros accesibles',async page=>{
+  await page.setViewportSize({width:1440,height:900});
   await openOffline(page);
   await page.evaluate(()=>{location.hash='laboratorio';});
   await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
   const sections=await page.$$eval('.islm-main > article',list=>list.map(a=>a.getAttribute('aria-label')));
   assert.deepEqual(sections,['Diagramas del modelo','Mecanismo de transmisión','Resultados del modelo']);
   assert.equal(await page.locator('.lab-context-bar select').count(),5);
+  assert.equal(await page.locator('.lab-policy-tabs [data-policy-tab]').count(),4);
+  assert.equal(await page.locator('#islmScenarioCards .lab-res-card').count(),6);
   const boxes=await page.evaluate(()=>{
-    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top};};
-    return {controls:box('.islm-controls'),diagrams:box('.islm-main>.chart-card'),reading:box('.lab-reading')};
+    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+    return {controls:box('.islm-controls'),diagrams:box('.islm-main>.chart-card'),reading:box('.lab-reading'),cards:box('#islmScenarioCards')};
   });
   assert.ok(boxes.controls.right<=boxes.diagrams.left);
   assert.ok(boxes.reading.left>=boxes.diagrams.right);
+  assert.ok(boxes.cards.bottom<=900,'las 6 tarjetas E0->E2 caben en el primer recorrido a 1440x900');
+  await page.click('[data-policy-tab="monetary"]');
+  assert.equal(await page.getAttribute('[data-policy-tab="monetary"]','aria-pressed'),'true');
+  assert.ok(await page.locator('.islm-control.is-group-highlighted').count()>=1);
+  assert.match(await page.textContent('#islmKeyIdea'),/Idea clave/);
   const before=await page.evaluate(()=>MacroScope.labs.islm.snapshot().E2);
   await page.locator('#islmResetBtn').scrollIntoViewIfNeeded();
   await page.locator('#islmResetBtn').focus();

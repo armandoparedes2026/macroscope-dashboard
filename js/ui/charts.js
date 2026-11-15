@@ -243,6 +243,7 @@
       const w = rect.width, h = rect.height;
       ctx.clearRect(0, 0, w, h);
       const css = getComputedStyle(document.documentElement);
+      const isDark = document.documentElement.dataset.theme === 'dark';
       const color = name => css.getPropertyValue(name).trim() || M.color('--text-muted');
       const font = (size, weight = 500) => `${weight} ${size}px 'DM Sans', system-ui, sans-serif`;
       if (spec.message) {
@@ -252,61 +253,201 @@
         ctx.fillText(line.trim(), w / 2, y);
         return;
       }
-      const pad = { l: 46, r: 16, t: 14, b: 32 };
+      const hasLegend = Array.isArray(spec.legend) && spec.legend.length > 0;
+      const pad = { l: 50, r: 14, t: 10, b: hasLegend ? 50 : 36 };
       const pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
       const [x0, x1] = spec.x.range, [y0, y1] = spec.y.range;
       const sx = x => pad.l + (x - x0) / (x1 - x0) * pw, sy = y => pad.t + ph - (y - y0) / (y1 - y0) * ph;
-      ctx.lineWidth = 1; ctx.font = font(10); ctx.fillStyle = color('--chart-tick'); ctx.strokeStyle = color('--grid');
-      const xt = niceTicks(x0, x1), yt = niceTicks(y0, y1);
+
+      // Subtle tinted plot background
+      ctx.save();
+      ctx.fillStyle = isDark ? 'rgba(15, 29, 51, 0.55)' : 'rgba(242, 247, 255, 0.72)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(pad.l, pad.t, pw, ph, 6);
+      else ctx.rect(pad.l, pad.t, pw, ph);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.lineWidth = 1; ctx.font = font(9.5, 600); ctx.fillStyle = color('--chart-tick');
+      const xt = niceTicks(x0, x1, 4), yt = niceTicks(y0, y1, 4);
       xt.ticks.forEach(xv => {
-        ctx.beginPath(); ctx.moveTo(sx(xv), pad.t); ctx.lineTo(sx(xv), pad.t + ph); ctx.stroke();
-        ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(fmtNum(xv, xt.decimals), sx(xv), pad.t + ph + 6);
+        const px = sx(xv);
+        ctx.strokeStyle = color('--grid');
+        ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(fmtNum(xv, xt.decimals), px, pad.t + ph + 4);
       });
       yt.ticks.forEach(yv => {
-        ctx.beginPath(); ctx.moveTo(pad.l, sy(yv)); ctx.lineTo(pad.l + pw, sy(yv)); ctx.stroke();
-        ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmtNum(yv, yt.decimals), pad.l - 6, sy(yv));
+        const py = sy(yv);
+        ctx.strokeStyle = color('--grid');
+        ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + pw, py); ctx.stroke();
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmtNum(yv, yt.decimals), pad.l - 6, py);
       });
-      ctx.strokeStyle = color('--line-strong'); ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + ph); ctx.lineTo(pad.l + pw, pad.t + ph); ctx.stroke();
-      ctx.fillStyle = color('--muted'); ctx.font = font(10, 700);
-      ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(spec.x.label, pad.l + pw, pad.t + ph - 4);
-      ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(spec.y.label, pad.l + 6, pad.t + 2);
+      ctx.strokeStyle = color('--line-strong'); ctx.lineWidth = 1.15;
+      ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + ph); ctx.lineTo(pad.l + pw, pad.t + ph); ctx.stroke();
+
+      // Axis titles outside plot area
+      ctx.fillStyle = color('--muted'); ctx.font = font(9.5, 700);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(spec.x.label, pad.l + pw / 2, pad.t + ph + 17);
+      ctx.save();
+      ctx.translate(12, pad.t + ph / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(spec.y.label, 0, 0);
+      ctx.restore();
+
       ctx.save(); ctx.beginPath(); ctx.rect(pad.l, pad.t, pw, ph); ctx.clip();
       const labels = [];
+      const drawnSegments = [];
       spec.lines.forEach(l => {
         const seg = clipLine(l.line, spec.x.range, spec.y.range);
         if (!seg) return;
-        ctx.strokeStyle = color(l.color); ctx.globalAlpha = l.initial ? 0.55 : 1; ctx.lineWidth = l.initial ? 1.6 : 2.4;
-        ctx.setLineDash(l.initial ? [6, 5] : []);
+        const cHex = l.stroke || color(l.color);
+        ctx.strokeStyle = cHex;
+        ctx.globalAlpha = l.initial ? 0.62 : 1;
+        ctx.lineWidth = l.initial ? 1.75 : 2.5;
+        ctx.setLineDash(l.initial || l.dashed ? [5, 4] : []);
         ctx.beginPath(); ctx.moveTo(sx(seg[0][0]), sy(seg[0][1])); ctx.lineTo(sx(seg[1][0]), sy(seg[1][1])); ctx.stroke();
         ctx.setLineDash([]); ctx.globalAlpha = 1;
+        drawnSegments.push({ l, seg, cHex });
         if (l.label) {
-          // Final curves are labelled at their top-right end, initial ones at the opposite end, so pairs never collide.
           const ranked = seg.slice().sort((p, q) => (sx(q[0]) - sy(q[1])) - (sx(p[0]) - sy(p[1])));
           const end = l.initial ? ranked[1] : ranked[0];
-          labels.push({ text: l.label, x: sx(end[0]), y: sy(end[1]), color: color(l.color), initial: l.initial });
+          labels.push({ text: l.label, x: sx(end[0]), y: sy(end[1]), color: cHex, initial: l.initial });
         }
       });
-      (spec.points || []).forEach(p => {
+
+      // Directional shift arrow between initial and final curve of the same color
+      drawnSegments.filter(d => d.l.initial).forEach(initD => {
+        const finD = drawnSegments.find(d => !d.l.initial && d.l.color === initD.l.color);
+        if (!finD) return;
+        const midY = (y0 + y1) * 0.54;
+        if (Math.abs(initD.l.line.a) > 1e-9 && Math.abs(finD.l.line.a) > 1e-9) {
+          const ix = (initD.l.line.c - initD.l.line.b * midY) / initD.l.line.a;
+          const fx = (finD.l.line.c - finD.l.line.b * midY) / finD.l.line.a;
+          const px1 = sx(ix), px2 = sx(fx), py = sy(midY);
+          if (Math.abs(px2 - px1) > 18 && px1 > pad.l + 8 && px1 < pad.l + pw - 8 && px2 > pad.l + 8 && px2 < pad.l + pw - 8) {
+            const dir = Math.sign(px2 - px1);
+            const ax1 = px1 + dir * 5, ax2 = px2 - dir * 5;
+            ctx.save();
+            ctx.strokeStyle = finD.cHex; ctx.fillStyle = finD.cHex; ctx.globalAlpha = 0.78; ctx.lineWidth = 1.4;
+            ctx.beginPath(); ctx.moveTo(ax1, py); ctx.lineTo(ax2, py); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(ax2, py); ctx.lineTo(ax2 - dir * 5, py - 3.5); ctx.lineTo(ax2 - dir * 5, py + 3.5); ctx.closePath(); ctx.fill();
+            ctx.restore();
+          }
+        }
+      });
+
+      const placedCallouts = [];
+      (spec.points || []).forEach((p, idx) => {
         if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
         const px = sx(p.x), py = sy(p.y);
+        const ptColor = p.stroke || color(p.color || '--ink-deep');
         if (p.guides) {
-          ctx.strokeStyle = color('--subtle'); ctx.setLineDash([2, 4]); ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, pad.t + ph); ctx.moveTo(px, py); ctx.lineTo(pad.l, py); ctx.stroke(); ctx.setLineDash([]);
+          ctx.strokeStyle = ptColor; ctx.globalAlpha = p.hollow ? 0.32 : 0.45; ctx.setLineDash([3, 3]); ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, pad.t + ph); ctx.moveTo(px, py); ctx.lineTo(pad.l, py); ctx.stroke();
+          ctx.setLineDash([]); ctx.globalAlpha = 1;
         }
-        ctx.beginPath(); ctx.arc(px, py, p.hollow ? 4.5 : 5, 0, Math.PI * 2);
-        ctx.lineWidth = 2; ctx.strokeStyle = color(p.color || '--ink-deep');
+        // Subtle glow halo
+        ctx.save();
+        ctx.beginPath(); ctx.arc(px, py, p.hollow ? 7.5 : 8.5, 0, Math.PI * 2);
+        ctx.fillStyle = ptColor; ctx.globalAlpha = p.hollow ? 0.14 : 0.2; ctx.fill();
+        ctx.restore();
+
+        ctx.beginPath(); ctx.arc(px, py, p.hollow ? 4.2 : 4.8, 0, Math.PI * 2);
+        ctx.lineWidth = 2; ctx.strokeStyle = ptColor;
         if (p.hollow) { ctx.fillStyle = color('--paper-3'); ctx.fill(); ctx.stroke(); }
-        else { ctx.fillStyle = color(p.color || '--ink-deep'); ctx.fill(); }
-        ctx.fillStyle = color(p.color || '--ink-deep'); ctx.font = font(10.5, 800); ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-        ctx.fillText(p.label, px + 7, py - 4);
+        else { ctx.fillStyle = ptColor; ctx.fill(); ctx.strokeStyle = isDark ? '#0b1526' : '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke(); }
+
+        const xSym = spec.x.sym || 'Y', ySym = spec.y.sym || 'i';
+        const xDec = spec.x.decimals ?? 1, yDec = spec.y.decimals ?? 1;
+        const showCoords = p.coords !== false && (p.label === 'E₀' || p.label === 'E₂');
+        const badgeText = showCoords ? `${p.label} (${xSym}: ${fmtNum(p.x, xDec)}, ${ySym}: ${fmtNum(p.y, yDec)})` : p.label;
+        ctx.font = font(9.5, 800);
+        const bw = ctx.measureText(badgeText).width + 10, bh = 16;
+        const candidates = [
+          { bx: px - bw - 7, by: py - bh - 5 },
+          { bx: px + 7, by: py - bh - 5 },
+          { bx: px + 7, by: py + 5 },
+          { bx: px - bw - 7, by: py + 5 },
+          { bx: px - bw / 2, by: py - bh - 8 }
+        ];
+        if (p.label === 'E₂' || idx > 0) candidates.reverse();
+        let chosen = candidates[0];
+        for (const cand of candidates) {
+          const cx = Math.min(Math.max(cand.bx, pad.l + 3), pad.l + pw - bw - 3);
+          const cy = Math.min(Math.max(cand.by, pad.t + 3), pad.t + ph - bh - 3);
+          const overlaps = placedCallouts.some(r => !(cx + bw + 2 < r.x || r.x + r.w + 2 < cx || cy + bh + 2 < r.y || r.y + r.h + 2 < cy));
+          if (!overlaps) { chosen = { bx: cx, by: cy }; break; }
+          chosen = { bx: cx, by: cy };
+        }
+        placedCallouts.push({ x: chosen.bx, y: chosen.by, w: bw, h: bh });
+        ctx.save();
+        ctx.fillStyle = isDark ? 'rgba(12, 22, 39, 0.88)' : 'rgba(255, 255, 255, 0.92)';
+        ctx.strokeStyle = ptColor; ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(chosen.bx, chosen.by, bw, bh, 4);
+        else ctx.rect(chosen.bx, chosen.by, bw, bh);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = ptColor; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(badgeText, chosen.bx + 5, chosen.by + bh / 2 + 0.5);
+        ctx.restore();
       });
       ctx.restore();
+
       labels.forEach(l => {
-        ctx.font = font(10.5, 800); ctx.fillStyle = l.color; ctx.globalAlpha = l.initial ? 0.75 : 1;
-        const tw = ctx.measureText(l.text).width;
-        const x = Math.min(Math.max(l.x + 4, pad.l + 2), pad.l + pw - tw - 2), y = Math.min(Math.max(l.y + 2, pad.t + 12), pad.t + ph - 2);
-        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(l.text, x, y); ctx.globalAlpha = 1;
+        ctx.font = font(9.5, 800);
+        const tw = ctx.measureText(l.text).width + 6, th = 13;
+        const baseX = Math.min(Math.max(l.x + 3, pad.l + 3), pad.l + pw - tw - 3);
+        const baseY = Math.min(Math.max(l.y - th + 2, pad.t + 3), pad.t + ph - th - 3);
+        const labelCands = [
+          [baseX, baseY],
+          [baseX, Math.min(baseY + 16, pad.t + ph - th - 2)],
+          [baseX, Math.max(baseY - 16, pad.t + 2)],
+          [Math.max(baseX - tw - 12, pad.l + 3), baseY],
+          [Math.min(baseX + tw + 12, pad.l + pw - tw - 3), baseY],
+          [pad.l + 5, baseY],
+          [baseX, Math.max(baseY - 28, pad.t + 2)],
+          [pad.l + pw - tw - 5, baseY]
+        ];
+        let [x, y] = labelCands[0];
+        for (const [cx, cy] of labelCands) {
+          if (!placedCallouts.some(r => !(cx + tw < r.x || r.x + r.w < cx || cy + th < r.y || r.y + r.h < cy))) {
+            x = cx; y = cy; break;
+          }
+        }
+        placedCallouts.push({ x, y, w: tw, h: th });
+        ctx.save();
+        ctx.fillStyle = isDark ? 'rgba(12, 22, 39, 0.78)' : 'rgba(255, 255, 255, 0.82)';
+        ctx.fillRect(x, y, tw, th);
+        ctx.fillStyle = l.color; ctx.globalAlpha = l.initial ? 0.8 : 1;
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText(l.text, x + 3, y + th / 2);
+        ctx.restore();
       });
+
+      // Bottom legend row
+      if (hasLegend) {
+        ctx.save();
+        ctx.font = font(9, 700);
+        const items = spec.legend;
+        const gap = 10, sampleW = 13;
+        const widths = items.map(it => sampleW + 4 + ctx.measureText(it.label).width);
+        const totalW = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, items.length - 1);
+        let lx = Math.max(pad.l, pad.l + (pw - totalW) / 2);
+        const ly = h - 9;
+        items.forEach((it, idx) => {
+          const cHex = it.stroke || color(it.color || '--blue');
+          ctx.strokeStyle = cHex; ctx.lineWidth = it.dashed ? 1.6 : 2.2;
+          ctx.setLineDash(it.dashed ? [4, 3] : []);
+          ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + sampleW, ly); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = color('--muted'); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+          ctx.fillText(it.label, lx + sampleW + 4, ly + 0.5);
+          lx += widths[idx] + gap;
+        });
+        ctx.restore();
+      }
     }
 
   Object.assign(M, { axisRange, chartTheme, clipLine, drawDiagram, niceTicks, renderCharts, sameLine });
