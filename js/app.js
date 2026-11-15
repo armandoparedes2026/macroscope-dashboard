@@ -44,6 +44,7 @@
       document.getElementById('tableSearchInput').addEventListener('input',e=>{state.tableFilter=e.target.value;renderDataTableAndInspector();});
       setupIslm();
       M.setupExperiences?.();
+      M.setupPolicy?.();
       M.setupStudentViews();
       M.setupPanorama?.();
       document.getElementById('themeBtn').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));

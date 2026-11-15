@@ -3,7 +3,7 @@
   'use strict';
   const M = globalThis.MacroScope;
   const destinations = Object.freeze([
-    { id: 'inicio', label: 'Inicio', icon: 'grid', description: 'Las siete experiencias de Macroscope' },
+    { id: 'inicio', label: 'Inicio', icon: 'grid', description: 'Las ocho experiencias de Macroscope' },
     { id: 'aprendizaje', label: 'Aprendizaje guiado', short: 'Aprendizaje', icon: 'book', description: 'Lecciones, ejercicios y progreso de aprendizaje' },
     { id: 'historico', label: 'Análisis histórico', short: 'Histórico', icon: 'calendar', description: 'Series de tiempo, periodos y exportación' },
     { id: 'indicadores', label: 'Indicadores macroeconómicos', short: 'Indicadores', icon: 'chart', description: 'Catálogo, definiciones y fichas analíticas' },
@@ -11,6 +11,7 @@
     { id: 'comparacion', label: 'Comparación de economías', short: 'Comparador', icon: 'compare', description: 'Países, mapas y comparaciones internacionales' },
     { id: 'simulacion', label: 'Simulación de escenarios', short: 'Laboratorio', icon: 'flask', tab: 'simulator', description: 'Laboratorio IS–LM–BP y escenarios guardados' },
     { id: 'modelos', label: 'Modelos y tendencias', short: 'Modelos', icon: 'model', description: 'Biblioteca de modelos económicos' },
+    { id: 'politica-economica', label: 'Política económica', short: 'Política', icon: 'compare', description: 'Instrumentos, aranceles, paquetes y bienestar' },
     { id: 'observatorio', label: 'Observatorio del Perú', short: 'Perú', icon: 'globe', description: 'Indicadores nacionales y fuentes peruanas' },
     { id: 'fuentes', label: 'Biblioteca de fuentes', short: 'Fuentes', icon: 'database', description: 'Organismos, bases, APIs y metodología' },
     { id: 'ayuda', label: 'Ayuda y metodología', icon: 'info', description: 'Guía de uso, glosario y citación' }
@@ -39,7 +40,7 @@
   function setupNavigation() {
     const nav = document.querySelector('.primary-nav');
     // Inicio followed by the seven experiences, in the same order as the home cards.
-    const primary = destinations.slice(0, 8);
+    const primary = destinations.slice(0, 9);
     const link = (d, extra = '') => `<a href="#${d.id}" data-route="${d.id}" class="${extra}">${icon(d.icon)}<span>${esc(d.short || d.label)}</span></a>`;
     nav.innerHTML = primary.map(d => link(d)).join('') +
       `<details class="nav-more"><summary aria-label="Más experiencias">Más <span aria-hidden="true">⌄</span></summary><div class="nav-more-panel">${destinations.filter(d => !primary.includes(d)).map(d => link(d)).join('')}</div></details>`;
