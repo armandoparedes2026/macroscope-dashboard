@@ -16,15 +16,17 @@ Este documento describe la arquitectura visual e interactiva del **Laboratorio I
    - **Columna central inferior — Resultados del escenario (`.lab-results-section`)**: Banda comparativa `E₀ → E₂` de 6 tarjetas (`#islmScenarioCards`), acompañada de leyenda (`Escenario base E₀` / `Escenario simulado E₂`), píldora resumen de variación (`#islmScenarioDeltaBadge`), ecuaciones estructurales en nivel avanzado (`#islmEquations`) y desplegable con la tabla analítica completa `E₀ / E₁ / E₂` y multiplicadores (`#islmFullTableDetails`).
    - **Columna derecha — Lectura del mecanismo (`.lab-reading`)**: Tarjeta superior de síntesis dinámica (`#islmReadingHighlight`), pasos numerados de transmisión (`#islmNarrative`) con agrupación desplegable para notas analíticas adicionales, tarjeta inferior `Idea clave` (`#islmKeyIdea`), nota de verificación empírica (`#islmReadingContext`) y botón `¿Por qué se mueve?` conectado al diálogo pedagógico `#islmHelp`.
 
-## 2. Ergonomía de foco permanente (sticky) en escritorio, scroll lateral independiente y adaptación móvil
+## 2. Ergonomía de foco permanente (sticky) en escritorio, scroll lateral independiente y adaptación por tamaño
 
-1. **Escritorio (`> 1279 px`, 3 columnas) y escritorio compacto (`1121–1279 px`, 2 columnas)**:
+1. **Escritorio amplio (`> 1279 px`, 3 columnas)**:
    - La columna central (`.lab-center`) permanece **anclada en foco (`position: sticky; top: calc(var(--topbar-h, 72px) + 10px)`)** dentro de los límites de `.islm-layout`.
    - Tanto el panel izquierdo de configuración (`.islm-controls`) como el panel derecho de lectura (`.lab-reading`) cuentan con altura acotada al viewport (`max-height: var(--lab-panel-max-h)` sincronizada dinámicamente con `syncLabStickyBounds()`) y desplazamiento vertical propio (`overflow-y: auto; overscroll-behavior: contain`) con contención de rueda del ratón y teclado.
    - Al abrir todas las secciones de parámetros (controles de régimen, parámetros estructurales `c..n`, escenarios rápidos y supuestos) o desplegar todas las notas del mecanismo de transmisión y recorrer cada columna lateral hasta su final, **los cuatro diagramas centrales mantienen sus coordenadas exactas en pantalla (`Δtop = 0 px`, `Δbottom = 0 px`)**.
    - Cuando el usuario continúa desplazándose más allá de `.islm-layout` hacia los paneles inferiores (escenarios guiados, matriz de eficacia, fuentes de calibración y tipos de cambio), el contenedor padre termina y libera el anclaje de forma natural sin tapar ninguna sección posterior.
-2. **Móvil y tableta estrecha (`<= 1120 px`)**:
-   - Se desactiva el anclaje sticky y el scroll interno anidado (`position: static; max-height: none; overflow: visible`) para preservar el flujo vertical natural sin trampas de scroll.
+2. **Escritorio compacto y tableta horizontal (`1121–1279 px`, 2 columnas)**:
+   - La mesa se dispone en dos columnas (`245px minmax(0, 1fr)`): el panel izquierdo de parámetros (`.islm-controls`) conserva su anclaje sticky y desplazamiento interno acotado (`max-height: var(--lab-panel-max-h); overflow-y: auto`), mientras que en la columna derecha `.lab-center` (diagramas + tarjetas de resultados en grilla de 3 columnas) y `.lab-reading` (con pasos en 2 columnas) pasan a flujo vertical normal (`position: static; max-height: none; overflow: visible`) para no comprimir horizontalmente los 4 lienzos.
+3. **Móvil y tableta estrecha (`<= 1120 px`, 1 columna)**:
+   - Se desactiva por completo el anclaje sticky y el scroll interno anidado en las tres regiones (`.islm-controls`, `.lab-center` y `.lab-reading` con `position: static; max-height: none; overflow: visible`) para preservar el flujo vertical natural sin trampas de scroll y con áreas táctiles de `>= 44 px`.
    - El botón **«Ampliar gráficos»** (`min-height: 44 px`) abre el diálogo expandido adaptado en una sola columna vertical legible (`<= 860 px`), evitando comprimir una grilla 2×2 ilegible en pantallas estrechas.
 
 ## 3. Diferencias justificadas por rigor económico y consistencia de plataforma
