@@ -11,7 +11,7 @@
     { id: 'comparacion', label: 'Comparación de economías', short: 'Comparador', icon: 'compare', description: 'Países, mapas y comparaciones internacionales' },
     { id: 'simulacion', label: 'Simulación de escenarios', short: 'Laboratorio', icon: 'flask', tab: 'simulator', description: 'Laboratorio IS–LM–BP y escenarios guardados' },
     { id: 'modelos', label: 'Modelos y tendencias', short: 'Modelos', icon: 'model', description: 'Biblioteca de modelos económicos' },
-    { id: 'politica-economica', label: 'Política económica', short: 'Política', icon: 'compare', description: 'Instrumentos, aranceles, paquetes y bienestar' },
+    { id: 'politica-economica', label: 'Política económica', short: 'Política', icon: 'compare', description: 'Fundamentos, objetivos, instituciones, instrumentos y evaluación' },
     { id: 'observatorio', label: 'Observatorio del Perú', short: 'Perú', icon: 'globe', description: 'Indicadores nacionales y fuentes peruanas' },
     { id: 'fuentes', label: 'Biblioteca de fuentes', short: 'Fuentes', icon: 'database', description: 'Organismos, bases, APIs y metodología' },
     { id: 'ayuda', label: 'Ayuda y metodología', icon: 'info', description: 'Guía de uso, glosario y citación' }
