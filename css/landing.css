@@ -93,7 +93,7 @@ body:has(#inicio:not([hidden])) #themeBtn:focus-visible{outline:3px solid #387de
 }
 .orbit-stage-haze{position:absolute;pointer-events:none;left:50%;bottom:1.5%;transform:translateX(-50%);width:min(80%,1050px);height:160px;border-radius:50%;background:radial-gradient(ellipse,rgba(90,156,245,.27),rgba(184,218,255,.06) 69%,transparent 81%);filter:blur(15px)}
 .orbit-platform{
-  position:absolute;left:50%;bottom:3%;transform:translateX(-50%);
+  position:absolute;left:50%;bottom:3%;transform:translateX(-50%);pointer-events:none;
   width:min(85%,1120px);height:clamp(94px,13vw,140px);border-radius:50%;
   background:linear-gradient(180deg,rgba(249,253,255,.17),rgba(198,224,255,.35) 53%,rgba(245,250,255,.38));
   border:1px solid var(--landing-ring);
@@ -185,7 +185,9 @@ body:has(#inicio:not([hidden])) #themeBtn:focus-visible{outline:3px solid #387de
 .trust-icon svg{width:22px;height:22px;stroke-width:1.9}
 /* Interacción táctil real sobre la plataforma: drag continuo, no solo swipe final. */
 .orbit-track{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
-.orbit-card{cursor:grab;user-select:none;-webkit-user-select:none}
+.orbit-card,.orbit-card *{touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.orbit-card{cursor:grab}
+.orbit-arrow,.orbit-dot{touch-action:manipulation}
 .orbit-stage.is-dragging,.orbit-stage.is-dragging .orbit-track,.orbit-stage.is-dragging .orbit-card{cursor:grabbing}
 .orbit-stage.is-dragging .orbit-card{transition:none!important}
 .orbit-stage.is-dragging .orbit-card-open{pointer-events:none}
