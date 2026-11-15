@@ -22,7 +22,7 @@ La tarjeta de Inicio, el menú principal, el menú móvil, la búsqueda y los en
 
 Las siete referencias de `docs/ux/referencias/` definen la composición. Se comparte cabecera translúcida, iconografía vectorial, selección azul con subrayado, búsqueda real de experiencias/indicadores/fuentes, tipografía y superficies de hielo en claro y marino en oscuro. La portada orbital conserva sus siete tarjetas y sus interacciones.
 
-Se elimina la cinta repetida de once botones que competía con la cabecera. Los destinos adicionales están en «Más» y en la búsqueda, también disponibles en móvil. Los enlaces contextuales entre módulos se mantienen.
+Se elimina la cinta repetida de once botones que competía con la cabecera. La cabecera empieza por Inicio y continúa con las siete experiencias en el mismo orden de las tarjetas: Aprendizaje, Histórico, Indicadores, Exploración, Comparación, Simulación y Modelos. Observatorio del Perú, Fuentes y Ayuda están en «Más» y en la búsqueda. El menú móvil conserva el mismo orden y los enlaces contextuales entre módulos se mantienen.
 
 El Laboratorio utiliza una franja superior de contexto, parámetros de política, cuatro diagramas, resultados reales y un panel lateral del mecanismo de transmisión. Los selectores existentes se reubican conservando nodos, IDs y eventos. Las opciones avanzadas, capas, comparación A/B, escenarios rápidos y supuestos permanecen disponibles en desplegables. Guardar escenario en la cabecera usa la persistencia existente. No se modifican el motor, las ecuaciones ni los resultados para reproducir cifras ilustrativas.
 
