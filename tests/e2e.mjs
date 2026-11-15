@@ -941,15 +941,22 @@ await check('laboratorio: contexto, diagramas, lectura lateral y parámetros acc
   });
   assert.ok(boxes.controls.right<=boxes.diagrams.left);
   assert.ok(boxes.reading.left>=boxes.diagrams.right);
-  // First-fold ergonomics with enlarged canvases (>=228px): all 4 diagrams and the expand bar fit completely in the initial fold (<=941px), and when anchored at the sticky top both the 4 diagrams and the 6 E0->E2 cards fit inside the viewport simultaneously.
+  // First-fold ergonomics with enlarged canvases (>=228px): all 4 diagrams and the expand bar fit completely in the initial fold (<=941px); when scrolling the workbench to its sticky anchor under the 72px header (or bringing #islmScenarioCards into nearest view), the 4 diagrams remain visible above and all 6 E0->E2 scenario cards are completely visible and accessible inside the viewport.
   assert.ok(boxes.canvases.every(c=>c.height>=228 && c.top>=72 && c.bottom<=941),'los 4 canvases ampliados caben íntegros en el primer pliegue (1672x941)');
   assert.ok(boxes.diagrams.bottom<=941,'el bloque completo de 4 diagramas y barra de ampliación cabe en el primer pliegue (1672x941)');
-  await page.evaluate(()=>window.scrollTo({top:135,behavior:'instant'}));
-  const stickyBoxes=await page.evaluate(()=>{
-    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom};};
-    return {diagrams:box('.lab-center>.chart-card'),cards:box('#islmScenarioCards')};
+  await page.evaluate(()=>{
+    const top=document.querySelector('.lab-center>.chart-card').getBoundingClientRect().top;
+    window.scrollTo({top:Math.max(0,Math.round(window.scrollY+top-82)),behavior:'instant'});
   });
-  assert.ok(stickyBoxes.diagrams.top>=72 && stickyBoxes.cards.bottom<=941,'al anclar la mesa de trabajo bajo la cabecera, los 4 diagramas ampliados y las 6 tarjetas E0->E2 caben juntos en pantalla');
+  const stickyBoxes=await page.evaluate(()=>{
+    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height};};
+    return {
+      diagrams:box('.lab-center>.chart-card'),
+      cards:box('#islmScenarioCards'),
+      cardItems:[...document.querySelectorAll('#islmScenarioCards .lab-res-card')].map(el=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,width:r.width};})
+    };
+  });
+  assert.ok(stickyBoxes.diagrams.top>=72 && stickyBoxes.diagrams.bottom<=stickyBoxes.cards.top && stickyBoxes.cards.top>=72 && stickyBoxes.cards.bottom<=941 && stickyBoxes.cardItems.length===6 && stickyBoxes.cardItems.every(c=>c.width>100 && c.bottom<=941),'al situar la mesa de trabajo bajo la cabecera, los 4 diagramas permanecen visibles y la banda de 6 tarjetas E0->E2 queda íntegramente accesible dentro del viewport');
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await page.click('[data-policy-tab="monetary"]');
   assert.equal(await page.getAttribute('[data-policy-tab="monetary"]','aria-pressed'),'true');
