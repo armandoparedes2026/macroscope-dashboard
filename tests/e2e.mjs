@@ -55,6 +55,7 @@ await check('modo sin conexión: respaldo local y gráficos alternativos', async
 await check('destinos canónicos del menú y navegación accesible', async page => {
   await openOffline(page);
   for(const route of ['exploracion','comparacion','observatorio','simulacion','aprendizaje','fuentes']) {
+    if (['observatorio','fuentes'].includes(route)) await page.click('.nav-more>summary');
     await page.click(`[data-route="${route}"]`);
     await page.waitForFunction(route=>!document.querySelector(`[data-view="${route}"]`).hidden,route);
     assert.equal(await page.isVisible(`[data-view="${route}"]`),true);
@@ -827,7 +828,9 @@ await check('rutas: Atrás y hash desconocido; menú móvil siempre etiquetado',
   await page.goBack();await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
   await page.evaluate(()=>{location.hash='desconocido';});await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
   await page.setViewportSize({width:360,height:900});await page.click('.nav-menu>summary');
-  assert.deepEqual(await page.locator('.primary-nav>a').allTextContents(),['Panorama','Comparador','Perú','Laboratorio','Aprendizaje','Fuentes']);
+  const cardRoutes = await page.locator('[data-home-slide] .orbit-card-open').evaluateAll(links => links.map(a => a.dataset.destination.slice(1)));
+  assert.deepEqual(await page.locator('.primary-nav>a').evaluateAll(links => links.map(a => a.dataset.route)), ['inicio', ...cardRoutes]);
+  await page.click('.nav-more>summary');
   await page.click('[data-route="fuentes"]');await page.waitForFunction(()=>!document.querySelector('#fuentes').hidden);
   assert.equal(await page.locator('.nav-menu').getAttribute('open'),null);
 });
@@ -1303,6 +1306,7 @@ await check('navegación unificada: cabecera, Inicio y búsqueda usan los mismos
     assert.equal(await page.locator('.primary-nav [aria-current="page"]').getAttribute('data-route'), view);
     assert.equal(await page.locator('.ms-exp-ribbon:visible').count(), 0);
   }
+  await page.click('.nav-more>summary');
   await page.click('[data-route="fuentes"]');
   await page.waitForFunction(() => document.documentElement.dataset.activeView === 'fuentes');
   assert.equal(await page.locator('#fuentes h1').textContent(), 'Biblioteca de fuentes');
@@ -1346,7 +1350,7 @@ await check('navegación unificada: menú móvil, siete experiencias y escenario
   await openOffline(page);
   for (const view of ['aprendizaje','exploracion','comparacion','fuentes','simulacion','historico','indicadores','modelos']) {
     await page.locator('.nav-menu>summary').click();
-    if (['historico','indicadores','modelos'].includes(view)) await page.locator('.nav-more>summary').click();
+    if (view === 'fuentes') await page.locator('.nav-more>summary').click();
     await page.locator(`.primary-nav [data-route="${view}"]`).click();
     await page.waitForFunction(v => document.documentElement.dataset.activeView === v, view);
     assert.equal(await page.locator('.nav-menu').evaluate(el => el.open), false);

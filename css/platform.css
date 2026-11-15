@@ -192,6 +192,10 @@ html[data-active-view="inicio"] .platform-search {display:none;}
 body:has(#inicio:not([hidden])) #inicio .landing-premium {height:calc(100svh - var(--topbar-h,72px));}
 @media(min-width:1600px) {#fuentes .source-grid {grid-template-columns:repeat(4,minmax(0,1fr));}}
 @media(max-width:1380px) {.platform-search span {display:none;}.platform-search {padding:0;width:40px;justify-content:center;}#platformHeader .brand-lockup small {max-width:190px;white-space:normal;}#platformHeader .primary-nav a {padding:0 8px;}}
+@media(min-width:1121px) and (max-width:1600px) {
+  .workspace>header#platformHeader.topbar {padding-inline:24px;gap:16px;}
+  #platformHeader .primary-nav a {padding-inline:6px;gap:5px;}
+}
 @media(max-width:1279px) {
   #tab-simulator .islm-layout {grid-template-columns:235px minmax(0,1fr);}
   #tab-simulator .islm-main {grid-template-columns:minmax(0,1fr);}
