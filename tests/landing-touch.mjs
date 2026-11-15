@@ -24,7 +24,8 @@ const CANONICAL_TITLES = [
   'Exploración macroeconómica',
   'Comparación de economías',
   'Simulación de escenarios',
-  'Modelos y tendencias'
+  'Modelos y tendencias',
+  'Política económica'
 ];
 
 async function check(name, opts, fn) {
@@ -224,11 +225,11 @@ for (const width of [360, 390, 412]) {
   );
 }
 
-await check('recorrido completo de las 7 tarjetas y wrap-around circular en ambos sentidos con tacto real', async (page, cdp) => {
+await check('recorrido completo de las 8 tarjetas y wrap-around circular en ambos sentidos con tacto real', async (page, cdp) => {
   // Inicialmente en índice 3 (Exploración macroeconómica)
   assert.equal(await page.locator('.orbit-card.is-active h2').textContent(), CANONICAL_TITLES[3]);
   // 4 swipes a la izquierda: 3 -> 4 -> 5 -> 6 -> 0 (wrap de 07/07 a 01/07)
-  for (const expectedIndex of [4, 5, 6, 0]) {
+  for (const expectedIndex of [4, 5, 6, 7, 0]) {
     const box = await page.locator('.orbit-card.is-active').boundingBox();
     await cdpSwipe(cdp, page, {
       startX: box.x + box.width * 0.72,
@@ -247,8 +248,8 @@ await check('recorrido completo de las 7 tarjetas y wrap-around circular en ambo
     endX: box.x + box.width * 0.28 + 96,
     endY: box.y + box.height * 0.52
   });
-  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(), CANONICAL_TITLES[6]);
-  assert.equal(await page.locator('[data-home-dot="6"]').getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(), CANONICAL_TITLES[7]);
+  assert.equal(await page.locator('[data-home-dot="7"]').getAttribute('aria-pressed'), 'true');
 });
 
 await check('drag corto recupera posición sin click y tap posterior sí navega al módulo', async (page, cdp) => {

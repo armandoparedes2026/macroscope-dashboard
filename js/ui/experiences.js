@@ -335,7 +335,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
             </span>
             <div>
-              <div class="ms-exp-eyebrow">MÓDULO 01 / 07 · PEDAGOGÍA INTERACTIVA Y PREDICCIÓN</div>
+              <div class="ms-exp-eyebrow">MÓDULO 01 / 08 · PEDAGOGÍA INTERACTIVA Y PREDICCIÓN</div>
               <h1 id="apTitle">Aprendizaje guiado</h1>
               <p>Comprende la teoría, experimenta con escenarios y aprende economía aplicada paso a paso.</p>
             </div>
@@ -754,7 +754,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/></svg>
             </span>
             <div>
-              <div class="ms-exp-eyebrow">MÓDULO 02 / 07 · EVOLUCIÓN TEMPORAL, SUBPERIODOS Y TENDENCIAS</div>
+              <div class="ms-exp-eyebrow">MÓDULO 02 / 08 · EVOLUCIÓN TEMPORAL, SUBPERIODOS Y TENDENCIAS</div>
               <h1 id="hiTitle">Análisis histórico</h1>
               <p>Explora series de tiempo largas, compara subperiodos, evalúa variaciones e interpreta hitos económicos respaldados por fuentes.</p>
             </div>
@@ -1151,7 +1151,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19v-5M9 19V8M14 19v-9M19 19V4"/></svg>
             </span>
             <div>
-              <div class="ms-exp-eyebrow">MÓDULO 03 / 07 · CATÁLOGO ANALÍTICO, METADATOS Y FICHAS TÉCNICAS</div>
+              <div class="ms-exp-eyebrow">MÓDULO 03 / 08 · CATÁLOGO ANALÍTICO, METADATOS Y FICHAS TÉCNICAS</div>
               <h1 id="indTitle">Indicadores macroeconómicos</h1>
               <p>Explora el catálogo categorizado de variables económicas, sus definiciones, fórmulas, códigos de serie y fichas analíticas.</p>
             </div>
@@ -1552,7 +1552,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="18" r="2.5"/><circle cx="12" cy="5" r="2.5"/><circle cx="19" cy="17" r="2.5"/><path d="m7 16 4-9m3 0 4 8M7.5 18h9"/></svg>
             </span>
             <div>
-              <div class="ms-exp-eyebrow">MÓDULO 07 / 07 · BIBLIOTECA VISUAL DE MODELOS ECONÓMICOS Y TENDENCIAS</div>
+              <div class="ms-exp-eyebrow">MÓDULO 07 / 08 · BIBLIOTECA VISUAL DE MODELOS ECONÓMICOS Y TENDENCIAS</div>
               <h1 id="modTitle">Modelos y tendencias</h1>
               <p>Comprende la arquitectura teórica, supuestos, ecuaciones y mecanismos de los modelos económicos y contrástalos con las tendencias empíricas.</p>
             </div>

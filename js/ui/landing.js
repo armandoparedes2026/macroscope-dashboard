@@ -26,14 +26,14 @@
     let lastWheelStep = -Infinity;
     let lastWheelInput = -Infinity;
 
-    const xPositions = [0, 1.16, 1.96, 2.6];
-    const scales = [1, .91, .81, .72];
-    const yPositions = [0, 20, 35, 48];
-    const zPositions = [0, -55, -120, -185];
-    const rotations = [0, 12, 20, 27];
-    const tilt = [0, 1.5, 2.8, 4];
-    const opacities = [1, .97, .85, .7];
-    const blurs = [0, 0, .35, .7];
+    const xPositions = [0, 1.16, 1.96, 2.6, 3.12];
+    const scales = [1, .91, .81, .72, .62];
+    const yPositions = [0, 20, 35, 48, 60];
+    const zPositions = [0, -55, -120, -185, -240];
+    const rotations = [0, 12, 20, 27, 32];
+    const tilt = [0, 1.5, 2.8, 4, 5];
+    const opacities = [1, .97, .85, .7, .55];
+    const blurs = [0, 0, .35, .7, 1];
 
     function isHomeVisible() {
       return !document.getElementById('inicio').hidden;
@@ -79,14 +79,14 @@
       }
     }
 
-    // El arrastre mueve las siete tarjetas de forma continua, con profundidad:
+    // El arrastre mueve las ocho tarjetas de forma continua, con profundidad:
     // la central acompaña al puntero y las laterales se desplazan menos.
     function renderDrag(offset) {
       slides.forEach((slide, index) => {
         let relative = (index - current + total) % total;
         if (relative > Math.floor(total / 2)) relative -= total;
         const distance = Math.abs(relative);
-        const weight = [1, .74, .48, .27][distance];
+        const weight = [1, .74, .48, .27, .16][distance];
         slide.style.setProperty('--orbit-drag', (offset * weight).toFixed(2) + 'px');
         slide.style.setProperty('--orbit-drag-angle', (offset / 27 * weight).toFixed(2) + 'deg');
       });

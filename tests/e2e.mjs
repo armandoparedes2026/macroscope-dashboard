@@ -63,11 +63,11 @@ await check('destinos canónicos del menú y navegación accesible', async page 
   assert.equal(await page.isHidden('#tab-overview'),true);
 });
 
-await check('inicio orbital: siete módulos, flechas, teclado, enlaces y accesibilidad',async page=>{
+await check('inicio orbital: ocho módulos, flechas, teclado, enlaces y accesibilidad',async page=>{
   await openOffline(page);
   await page.evaluate(()=>{location.hash='inicio';});
   await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
-  assert.equal(await page.locator('.orbit-card').count(),7);
+  assert.equal(await page.locator('.orbit-card').count(),8);
   assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Exploración macroeconómica');
   await page.click('#homeNext');
   assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Comparación de economías');
@@ -182,7 +182,7 @@ await check('home premium: rueda del mouse con cooldown, dirección inversa y en
   await page.keyboard.press('Home');
   assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Aprendizaje guiado');
   await page.keyboard.press('End');
-  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Modelos y tendencias');
+  assert.equal(await page.locator('.orbit-card.is-active h2').textContent(),'Política económica');
 });
 
 await check('home premium: arrastre horizontal continuo con mouse, retorno y prevención de clics accidentales',async page=>{
@@ -257,8 +257,8 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
   await openOffline(page);
   await page.evaluate(()=>{location.hash='inicio';});
   await page.waitForFunction(()=>!document.querySelector('#inicio').hidden);
-  assert.equal(await page.locator('.orbit-illustration').count(),7);
-  assert.equal(await page.locator('.orbit-illustration filter').count(),14);
+  assert.equal(await page.locator('.orbit-illustration').count(),8);
+  assert.equal(await page.locator('.orbit-illustration filter').count(),16);
   const semantics=[
     ['learning','.ms-book-leaf-left','.ms-book-leaf-right'],
     ['history','.ms-history-line','.ms-history-grid'],
@@ -266,7 +266,8 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
     ['exploration','.ms-explore-bars','.ms-exploration-curve'],
     ['comparison','.ms-map-network','.ms-map-nodes'],
     ['simulation','.ms-decision-curves','.ms-decision-marker'],
-    ['trends','.ms-wave-ribbons','.ms-projection-line']
+    ['trends','.ms-wave-ribbons','.ms-projection-line'],
+    ['policy','.ms-policy-market','.ms-policy-budget']
   ];
   const kinds=await page.locator('.orbit-illustration').evaluateAll(nodes=>nodes.map(n=>n.dataset.chartKind));
   assert.deepEqual(kinds,semantics.map(row=>row[0]),'cada tarjeta debe tener su propio concepto gráfico');
@@ -283,12 +284,12 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
   const defsValid=await page.locator('.orbit-illustration').evaluateAll(nodes=>{
     const gradientIds=nodes.flatMap(svg=>[...svg.querySelectorAll('linearGradient,radialGradient')]
       .map(node=>node.id));
-    return gradientIds.length===42&&new Set(gradientIds).size===gradientIds.length;
+    return gradientIds.length===43&&new Set(gradientIds).size===gradientIds.length;
   });
-  assert.equal(defsValid,true,'las siete tarjetas usan 42 gradientes independientes sin colisiones');
-  assert.equal(await page.locator('.orbit-illustration[role="img"]').count(),7);
+  assert.equal(defsValid,true,'las ocho tarjetas usan 43 gradientes independientes sin colisiones');
+  assert.equal(await page.locator('.orbit-illustration[role="img"]').count(),8);
   const vectors=await page.locator('.orbit-illustration').evaluateAll(nodes=>nodes.map(node=>node.querySelectorAll('path,rect,circle,ellipse').length));
-  assert.ok(vectors.every(count=>count>=7),'las siete ilustraciones contienen gráficos vectoriales detallados');
+  assert.ok(vectors.every(count=>count>=7),'las ocho ilustraciones contienen gráficos vectoriales detallados');
   await page.evaluate(()=>MacroScope.setTheme('light'));
   const button=page.locator('#themeBtn');
   await page.waitForFunction(()=>document.getElementById('themeBtn').getAttribute('aria-label')==='Cambiar a modo oscuro');
@@ -304,7 +305,7 @@ await check('home premium: botón de tema solo icono y mini ilustraciones SVG di
 });
 
 
-await check('home premium: los siete artes son específicos, legibles y conservan referencias SVG accesibles',async page=>{
+await check('home premium: los ocho artes son específicos, legibles y conservan referencias SVG accesibles',async page=>{
   for(const [width,height] of [[390,844],[1440,900]]){
     await page.setViewportSize({width,height});
     await openOffline(page);
@@ -318,7 +319,7 @@ await check('home premium: los siete artes son específicos, legibles y conserva
         nonEmpty:svg.querySelectorAll('path,rect,ellipse,circle').length>=5
       }))
     );
-    assert.equal(semantics.length,7);
+    assert.equal(semantics.length,8);
     assert.ok(semantics.every(x=>x.title&&x.nonEmpty));
     const allIds=semantics.flatMap(x=>x.uniqueDefs);
     assert.equal(allIds.length,new Set(allIds).size,'no debe haber ID SVG duplicado');
@@ -1109,7 +1110,7 @@ await writeFile('test-results/rediseno/aceptacion.json',JSON.stringify(acceptanc
 
 await mkdir('test-results/experiencias',{recursive:true});
 
-await check('siete experiencias desde la portada orbital y compatibilidad con rutas heredadas',async page=>{
+await check('ocho experiencias desde la portada orbital y compatibilidad con rutas heredadas',async page=>{
   await openOffline(page);
   const expectedSlides=[
     [0,'Aprendizaje guiado','#aprendizaje','aprendizaje'],
@@ -1118,7 +1119,8 @@ await check('siete experiencias desde la portada orbital y compatibilidad con ru
     [3,'Exploración macroeconómica','#exploracion','exploracion'],
     [4,'Comparación de economías','#comparacion','comparacion'],
     [5,'Simulación de escenarios','#simulacion','simulacion'],
-    [6,'Modelos y tendencias','#modelos','modelos']
+    [6,'Modelos y tendencias','#modelos','modelos'],
+    [7,'Política económica','#politica-economica','politica-economica']
   ];
   for(const [idx,title,hash,view] of expectedSlides){
     await page.evaluate(()=>{location.hash='inicio';});
@@ -1299,7 +1301,7 @@ await check('observatorio del Perú y ficha de la fuente: series nacionales BCRP
   assert.match(await page.textContent('#sourceSheetTitle'),/World Development Indicators/);
 });
 
-await check('capturas multi-resolución y claro/oscuro de las siete experiencias y observatorio',async page=>{
+await check('capturas multi-resolución y claro/oscuro de las ocho experiencias y observatorio',async page=>{
   await openOffline(page);
   const viewsToCapture=['inicio','aprendizaje','historico','indicadores','exploracion','comparacion','simulacion','modelos','observatorio','fuentes'];
   for(const [label,width,height] of [['desktop',1440,900],['tablet',768,1024],['mobile',390,844]]){
@@ -1321,7 +1323,7 @@ await check('capturas multi-resolución y claro/oscuro de las siete experiencias
 
 await check('navegación unificada: cabecera, Inicio y búsqueda usan los mismos destinos', async page => {
   await openOffline(page);
-  for (const [index, view] of [[0,'aprendizaje'],[3,'exploracion'],[4,'comparacion'],[5,'simulacion']]) {
+  for (const [index, view] of [[0,'aprendizaje'],[3,'exploracion'],[4,'comparacion'],[5,'simulacion'],[7,'politica-economica']]) {
     await page.evaluate(() => { location.hash = 'inicio'; });
     await page.waitForFunction(() => !document.getElementById('inicio').hidden);
     await page.click(`[data-home-dot="${index}"]`);
@@ -1375,7 +1377,7 @@ await check('navegación unificada: alias, enlace profundo, actualizar y Atrás/
   assert.equal(await page.locator('[data-route="simulacion"]').getAttribute('aria-current'), null);
 });
 
-await check('navegación unificada: menú móvil, siete experiencias y escenarios sin desbordamiento', async page => {
+await check('navegación unificada: menú móvil, ocho experiencias y escenarios sin desbordamiento', async page => {
   await page.setViewportSize({width:360,height:800});
   await openOffline(page);
   for (const view of ['aprendizaje','exploracion','comparacion','fuentes','simulacion','historico','indicadores','modelos']) {

@@ -12,7 +12,8 @@
     if (old) cancelAnimationFrame(old.frame);
     const hidden = new Set([...document.querySelectorAll('#islmLayers [data-curve]:not(:checked)')].map(el => el.dataset.curve));
     if (hidden.has('--blue')) hidden.add('--violet');
-    if (target.lines) target = { ...target, lines: target.lines.filter(l => !hidden.has(l.color) && (document.getElementById('islmInitial').checked || !l.initial)) };
+    const showInit = document.getElementById('islmInitial')?.checked !== false;
+    if (target.lines) target = {...target, lines: target.lines.filter(l => !hidden.has(l.color) && (showInit || !l.initial))};
     const entry = { spec: old?.spec, frame: 0 };
     diagramFrames.set(canvas.id, entry);
     const start = performance.now();
@@ -27,7 +28,11 @@
       const f = 1 - (1 - t) ** 3;
       const spec = t === 1 ? target : { ...target,
         lines: target.lines.map(l => {
-          const before = previous.lines.find(v => v.color === l.color && v.initial === l.initial) || l;
+          const lKey = l.family || l.color;
+          const lStage = l.stage || (l.initial ? 'initial' : 'final');
+          const before = previous.lines.find(v => (v.family || v.color) === lKey && (v.stage || (v.initial ? 'initial' : 'final')) === lStage)
+            || previous.lines.find(v => (v.family || v.color) === lKey && v.initial === l.initial)
+            || l;
           return { ...l, line: Object.fromEntries(['a', 'b', 'c'].map(k => [k, mix(before.line[k], l.line[k], f)])) };
         }),
         points: target.points.map(p => {
@@ -490,7 +495,7 @@
       const shiftList = shifts.filter(Boolean);
       if (shiftList.length) steps.push(`Desplazamiento de curvas: ${shiftList.join('; ')}.`);
       if (open) {
-        let impact = `Impacto (E₁), antes del ajuste externo: Y = ${fmtNum(E1.Y)}, i = ${fmtNum(E1.i, 2)}%.`;
+        let impact = `Impacto (E₀ → E₁), antes del ajuste externo: Y = ${fmtNum(E1.Y)}, i = ${fmtNum(E1.i, 2)}%.`;
         const parity = u.istar + u.rho;
         if (m.kappa > 0 && Math.abs(E1.i - parity) > 0.005) impact += ` La tasa doméstica queda ${E1.i > parity ? 'por encima' : 'por debajo'} de i* + ρ (${fmtNum(parity, 2)}%), lo que ${E1.i > parity ? 'atrae' : 'expulsa'} capitales.`;
         const surplus = E1.BP > 0.005, deficit = E1.BP < -0.005;
@@ -500,16 +505,18 @@
         steps.push(impact);
         if (islm.regime === 'flex' && Math.abs(E2.e - E1.e) > 0.05) {
           const pctE = (E2.e / E1.e - 1) * 100;
-          steps.push(`Ajuste cambiario: e pasa de ${fmtNum(E1.e)} a ${fmtNum(E2.e)} (${pctE < 0 ? 'apreciación' : 'depreciación'} de ${fmtNum(Math.abs(pctE))}%). Las exportaciones netas cambian en ${fmtSigned(E2.NX - E1.NX)} y la IS se desplaza ${E2.e > E1.e ? 'a la derecha' : 'a la izquierda'}${m.kappa > 0 && m.kappa < Infinity ? ' (la BP también se mueve con e)' : ''} hasta E₂.`);
+          steps.push(`Ajuste externo (E₁ → E₂): e pasa de ${fmtNum(E1.e)} a ${fmtNum(E2.e)} (${pctE < 0 ? 'apreciación' : 'depreciación'} de ${fmtNum(Math.abs(pctE))}%). Las exportaciones netas cambian en ${fmtSigned(E2.NX - E1.NX)} y la IS se desplaza ${E2.e > E1.e ? 'a la derecha' : 'a la izquierda'}${m.kappa > 0 && m.kappa < Infinity ? ' (la BP también se mueve con e)' : ''} hasta E₂.`);
         }
         if (islm.regime === 'fixed' && Math.abs(E2.M - E1.M) > 0.05) {
-          steps.push(`Ajuste monetario por reservas: M pasa de ${fmtNum(E1.M)} a ${fmtNum(E2.M)} (${fmtSigned(E2.M - E1.M)}); la LM se desplaza hasta que la balanza de pagos vuelve al equilibrio en E₂.`);
+          steps.push(`Ajuste externo (E₁ → E₂), monetario por reservas: M pasa de ${fmtNum(E1.M)} a ${fmtNum(E2.M)} (${fmtSigned(E2.M - E1.M)}); la LM se desplaza hasta que la balanza de pagos vuelve al equilibrio en E₂.`);
         }
       }
+      if (!open) steps.push('E₀ → E₁: se ajustan los mercados internos de bienes y dinero. E₁ = E₂: al no existir sector externo no hay una segunda etapa cambiaria.');
       const dY = E2.Y - E0.Y;
       const iText = Math.abs(E2.i - E0.i) < 0.005 ? `i se mantiene en ${fmtNum(E2.i, 2)}%` : `i pasa de ${fmtNum(E0.i, 2)}% a ${fmtNum(E2.i, 2)}%`;
       const eText = !open ? '' : Math.abs(E2.e - E0.e) < 0.05 ? `; e se mantiene en ${fmtNum(E2.e)}${islm.regime === 'fixed' ? ' (tipo de cambio fijo)' : ''}` : `; e pasa de 100 a ${fmtNum(E2.e)}`;
       steps.push(`Equilibrio final (E₂): Y ${Math.abs(dY) < 0.005 ? 'no cambia' : `${dY > 0 ? 'sube' : 'baja'} ${fmtNum(Math.abs(dY))} (de 100 a ${fmtNum(E2.Y)})`}; ${iText}${eText}.`);
+      steps.push('Lectura de curvas: subíndice ₀ = inicial, ₁ = impacto y ₂ = final. Las etiquetas unidas por = indican curvas coincidentes. La curva de impacto permanece visible aunque la final retorne a la inicial. Los cambios de L(Y) y DA reflejan también variaciones de Y, i y e; no son nuevos shocks autónomos. E₁ puede no estar sobre BP o LM–BP, que imponen equilibrio externo. Esta secuencia es una descomposición estática, no un tiempo de ajuste estimado.');
       const comp = [['consumo', E2.C - E0.C], ['inversión', E2.I - E0.I], ['gasto público', E2.G - E0.G], ...(open ? [['exportaciones netas', E2.NX - E0.NX]] : [])]
         .filter(([, v]) => Math.abs(v) > 0.005).map(([k, v]) => `${k} ${fmtSigned(v)}`);
       if (comp.length) steps.push(`Composición del cambio en la demanda: ${comp.join(', ')}.`);
@@ -546,10 +553,21 @@
 
     // --- Diagrams (custom canvas renderer: lines a·x + b·y = c) --------------------------------
     function islmLinePair(initial, final, color, base) {
-      const out = [];
-      out.push({ line: initial, color, initial: true, label: `${base}₀` });
-      out.push({ line: final, color, label: sameLine(initial, final) ? base : `${base}₁` });
-      return out;
+      return islmStageLines(initial, final, final, color, base);
+    }
+    function islmStageLines(initial, impact, final, color, family) {
+      const groups = [];
+      [initial, impact, final].forEach((line, stage) => {
+        const group = groups.find(g => sameLine(g.line, line));
+        if (group) group.stages.push(stage);
+        else groups.push({line, stages:[stage], color, family});
+      });
+      return groups.map(g => ({...g,
+        label:g.stages.map(n => family + ['₀','₁','₂'][n]).join('='),
+        initial:g.stages.length === 1 && g.stages[0] === 0,
+        stage:g.stages.includes(2) ? 'final' : g.stages.includes(1) ? 'impact' : 'initial',
+        dash:g.stages.includes(2) ? [] : g.stages.includes(1) ? [9,3,2,3] : [5,4]
+      }));
     }
     let lastIslmSpecs = null;
     let lastIslmEquilibria = null;
@@ -618,9 +636,9 @@
         x: { range: yRange, label: 'Producción (Y, base = 100)', sym: 'Y', decimals: 1 },
         y: { range: iRange, label: 'Tasa i (%)', sym: 'i', decimals: 1 },
         lines: [
-          ...islmLinePair(c.IS(u0, 100), c.IS(u, E2.e), '--blue', 'IS'),
-          ...islmLinePair(c.LM(u0, m.M0), c.LM(u, E2.M), '--teal', lmLabel),
-          ...(open ? islmLinePair(c.BP(u0, 100), c.BP(u, E2.e), '--amber', 'BP') : [])
+          ...islmStageLines(c.IS(u0, E0.e), c.IS(u, E1.e), c.IS(u, E2.e), '--blue', 'IS'),
+          ...islmStageLines(c.LM(u0, E0.M), c.LM(u, E1.M), c.LM(u, E2.M), '--teal', lmLabel),
+          ...(open ? islmStageLines(c.BP(u0, E0.e), c.BP(u, E1.e), c.BP(u, E2.e), '--amber', 'BP') : [])
         ],
         points: points(p => p.Y, p => p.i),
         legend: [
@@ -635,8 +653,8 @@
         x: { range: yRange, label: 'Producción (Y, base = 100)', sym: 'Y', decimals: 1 },
         y: { range: eRange, label: 'e (↑ = deprec.)', sym: 'e', decimals: 1 },
         lines: [
-          ...islmLinePair(c.ISstar(u0, E0.i), c.ISstar(u, E2.i), '--blue', 'IS*'),
-          ...islmLinePair(c.LMstar(u0, m.M0), c.LMstar(u, E2.M), '--teal', mfLabel),
+          ...islmStageLines(c.ISstar(u0, E0.i), c.ISstar(u, E1.i), c.ISstar(u, E2.i), '--blue', 'IS*'),
+          ...islmStageLines(c.LMstar(u0, E0.M), c.LMstar(u, E1.M), c.LMstar(u, E2.M), '--teal', mfLabel),
           ...(islm.regime === 'fixed' ? islmLinePair({ a: 0, b: 1, c: 100 }, { a: 0, b: 1, c: u.ebar }, '--amber', 'ē') : [])
         ],
         points: points(p => p.Y, p => p.e),
@@ -652,8 +670,8 @@
         x: { range: mRange, label: 'Saldos reales (M/P)', sym: 'M/P', decimals: 1 },
         y: { range: iRange, label: 'Tasa i (%)', sym: 'i', decimals: 1 },
         lines: [
-          ...islmLinePair(c.moneyDemand(E0.Y), c.moneyDemand(E2.Y), '--blue', 'L(Y)'),
-          ...islmLinePair({ a: 1, b: 0, c: E0.M }, { a: 1, b: 0, c: E2.M }, '--teal', 'Mˢ'),
+          ...islmStageLines(c.moneyDemand(E0.Y), c.moneyDemand(E1.Y), c.moneyDemand(E2.Y), '--blue', 'L(Y)'),
+          ...islmStageLines({a:1,b:0,c:E0.M}, {a:1,b:0,c:E1.M}, {a:1,b:0,c:E2.M}, '--teal', 'Mˢ'),
           ...(rateRule ? islmLinePair({ a: 0, b: 1, c: u0.ipol }, { a: 0, b: 1, c: u.ipol }, '--amber', 'i política') : [])
         ],
         points: points(p => p.M, p => p.i),
@@ -668,7 +686,7 @@
         y: { range: yRange, label: 'Demanda agregada DA', sym: 'DA', decimals: 1 },
         lines: [
           { line: { a: -1, b: 1, c: 0 }, color: '--subtle', label: '45°' },
-          ...islmLinePair(c.aggregateDemand(u0, E0.i, E0.e), c.aggregateDemand(u, E2.i, E2.e), '--violet', 'DA')
+          ...islmStageLines(c.aggregateDemand(u0, E0.i, E0.e), c.aggregateDemand(u, E1.i, E1.e), c.aggregateDemand(u, E2.i, E2.e), '--violet', 'DA')
         ],
         points: points(p => p.Y, p => p.Y),
         legend: [
@@ -677,6 +695,13 @@
           { label: 'DA simulada', color: '--violet' }
         ]
       };
+      for (const spec of [specISLM, specMF, specMoney, specCross]) if (spec.lines) {
+        spec.legend = [
+          {label:'0 Inicial',color:'--subtle',dash:[5,4]},
+          {label:'1 Impacto',color:'--subtle',dash:[9,3,2,3]},
+          {label:'2 Final',color:'--subtle',dash:[]}
+        ];
+      }
       lastIslmSpecs = { islmPanelISLM: specISLM, islmPanelMF: specMF, islmPanelMoney: specMoney, islmPanelCross: specCross };
       lastIslmEquilibria = { E0, E1, E2 };
       drawDiagram(document.getElementById('islmPanelISLM'), specISLM);

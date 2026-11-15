@@ -1,5 +1,15 @@
 # Laboratorio IS–LM–BP: Estructura, Correspondencia Visual y Rigor Económico
 
+## Actualización: curvas iniciales, de impacto y finales
+
+Cada familia conserva las posiciones distintas de las etapas E₀, E₁ y E₂. Las curvas coincidentes se dibujan una vez con etiqueta conjunta, por ejemplo **IS₀=IS₂**, conservando **IS₁** por separado cuando hay un desplazamiento de impacto y un retorno posterior. Trazo discontinuo: inicial; punto-raya: impacto; continuo: final. Las flechas enlazan desplazamientos consecutivos, incluidos los retornos. No son una trayectoria temporal estimada.
+
+Las curvas se derivan de las funciones del motor existente con los parámetros de cada etapa: IS/BP usan el tipo de cambio de esa etapa; LM sus saldos reales; IS* la tasa de interés; L(Y) el producto; DA la tasa y el tipo de cambio. E₁ satisface el equilibrio interno, pero puede quedar fuera de BP o de la proyección LM–BP: esas relaciones externas permiten visualizar el desequilibrio previo al ajuste. El motor matemático no fue modificado.
+
+La lectura mantiene visibles el impacto E₀→E₁, el ajuste E₁→E₂ y el resultado final; explica las coincidencias y diferencia cambios inducidos de nuevos shocks. La vista ampliada reutiliza exactamente las mismas especificaciones. Sin animaciones se conserva toda la información.
+
+`node tests/lab-stages.mjs` comprueba geométricamente los tres estados en siete casos: fiscal flexible con movilidad alta/perfecta, monetario flexible, fiscal fijo, devaluación, shock de i* y economía cerrada. Verifica persistencia de curvas después de animación y correspondencia normal/zoom. [Caso fiscal con retorno de IS](../evidence/laboratorio-etapas/fiscal-perfecta.png) · [Vista ampliada](../evidence/laboratorio-etapas/zoom.png).
+
 Este documento describe la arquitectura visual e interactiva del **Laboratorio IS–LM–BP y Mundell–Fleming** (`#simulacion` / `#laboratorio`) y documenta tanto su correspondencia con la referencia visual de diseño como las decisiones donde el rigor teórico y de datos prevalece sobre las cifras o etiquetas ilustrativas de la maqueta.
 
 ## 1. Estructura y composición visual

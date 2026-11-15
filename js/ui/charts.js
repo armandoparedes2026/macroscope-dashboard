@@ -329,7 +329,7 @@
         ctx.strokeStyle = cHex;
         ctx.globalAlpha = l.initial ? 0.65 : 1;
         ctx.lineWidth = l.initial ? (isZoom ? 2.1 : 1.85) : (isZoom ? 3 : 2.65);
-        ctx.setLineDash(l.initial || l.dashed ? [5, 4] : []);
+        ctx.setLineDash(l.dash || (l.initial || l.dashed ? [5, 4] : []));
         ctx.beginPath(); ctx.moveTo(sx(seg[0][0]), sy(seg[0][1])); ctx.lineTo(sx(seg[1][0]), sy(seg[1][1])); ctx.stroke();
         ctx.setLineDash([]); ctx.globalAlpha = 1;
         drawnSegments.push({ l, seg, cHex });
@@ -340,24 +340,28 @@
         }
       });
 
-      // Directional shift arrow between initial and final curve of the same color
-      drawnSegments.filter(d => d.l.initial).forEach(initD => {
-        const finD = drawnSegments.find(d => !d.l.initial && d.l.color === initD.l.color);
-        if (!finD) return;
-        const midY = (y0 + y1) * 0.54;
-        if (Math.abs(initD.l.line.a) > 1e-9 && Math.abs(finD.l.line.a) > 1e-9) {
-          const ix = (initD.l.line.c - initD.l.line.b * midY) / initD.l.line.a;
-          const fx = (finD.l.line.c - finD.l.line.b * midY) / finD.l.line.a;
-          const px1 = sx(ix), px2 = sx(fx), py = sy(midY);
-          if (Math.abs(px2 - px1) > 18 && px1 > pad.l + 8 && px1 < pad.l + pw - 8 && px2 > pad.l + 8 && px2 < pad.l + pw - 8) {
-            const dir = Math.sign(px2 - px1);
-            const ax1 = px1 + dir * 5, ax2 = px2 - dir * 5;
-            ctx.save();
-            ctx.strokeStyle = finD.cHex; ctx.fillStyle = finD.cHex; ctx.globalAlpha = 0.8; ctx.lineWidth = isZoom ? 1.7 : 1.45;
-            ctx.beginPath(); ctx.moveTo(ax1, py); ctx.lineTo(ax2, py); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(ax2, py); ctx.lineTo(ax2 - dir * 5.5, py - 3.8); ctx.lineTo(ax2 - dir * 5.5, py + 3.8); ctx.closePath(); ctx.fill();
-            ctx.restore();
-          }
+      // Arrows connect consecutive curve positions, including a return to the base.
+      const families = [...new Set(drawnSegments.map(d => d.l.family).filter(Boolean))];
+      families.forEach((family, fi) => {
+        for (let stage = 0; stage < 2; stage++) {
+          const from = drawnSegments.find(d => d.l.family === family && d.l.stages.includes(stage));
+          const to = drawnSegments.find(d => d.l.family === family && d.l.stages.includes(stage + 1));
+          if (!from || !to || from === to) continue;
+          const l = from.l.line, r = to.l.line;
+          const yy = y0 + (y1-y0) * (0.62 - stage*.2 + (fi%2)*.07);
+          const xx = x0 + (x1-x0) * (0.62 - stage*.2);
+          let a,b;
+          if(Math.abs(l.a)>1e-9 && Math.abs(r.a)>1e-9) {
+            a=[sx((l.c-l.b*yy)/l.a),sy(yy)];b=[sx((r.c-r.b*yy)/r.a),sy(yy)];
+          } else if(Math.abs(l.b)>1e-9 && Math.abs(r.b)>1e-9) {
+            a=[sx(xx),sy((l.c-l.a*xx)/l.b)];b=[sx(xx),sy((r.c-r.a*xx)/r.b)];
+          } else continue;
+          const len=Math.hypot(b[0]-a[0],b[1]-a[1]);
+          if(len<12 || [a,b].some(p=>p[0]<pad.l+5||p[0]>pad.l+pw-5||p[1]<pad.t+5||p[1]>pad.t+ph-5))continue;
+          const dx=(b[0]-a[0])/len,dy=(b[1]-a[1])/len;
+          ctx.save();ctx.strokeStyle=to.cHex;ctx.fillStyle=to.cHex;ctx.lineWidth=1.5;
+          ctx.setLineDash(stage===0?[3,2]:[]);ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.stroke();ctx.setLineDash([]);
+          ctx.beginPath();ctx.moveTo(...b);ctx.lineTo(b[0]-dx*6-dy*3,b[1]-dy*6+dx*3);ctx.lineTo(b[0]-dx*6+dy*3,b[1]-dy*6-dx*3);ctx.closePath();ctx.fill();ctx.restore();
         }
       });
 
@@ -491,7 +495,7 @@
         items.forEach((it, idx) => {
           const cHex = it.stroke || color(it.color || '--blue');
           ctx.strokeStyle = cHex; ctx.lineWidth = it.dashed ? 1.8 : 2.4;
-          ctx.setLineDash(it.dashed ? [4, 3] : []);
+          ctx.setLineDash(it.dash || (it.dashed ? [4, 3] : []));
           ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + sampleW, ly); ctx.stroke();
           ctx.setLineDash([]);
           ctx.fillStyle = color('--muted'); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
