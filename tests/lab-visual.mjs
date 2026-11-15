@@ -27,17 +27,47 @@ for (const [name,width,height,theme,preset,regime,mobility] of cases) {
   await page.selectOption('#islmMobility', mobility);
   if (preset) await page.evaluate(p => document.querySelector(`[data-preset="${p}"]`).click(), preset);
   await page.waitForFunction(() => [...document.querySelectorAll('.islm-panel canvas')].every(c => c.dataset.animating === 'false'));
-  const metrics = await page.evaluate(() => ({
-    overflow: document.documentElement.scrollWidth-innerWidth,
-    resultsBottom: Math.round(document.querySelector('#islmScenarioCards').getBoundingClientRect().bottom),
-    readingFont: getComputedStyle(document.querySelector('#islmNarrative')).fontSize,
-    badge: document.querySelector('#islmScenarioDeltaBadge').textContent,
-    E0: MacroScope.labs.islm.snapshot().E0,
-    E2: MacroScope.labs.islm.snapshot().E2
-  }));
+  const metrics = await page.evaluate(() => {
+    const c = document.getElementById('islmPanelISLM');
+    const cr = c.getBoundingClientRect();
+    const layout = JSON.parse(c.dataset.layoutAudit || '{}');
+    return {
+      overflow: document.documentElement.scrollWidth-innerWidth,
+      canvasWidth: Math.round(cr.width),
+      canvasHeight: Math.round(cr.height),
+      plotWidth: layout.pw,
+      plotHeight: layout.ph,
+      dpr: layout.dpr,
+      resultsBottom: Math.round(document.querySelector('#islmScenarioCards').getBoundingClientRect().bottom),
+      readingFont: getComputedStyle(document.querySelector('#islmNarrative')).fontSize,
+      badge: document.querySelector('#islmScenarioDeltaBadge').textContent,
+      E0: MacroScope.labs.islm.snapshot().E0,
+      E2: MacroScope.labs.islm.snapshot().E2
+    };
+  });
   results.push({name,width,height,...metrics});
   await page.screenshot({path:`${output}/${name}.png`});
   await page.screenshot({path:`${output}/${name}-full.png`,fullPage:true});
+
+  if (name === 'desktop-1672-light-fiscal') {
+    await page.evaluate(() => {
+      document.querySelectorAll('.islm-controls details, .lab-reading details').forEach(d => { d.open = true; });
+      window.scrollTo(0, 135);
+      MacroScope.syncLabStickyBounds?.();
+      const c = document.querySelector('.islm-controls');
+      const r = document.querySelector('.lab-reading');
+      c.scrollTop = c.scrollHeight;
+      r.scrollTop = r.scrollHeight;
+    });
+    await page.screenshot({path:`${output}/${name}-sticky-scroll.png`});
+  }
+  if (name === 'desktop-1672-light-fiscal' || name === 'desktop-1440-dark-fiscal' || name === 'mobile-390-light-fiscal') {
+    await page.click('#islmExpandChartsBtn');
+    await page.waitForFunction(() => document.getElementById('islmZoomDialog')?.open === true);
+    await page.screenshot({path:`${output}/${name}-zoom.png`});
+    await page.click('#islmCloseZoom');
+    await page.waitForFunction(() => !document.getElementById('islmZoomDialog')?.open);
+  }
 }
 await browser.close();
 await writeFile(`${output}/metrics.json`, JSON.stringify({results,errors},null,2));

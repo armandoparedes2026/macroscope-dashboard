@@ -551,6 +551,50 @@
       out.push({ line: final, color, label: sameLine(initial, final) ? base : `${base}₁` });
       return out;
     }
+    let lastIslmSpecs = null;
+    let lastIslmEquilibria = null;
+    function renderIslmZoom() {
+      const dialog = document.getElementById('islmZoomDialog');
+      if (!dialog || !dialog.open || !lastIslmSpecs || !lastIslmEquilibria) return;
+      const { E0, E1, E2 } = lastIslmEquilibria;
+      const m = islm.model;
+      const metaEl = document.getElementById('islmZoomMeta');
+      if (metaEl && m) {
+        const badgeTxt = document.getElementById('islmScenarioDeltaBadge')?.textContent || '';
+        const open = m.open;
+        const items = [
+          ['Y', fmtNum(E0.Y, 1), fmtNum(E2.Y, 1), ''],
+          ['i', fmtNum(E0.i, 2), fmtNum(E2.i, 2), '%'],
+          ...(open ? [['e', fmtNum(E0.e, 1), fmtNum(E2.e, 1), ''], ['NX', fmtNum(E0.NX, 1), fmtNum(E2.NX, 1), ' pts']] : []),
+          ['M/P', fmtNum(E0.M, 1), fmtNum(E2.M, 1), '']
+        ];
+        metaEl.innerHTML = `<span class="lab-meta-pill"><strong>Economía:</strong> ${escapeHTML(COUNTRIES[state.country].name)}</span>` +
+          `<span class="lab-meta-pill"><strong>Régimen:</strong> ${escapeHTML(({ closed: 'Cerrada', flex: 'Flexible', fixed: 'Fijo' })[islm.regime])} · Movilidad ${escapeHTML(ISLM.MOBILITY[islm.mobility].label.toLowerCase())}</span>` +
+          `<span class="lab-meta-pill is-scenario">${escapeHTML(badgeTxt)}</span>` +
+          items.map(([k, v0, v2, uTxt]) => `<span class="lab-meta-pill" data-zoom-var="${escapeHTML(k)}"><strong>${escapeHTML(k)}:</strong> ${escapeHTML(v0)}${escapeHTML(uTxt)} → <strong>${escapeHTML(v2)}${escapeHTML(uTxt)}</strong></span>`).join('');
+      }
+      const zoomMap = [
+        ['islmPanelISLM', 'islmZoomISLM'],
+        ['islmPanelMF', 'islmZoomMF'],
+        ['islmPanelMoney', 'islmZoomMoney'],
+        ['islmPanelCross', 'islmZoomCross']
+      ];
+      const hidden = new Set([...document.querySelectorAll('#islmLayers [data-curve]:not(:checked)')].map(el => el.dataset.curve));
+      if (hidden.has('--blue')) hidden.add('--violet');
+      const showInit = document.getElementById('islmInitial')?.checked !== false;
+      zoomMap.forEach(([srcId, zoomId]) => {
+        const zCanvas = document.getElementById(zoomId);
+        let spec = lastIslmSpecs[srcId];
+        if (!zCanvas || !spec) return;
+        if (spec.lines) {
+          spec = { ...spec, lines: spec.lines.filter(l => !hidden.has(l.color) && (showInit || !l.initial)) };
+        }
+        M.drawDiagram(zCanvas, spec);
+        zCanvas.dataset.points = JSON.stringify(spec.points || []);
+        zCanvas.dataset.curves = JSON.stringify(spec.lines || []);
+        zCanvas.dataset.animating = 'false';
+      });
+    }
     function drawIslmPanels(E0, E1, E2) {
       const m = islm.model, u = islm.u, u0 = m.baseline, c = m.curves, open = m.open;
       const pts = [E0, E1, E2];
@@ -570,7 +614,7 @@
         ];
       };
       const lmLabel = islm.instrument === 'rate' && islm.regime !== 'fixed' ? 'LM (i fija)' : 'LM';
-      drawDiagram(document.getElementById('islmPanelISLM'), {
+      const specISLM = {
         x: { range: yRange, label: 'Producción (Y, base = 100)', sym: 'Y', decimals: 1 },
         y: { range: iRange, label: 'Tasa i (%)', sym: 'i', decimals: 1 },
         lines: [
@@ -585,9 +629,9 @@
           { label: lmLabel, color: '--teal' },
           ...(open ? [{ label: 'BP', color: '--amber' }] : [])
         ]
-      });
+      };
       const mfLabel = m.kappa === Infinity ? 'LM*' : m.kappa === 0 ? 'BP*' : 'LM–BP';
-      drawDiagram(document.getElementById('islmPanelMF'), open ? {
+      const specMF = open ? {
         x: { range: yRange, label: 'Producción (Y, base = 100)', sym: 'Y', decimals: 1 },
         y: { range: eRange, label: 'e (↑ = deprec.)', sym: 'e', decimals: 1 },
         lines: [
@@ -602,9 +646,9 @@
           { label: mfLabel, color: '--teal' },
           ...(islm.regime === 'fixed' ? [{ label: 'Paridad ē', color: '--amber' }] : [])
         ]
-      } : { message: 'En una economía cerrada no hay tipo de cambio. Elige un régimen abierto para ver el diagrama de Mundell–Fleming.' });
+      } : { message: 'En una economía cerrada no hay tipo de cambio. Elige un régimen abierto para ver el diagrama de Mundell–Fleming.' };
       const rateRule = islm.instrument === 'rate' && islm.regime !== 'fixed';
-      drawDiagram(document.getElementById('islmPanelMoney'), {
+      const specMoney = {
         x: { range: mRange, label: 'Saldos reales (M/P)', sym: 'M/P', decimals: 1 },
         y: { range: iRange, label: 'Tasa i (%)', sym: 'i', decimals: 1 },
         lines: [
@@ -618,8 +662,8 @@
           { label: 'L(Y₂)', color: '--blue' },
           { label: 'Oferta M/P', color: '--teal' }
         ]
-      });
-      drawDiagram(document.getElementById('islmPanelCross'), {
+      };
+      const specCross = {
         x: { range: yRange, label: 'Producción (Y, base = 100)', sym: 'Y', decimals: 1 },
         y: { range: yRange, label: 'Demanda agregada DA', sym: 'DA', decimals: 1 },
         lines: [
@@ -632,7 +676,14 @@
           { label: 'DA inicial', color: '--violet', dashed: true },
           { label: 'DA simulada', color: '--violet' }
         ]
-      });
+      };
+      lastIslmSpecs = { islmPanelISLM: specISLM, islmPanelMF: specMF, islmPanelMoney: specMoney, islmPanelCross: specCross };
+      lastIslmEquilibria = { E0, E1, E2 };
+      drawDiagram(document.getElementById('islmPanelISLM'), specISLM);
+      drawDiagram(document.getElementById('islmPanelMF'), specMF);
+      drawDiagram(document.getElementById('islmPanelMoney'), specMoney);
+      drawDiagram(document.getElementById('islmPanelCross'), specCross);
+      renderIslmZoom();
       const summary = `inicial Y = 100, i = ${fmtNum(E0.i, 2)}%; final Y = ${fmtNum(E2.Y)}, i = ${fmtNum(E2.i, 2)}%${open ? `, e = ${fmtNum(E2.e)}` : ''}`;
       document.getElementById('islmPanelISLM').setAttribute('aria-label', `Diagrama IS-LM-BP: ${summary}`);
       document.getElementById('islmPanelMF').setAttribute('aria-label', open ? `Diagrama Mundell-Fleming: ${summary}` : 'Diagrama Mundell-Fleming: no aplica en economía cerrada');
@@ -713,8 +764,24 @@
         keyIdeaEl.innerHTML = `<span class="lab-ki-icon" aria-hidden="true">${paramSvg('risk')}</span><div><strong>${escapeHTML(ideaTitle)}</strong><p>${escapeHTML(ideaBody)}</p></div>`;
       }
 
+      const assumptionsExtraEl = document.getElementById('islmAssumptionsExtra');
+      if (assumptionsExtraEl) {
+        const mult = m.multipliers();
+        assumptionsExtraEl.innerHTML = `<p><strong>Cierre y calibración activa (${escapeHTML(COUNTRIES[state.country].name)}):</strong> Y₀ = 100, i₀ = ${fmtNum(E0.i, 2)}%${m.open ? `, e₀ = 100, NX₀ = ${fmtNum(E0.NX, 1)}, CA₀ = ${fmtNum(E0.CA, 1)}` : ''}, M₀/P = ${fmtNum(E0.M, 1)} (P = 1).</p><p><strong>Multiplicadores efectivos:</strong> dY/dG = ${fmtSigned(mult.fiscal, 2)}${mult.monetary !== null ? ` · eficacia monetaria = ${fmtSigned(mult.monetary, 2)}` : ''}${mult.devaluation !== null ? ` · devaluación = ${fmtSigned(mult.devaluation, 2)}` : ''}. Propensión marginal a importar m = ${fmtNum(islm.params.m, 2)}, sensibilidad cambiaria n = ${fmtNum(islm.params.n, 2)}.</p>`;
+      }
+
+      const readingContextEl = document.getElementById('islmReadingContext');
+      if (readingContextEl) {
+        const mult = m.multipliers();
+        const extraNotes = extraSteps.length
+          ? extraSteps.map(s => `<p>${formatStep(s)}</p>`).join('')
+          : `<p><strong>Coherencia entre los 4 diagramas:</strong> (1) El cruce IS–LM–BP determina el par (Y, i) compatible con el equilibrio interno y externo; (2) el plano Mundell–Fleming proyecta el equilibrio en (Y, e); (3) el mercado de dinero muestra el ajuste entre L(Y, i) y los saldos reales M/P (${fmtNum(E0.M, 1)} → ${fmtNum(E2.M, 1)}); (4) la cruz keynesiana confirma Y = DA en ${fmtNum(E2.Y, 1)}.</p>`;
+        readingContextEl.innerHTML = `<div class="lab-reading-context-card"><strong>Síntesis estructural y lectura completa</strong>${extraNotes}<p><strong>Parámetros y multiplicadores vigentes:</strong> c = ${fmtNum(islm.params.c, 2)}, t = ${fmtNum(islm.params.t, 2)}, b = ${fmtNum(islm.params.b, 1)}, h = ${fmtNum(islm.params.h, 1)}${m.open ? `, m = ${fmtNum(islm.params.m, 2)}, n = ${fmtNum(islm.params.n, 2)}` : ''}. Multiplicador fiscal efectivo: ${fmtSigned(mult.fiscal, 2)}. Nivel de precios fijo a corto plazo (P = 1).</p></div>`;
+      }
+
       renderIslmClasses();
       drawIslmPanels(E0, E1, E2);
+      M.syncLabStickyBounds?.();
     }
     function setupIslm() {
       setupLearning();
@@ -771,5 +838,5 @@
       renderIslm();
     }
   };
-  Object.assign(M, { drawIslmPanels, islmBuildModel, islmCalibrationData, islmDisabledReason, islmFmtKF, islmLinePair, islmNarrative, islmRegimeText, islmShiftText, islmSyncCountry, renderIslm, renderIslmClasses, renderIslmInputs, renderIslmMultipliers, renderIslmResults, setupIslm, syncIslmControls });
+  Object.assign(M, { drawIslmPanels, islmBuildModel, islmCalibrationData, islmDisabledReason, islmFmtKF, islmLinePair, islmNarrative, islmRegimeText, islmShiftText, islmSyncCountry, renderIslm, renderIslmClasses, renderIslmInputs, renderIslmMultipliers, renderIslmResults, renderIslmZoom, setupIslm, syncIslmControls });
 })();
