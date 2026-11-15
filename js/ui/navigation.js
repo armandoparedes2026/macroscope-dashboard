@@ -148,11 +148,14 @@
     const readingTop = reading.querySelector('.card-top');
     const readingTitle = readingTop.querySelector('h3');
     readingTitle.textContent = 'Lectura del mecanismo';
+    readingTop.querySelector('p').textContent = 'Del equilibrio inicial al ajuste final.';
     const whyTrigger = document.createElement('button');
     whyTrigger.type = 'button';
     whyTrigger.className = 'control-action lab-why-btn';
     whyTrigger.id = 'islmWhyTrigger';
-    whyTrigger.innerHTML = '¿Por qué se mueve? <span aria-hidden="true">↗</span>';
+    whyTrigger.setAttribute('aria-label', '¿Por qué se mueve?');
+    whyTrigger.title = '¿Por qué se mueve?';
+    whyTrigger.innerHTML = icon('info');
     whyTrigger.addEventListener('click', () => document.getElementById('islmWhy')?.click());
     readingTop.append(whyTrigger);
 
@@ -188,6 +191,12 @@
     const tableWrap = resultsCard.querySelector('.data-table-wrap');
     resultsCard.append(fullTableDetails);
     fullTableDetails.append(multEl, tableWrap);
+
+    // Keep the plot/result stack independent of the length of the explanation.
+    const center = document.createElement('div');
+    center.className = 'lab-center';
+    main.insertBefore(center, diagramsCard);
+    center.append(diagramsCard, resultsCard);
 
     lab.querySelector('.islm-controls .card-top h3').textContent = 'Parámetros';
     lab.querySelector('.islm-controls > summary').textContent = 'Configurar y experimentar';

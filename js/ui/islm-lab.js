@@ -376,7 +376,7 @@
         ['Y', 'Producto (Y)', r => r.Y, 1],
         ['i', 'Tasa de interés (i, %)', r => r.i, 2],
         ...(open ? [['e', 'Tipo de cambio (e)', r => r.e, 1]] : []),
-        ['M', islm.regime === 'fixed' ? 'Oferta monetaria (M/P) · reservas' : 'Oferta monetaria (M/P)', r => r.M, 1],
+        ['M', 'Saldos reales (M/P)', r => r.M, 1],
         ['C', 'Consumo (C)', r => r.C, 1],
         ['I', 'Inversión (I)', r => r.I, 1],
         ['G', 'Gasto público (G)', r => r.G, 1],
@@ -400,7 +400,7 @@
           { key: 'NX', title: 'Balanza comercial (NX)', unit: 'puntos de Y₀', icon: 'trade', v0: E0.NX, v2: E2.NX, dec: 1, delta: comparison.NX?.abs, dUnit: ' pts Y₀' },
           { key: 'CA', title: 'Cuenta corriente (CA)', unit: 'puntos de Y₀ (NX + NFI)', icon: 'globe', v0: E0.CA, v2: E2.CA, dec: 1, delta: E2.CA - E0.CA, dUnit: ' pts Y₀' },
           islm.regime === 'fixed' || Math.abs(E2.M - E0.M) > 0.01
-            ? { key: 'M', title: islm.regime === 'fixed' ? 'Saldos reales y reservas' : 'Saldos reales (M/P)', unit: 'índice M/P (P = 1)', icon: 'money', v0: E0.M, v2: E2.M, dec: 1, delta: comparison.M?.pct, dUnit: '%' }
+            ? { key: 'M', title: 'Saldos reales (M/P)', unit: 'unidades reales (P = 1)', icon: 'money', v0: E0.M, v2: E2.M, dec: 1, delta: comparison.M?.pct, dUnit: '%' }
             : { key: 'I', title: 'Inversión privada (I)', unit: 'puntos de Y₀', icon: 'fiscal', v0: E0.I, v2: E2.I, dec: 1, delta: comparison.I?.abs, dUnit: ' pts Y₀' }
         ] : [
           { key: 'Y', title: 'Producción (Y)', unit: 'índice (base = 100)', icon: 'confidence', v0: E0.Y, v2: E2.Y, dec: 1, delta: comparison.Y?.pct, dUnit: '%' },
@@ -408,7 +408,7 @@
           { key: 'C', title: 'Consumo privado (C)', unit: 'puntos de Y₀', icon: 'tax', v0: E0.C, v2: E2.C, dec: 1, delta: comparison.C?.abs, dUnit: ' pts Y₀' },
           { key: 'I', title: 'Inversión privada (I)', unit: 'puntos de Y₀', icon: 'fiscal', v0: E0.I, v2: E2.I, dec: 1, delta: comparison.I?.abs, dUnit: ' pts Y₀' },
           { key: 'G', title: 'Gasto público (G)', unit: 'puntos de Y₀', icon: 'fiscal', v0: E0.G, v2: E2.G, dec: 1, delta: E2.G - E0.G, dUnit: ' pts Y₀' },
-          { key: 'M', title: 'Saldos reales (M/P)', unit: 'índice M/P (P = 1)', icon: 'money', v0: E0.M, v2: E2.M, dec: 1, delta: comparison.M?.pct, dUnit: '%' }
+          { key: 'M', title: 'Saldos reales (M/P)', unit: 'unidades reales (P = 1)', icon: 'money', v0: E0.M, v2: E2.M, dec: 1, delta: comparison.M?.pct, dUnit: '%' }
         ];
         cardsHost.innerHTML = cardDefs.map(c => {
           const moved = Number.isFinite(c.delta) && Math.abs(c.delta) > 0.005;
@@ -436,9 +436,17 @@
       if (deltaBadge) {
         const dY = comparison.Y?.pct ?? 0;
         const di = comparison.i?.abs ?? 0;
-        deltaBadge.textContent = Math.abs(dY) < 0.005 && Math.abs(di) < 0.005
-          ? 'E₂ = E₀ · Sin perturbación'
-          : `ΔY: ${fmtSigned(dY, 1)}% · Δi: ${fmtSigned(di, 2)} pp`;
+        const perturbed = Object.entries(islm.model.baseline).some(([key, initial]) =>
+          Number.isFinite(initial) && Number.isFinite(islm.u[key]) && Math.abs(islm.u[key] - initial) > 1e-9);
+        const sameEquilibrium = Object.values(comparison).every(delta => !delta || Math.abs(delta.abs) < 1e-7);
+        const sameYAndI = Math.abs(E2.Y - E0.Y) < 1e-7 && Math.abs(E2.i - E0.i) < 1e-7;
+        deltaBadge.textContent = !perturbed
+          ? 'E₂ = E₀ · Escenario base'
+          : sameEquilibrium
+            ? 'Perturbaciones compensadas · E₂ ≈ E₀'
+            : sameYAndI
+              ? 'Y e i sin cambio · cambia la composición'
+              : `ΔY: ${fmtSigned(dY, 1)}% · Δi: ${fmtSigned(di, 2)} pp`;
       }
     }
     function renderIslmMultipliers() {
