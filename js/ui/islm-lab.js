@@ -54,24 +54,37 @@
   const updateRangeStyles = (...args) => M.updateRangeStyles(...args);
     const SOURCE_LABELS = {observed:'Dato observado',calibrated:'Parámetro calibrado',assumption:'Supuesto teórico',illustrative:'Valor ilustrativo',result:'Resultado del modelo'};
     const ISLM_FOREIGN_RATE = 3; // reference international rate (assumption)
+    const PARAM_PATHS = {
+      fiscal: 'M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6',
+      tax: 'M6 4h12v16l-3-2-3 2-3-2-3 2V4zm3 5h6m-6 4h4',
+      money: 'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
+      rate: 'M4 19h16M6 15l4-5 4 3 4-7',
+      fx: 'M3 7h14m-3-3 3 3-3 3M21 17H7m3-3-3 3 3 3',
+      globe: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2c-3.5 3.8-3.5 16.2 0 20 3.5-3.8 3.5-16.2 0-20',
+      risk: 'M12 3l9 16H3L12 3zm0 6v4m0 3h.01',
+      trade: 'M2 17h20M4 17l2-7h12l2 7M8 10V6h8v4',
+      confidence: 'M4 16l5-5 4 3 7-8',
+      param: 'M4 6h16M4 12h16M4 18h16'
+    };
+    const paramSvg = name => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${PARAM_PATHS[name] || PARAM_PATHS.param}"/></svg>`;
     // Round first so tiny residuals never print as "-0.0"/"+0.0"; use a true minus sign.
     const ISLM_INPUTS = [
-      { key: 'G', group: 'policy', tag: 'Política fiscal', label: 'Gasto público (G)', min: 10, max: 30, step: 0.5, fmt: v => fmtNum(v), help: 'Desplaza la IS. Inicial: 18 (% del producto).' },
-      { key: 'T0', group: 'policy', tag: 'Política fiscal', label: 'Impuestos autónomos (ΔT)', min: -5, max: 5, step: 0.5, fmt: v => fmtSigned(v), help: 'Más impuestos reducen el ingreso disponible y el consumo: IS a la izquierda.' },
-      { key: 'Mpct', group: 'policy', tag: 'Política monetaria', label: 'Oferta monetaria (ΔM/M)', min: -20, max: 20, step: 1, fmt: v => `${fmtSigned(v, 0)}%`, help: 'Desplaza la LM (y la LM* en Mundell–Fleming).' },
-      { key: 'ipol', group: 'policy', tag: 'Política monetaria', label: 'Tasa de interés de política (i)', min: 0, max: 15, step: 0.25, fmt: v => `${fmtNum(v, 2)}%`, help: 'Regla de tasa: el banco central fija i y suministra el dinero que se demande.' },
-      { key: 'ebar', group: 'policy', tag: 'Política cambiaria', label: 'Tipo de cambio fijado (ē)', min: 80, max: 130, step: 1, fmt: v => fmtNum(v, 0), help: 'Subir ē es devaluar (100 = paridad inicial).' },
-      { key: 'istar', group: 'external', tag: 'Externo', label: 'Tasa de interés internacional (i*)', min: 0, max: 10, step: 0.25, fmt: v => `${fmtNum(v, 2)}%`, help: 'La fija el resto del mundo (p. ej., la Reserva Federal). Desplaza la BP.' },
-      { key: 'rho', group: 'external', tag: 'Externo / mercados', label: 'Prima de riesgo país y depreciación esperada (ρ)', min: 0, max: 10, step: 0.25, fmt: v => `${fmtNum(v, 2)} pp`, help: 'Rendimiento extra que exigen los inversionistas; sube con la incertidumbre.' },
-      { key: 'Ystar', group: 'external', tag: 'Externo', label: 'Ingreso mundial (Y*)', min: 85, max: 115, step: 1, fmt: v => fmtNum(v, 0), help: 'Demanda externa por exportaciones (índice, 100 = inicial).' },
-      { key: 'nxShock', group: 'external', tag: 'Externo', label: 'Términos de intercambio (Δ NX autónomas)', min: -6, max: 6, step: 0.5, fmt: v => fmtSigned(v), help: 'Precios de exportación (cobre, oro, petróleo): desplaza IS y BP.' },
-      { key: 'confShock', group: 'external', tag: 'Sector privado', label: 'Confianza privada (Δ C e I autónomos)', min: -6, max: 6, step: 0.5, fmt: v => fmtSigned(v), help: 'Expectativas de hogares y empresas: desplaza la IS.' },
-      { key: 'c', group: 'param', label: 'Propensión marginal a consumir (c)', min: 0.5, max: 0.9, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Mayor c → mayor multiplicador y una IS más plana.' },
-      { key: 't', group: 'param', label: 'Tasa impositiva (t)', min: 0.1, max: 0.4, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Estabilizador automático: reduce el multiplicador.' },
-      { key: 'b', group: 'param', label: 'Sensibilidad de la inversión a i (b)', min: 0.5, max: 4, step: 0.1, fmt: v => fmtNum(v), help: 'Mayor b → IS más plana y más crowding out.' },
-      { key: 'h', group: 'param', label: 'Sensibilidad de la demanda de dinero a i (h)', min: 0.5, max: 4, step: 0.1, fmt: v => fmtNum(v), help: 'Mayor h → LM más plana (hacia la trampa de liquidez).' },
-      { key: 'm', group: 'param', label: 'Propensión marginal a importar (m)', min: 0, max: 0.5, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Aproximación: propensión media × elasticidad-ingreso supuesta = 1; no es una estimación.' },
-      { key: 'n', group: 'param', label: 'Sensibilidad de NX al tipo de cambio (n)', min: 0.05, max: 0.5, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Condición de Marshall–Lerner: una depreciación mejora NX.' }
+      { key: 'G', group: 'policy', primary: true, policyTab: 'fiscal', icon: 'fiscal', tag: 'Política fiscal', label: 'Gasto público (G)', unit: '% de Y₀ (base = 18)', minLbl: '10', maxLbl: '30', min: 10, max: 30, step: 0.5, fmt: v => fmtNum(v), help: 'Desplaza la IS. Inicial: 18 (% del producto).' },
+      { key: 'T0', group: 'policy', primary: true, policyTab: 'fiscal', icon: 'tax', tag: 'Política fiscal', label: 'Impuestos autónomos (ΔT)', unit: 'puntos de Y₀ (base = 0)', minLbl: '−5', maxLbl: '+5', min: -5, max: 5, step: 0.5, fmt: v => fmtSigned(v), help: 'Más impuestos reducen el ingreso disponible y el consumo: IS a la izquierda.' },
+      { key: 'Mpct', group: 'policy', primary: true, policyTab: 'monetary', icon: 'money', tag: 'Política monetaria', label: 'Oferta monetaria (ΔM/M)', unit: '% sobre M₀', minLbl: '−20%', maxLbl: '+20%', min: -20, max: 20, step: 1, fmt: v => `${fmtSigned(v, 0)}%`, help: 'Desplaza la LM (y la LM* en Mundell–Fleming).' },
+      { key: 'ipol', group: 'policy', primary: false, policyTab: 'monetary', icon: 'rate', tag: 'Política monetaria', label: 'Tasa de interés de política (i)', unit: '% anual (regla de tasa)', minLbl: '0%', maxLbl: '15%', min: 0, max: 15, step: 0.25, fmt: v => `${fmtNum(v, 2)}%`, help: 'Regla de tasa: el banco central fija i y suministra el dinero que se demande.' },
+      { key: 'ebar', group: 'policy', primary: false, policyTab: 'monetary', icon: 'fx', tag: 'Política cambiaria', label: 'Tipo de cambio fijado (ē)', unit: 'índice (100 = paridad)', minLbl: '80', maxLbl: '130', min: 80, max: 130, step: 1, fmt: v => fmtNum(v, 0), help: 'Subir ē es devaluar (100 = paridad inicial).' },
+      { key: 'istar', group: 'external', primary: true, policyTab: 'external', icon: 'globe', tag: 'Externo', label: 'Tasa de interés internacional (i*)', unit: '% anual externa', minLbl: '0%', maxLbl: '10%', min: 0, max: 10, step: 0.25, fmt: v => `${fmtNum(v, 2)}%`, help: 'La fija el resto del mundo (p. ej., la Reserva Federal). Desplaza la BP.' },
+      { key: 'rho', group: 'external', primary: true, policyTab: 'mobility', icon: 'risk', tag: 'Externo / mercados', label: 'Prima de riesgo y exp. (ρ)', unit: 'pp sobre i*', minLbl: '0 pp', maxLbl: '10 pp', min: 0, max: 10, step: 0.25, fmt: v => `${fmtNum(v, 2)} pp`, help: 'Rendimiento extra que exigen los inversionistas; sube con la incertidumbre.' },
+      { key: 'Ystar', group: 'external', primary: false, policyTab: 'external', icon: 'globe', tag: 'Externo', label: 'Ingreso mundial (Y*)', unit: 'índice (100 = base)', minLbl: '85', maxLbl: '115', min: 85, max: 115, step: 1, fmt: v => fmtNum(v, 0), help: 'Demanda externa por exportaciones (índice, 100 = inicial).' },
+      { key: 'nxShock', group: 'external', primary: true, policyTab: 'external', icon: 'trade', tag: 'Externo', label: 'Términos de intercambio (ΔNX)', unit: 'puntos de Y₀ (export.)', minLbl: '−6', maxLbl: '+6', min: -6, max: 6, step: 0.5, fmt: v => fmtSigned(v), help: 'Precios de exportación (cobre, oro, petróleo): desplaza IS y BP.' },
+      { key: 'confShock', group: 'external', primary: true, policyTab: 'fiscal', icon: 'confidence', tag: 'Sector privado', label: 'Confianza privada (ΔC, ΔI)', unit: 'puntos de Y₀ (demanda)', minLbl: '−6', maxLbl: '+6', min: -6, max: 6, step: 0.5, fmt: v => fmtSigned(v), help: 'Expectativas de hogares y empresas: desplaza la IS.' },
+      { key: 'c', group: 'param', icon: 'param', label: 'Propensión marginal a consumir (c)', unit: 'fracción del ingreso disp.', minLbl: '0.50', maxLbl: '0.90', min: 0.5, max: 0.9, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Mayor c → mayor multiplicador y una IS más plana.' },
+      { key: 't', group: 'param', icon: 'param', label: 'Tasa impositiva (t)', unit: 'alícuota sobre Y', minLbl: '0.10', maxLbl: '0.40', min: 0.1, max: 0.4, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Estabilizador automático: reduce el multiplicador.' },
+      { key: 'b', group: 'param', icon: 'param', label: 'Sensibilidad de la inversión a i (b)', unit: 'ΔI por −1 pp de i', minLbl: '0.5', maxLbl: '4.0', min: 0.5, max: 4, step: 0.1, fmt: v => fmtNum(v), help: 'Mayor b → IS más plana y más crowding out.' },
+      { key: 'h', group: 'param', icon: 'param', label: 'Sensibilidad monetaria a i (h)', unit: 'Δ(M/P) por −1 pp de i', minLbl: '0.5', maxLbl: '4.0', min: 0.5, max: 4, step: 0.1, fmt: v => fmtNum(v), help: 'Mayor h → LM más plana (hacia la trampa de liquidez).' },
+      { key: 'm', group: 'param', icon: 'param', label: 'Propensión marginal a importar (m)', unit: 'ΔIMP / ΔY', minLbl: '0.00', maxLbl: '0.50', min: 0, max: 0.5, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Aproximación: propensión media × elasticidad-ingreso supuesta = 1; no es una estimación.' },
+      { key: 'n', group: 'param', icon: 'param', label: 'Sensibilidad de NX al tipo de cambio (n)', unit: 'ΔNX por +1 de e', minLbl: '0.05', maxLbl: '0.50', min: 0.05, max: 0.5, step: 0.01, fmt: v => fmtNum(v, 2), help: 'Condición de Marshall–Lerner: una depreciación mejora NX.' }
     ];
     const ISLM_PRESETS = [
       { id: 'fiscal', label: 'Expansión fiscal', patch: u0 => ({ G: u0.G + 3 }) },
@@ -251,25 +264,25 @@
       islmBuildModel();
     }
     function renderIslmInputs() {
-      const groups = { policy: 'islmPolicyInputs', external: 'islmExternalInputs', param: 'islmParamInputs' };
-      Object.entries(groups).forEach(([group, id]) => {
+      const buckets = {
+        islmPolicyInputs: ISLM_INPUTS.filter(d => d.primary),
+        islmExternalInputs: ISLM_INPUTS.filter(d => d.group !== 'param' && !d.primary),
+        islmParamInputs: ISLM_INPUTS.filter(d => d.group === 'param')
+      };
+      const extDetails = document.getElementById('islmExternalInputs')?.closest('details');
+      if (extDetails) {
+        const sum = extDetails.querySelector('summary');
+        if (sum) sum.textContent = 'Instrumentos de régimen y demanda mundial (i, ē, Y*)';
+      }
+      Object.entries(buckets).forEach(([id, defs]) => {
         const node = document.getElementById(id);
         if (!node || node.childElementCount) return;
-        node.innerHTML = ISLM_INPUTS.filter(d => d.group === group).map(d => {
-          const inputId = group === 'param' ? `islm-p-${d.key}` : `islm-${d.key}`;
-          const tag = d.tag ? `<span class="islm-tag ${group === 'policy' ? 'control' : 'external'}">${d.tag}</span>` : '';
-          return `<div class="sim-field islm-field" data-key="${d.key}"><div class="sim-label"><label for="${inputId}">${d.label}</label><output class="sim-value" id="${inputId}-val" for="${inputId}"></output></div><input class="sim-range" id="${inputId}" type="range" min="${d.min}" max="${d.max}" step="${d.step}"><div class="sim-hint">${tag} <span class="islm-hint-text">${d.help} · <span class="islm-source-kind">${SOURCE_LABELS[ISLM.PARAM_SOURCES[d.key]] || (d.group==='param'?'Valor ilustrativo':'Supuesto teórico')}</span></span></div></div>`;
+        node.innerHTML = defs.map(d => {
+          const isParam = d.group === 'param';
+          const inputId = isParam ? `islm-p-${d.key}` : `islm-${d.key}`;
+          const tag = d.tag ? `<span class="islm-tag ${d.group === 'policy' ? 'control' : 'external'}">${d.tag}</span>` : '';
+          return `<div class="sim-field islm-field islm-control" data-key="${d.key}" data-policy-group="${d.policyTab || 'param'}"><div class="sim-label"><span class="param-icon-badge" aria-hidden="true">${paramSvg(d.icon)}</span><div class="param-title-stack"><label for="${inputId}">${d.label}</label><span class="param-unit-sub">${d.unit || ''}</span></div><output class="sim-value" id="${inputId}-val" for="${inputId}"></output></div><input class="sim-range" id="${inputId}" type="range" min="${d.min}" max="${d.max}" step="${d.step}"><div class="param-range-ends" aria-hidden="true"><span>${d.minLbl ?? d.min}</span><span>${d.maxLbl ?? d.max}</span></div><div class="sim-hint">${tag} <span class="islm-hint-text">${d.help} · <span class="islm-source-kind">${SOURCE_LABELS[ISLM.PARAM_SOURCES[d.key]] || (isParam?'Valor ilustrativo':'Supuesto teórico')}</span></span></div></div>`;
         }).join('');
-        if (group === 'policy') {
-          [['Política fiscal', ['G', 'T0']], ['Política monetaria', ['Mpct', 'ipol']], ['Política cambiaria', ['ebar']]].forEach(([label, keys]) => {
-            const details = document.createElement('details');
-            details.className = 'islm-details'; details.open = label === 'Política fiscal';
-            const summary = document.createElement('summary'); summary.textContent = label;
-            details.append(summary);
-            keys.forEach(key => details.append(node.querySelector(`[data-key="${key}"]`)));
-            node.append(details);
-          });
-        }
         node.querySelectorAll('input').forEach(input => input.addEventListener('input', () => {
           const key = input.closest('.islm-field').dataset.key;
           const def = ISLM_INPUTS.find(d => d.key === key);
@@ -305,6 +318,10 @@
       [...instrument.options].forEach(opt => { opt.disabled = islm.regime !== 'closed' && !allowed.includes(opt.value); });
       instrument.disabled = islm.regime === 'fixed';
       instrument.value = islm.instrument;
+      const extDetails = document.getElementById('islmExternalInputs')?.closest('details');
+      if (extDetails && (islm.instrument === 'rate' || islm.regime === 'fixed')) {
+        extDetails.open = true;
+      }
       ISLM_INPUTS.forEach(d => {
         const isParam = d.group === 'param';
         const input = document.getElementById(isParam ? `islm-p-${d.key}` : `islm-${d.key}`);
@@ -359,7 +376,7 @@
         ['Y', 'Producto (Y)', r => r.Y, 1],
         ['i', 'Tasa de interés (i, %)', r => r.i, 2],
         ...(open ? [['e', 'Tipo de cambio (e)', r => r.e, 1]] : []),
-        ['M', islm.regime === 'fixed' ? 'Oferta monetaria (M/P) · reservas' : 'Oferta monetaria (M/P)', r => r.M, 1],
+        ['M', 'Saldos reales (M/P)', r => r.M, 1],
         ['C', 'Consumo (C)', r => r.C, 1],
         ['I', 'Inversión (I)', r => r.I, 1],
         ['G', 'Gasto público (G)', r => r.G, 1],
@@ -373,6 +390,64 @@
         const cls = key === 'Y' && delta !== null && Math.abs(delta) > 0.005 ? (delta > 0 ? 'positive' : 'negative') : '';
         return `<tr data-var="${key}"><td class="variable">${label}<small style="display:block">Resultado del modelo</small></td><td data-label="E₀ · inicial" class="v0">${f(v0)}</td><td data-label="E₁ · impacto" class="v1">${f(v1)}</td><td data-label="E₂ · final" class="v2">${f(v2)}</td><td data-label="Δ E₂ − E₀" class="dv ${cls}">${delta === null ? '—' : fmtSigned(delta, d)+unit}</td></tr>`;
       }).join('');
+
+      const cardsHost = document.getElementById('islmScenarioCards');
+      if (cardsHost) {
+        const cardDefs = open ? [
+          { key: 'Y', title: 'Producción (Y)', unit: 'índice (base = 100)', icon: 'confidence', v0: E0.Y, v2: E2.Y, dec: 1, delta: comparison.Y?.pct, dUnit: '%' },
+          { key: 'i', title: 'Tasa de interés (i)', unit: '% anual', icon: 'rate', v0: E0.i, v2: E2.i, dec: 2, delta: comparison.i?.abs, dUnit: ' pp' },
+          { key: 'e', title: 'Tipo de cambio (e)', unit: 'índice (↑ = deprec.)', icon: 'fx', v0: E0.e, v2: E2.e, dec: 1, delta: comparison.e?.pct, dUnit: '%' },
+          { key: 'NX', title: 'Balanza comercial (NX)', unit: 'puntos de Y₀', icon: 'trade', v0: E0.NX, v2: E2.NX, dec: 1, delta: comparison.NX?.abs, dUnit: ' pts Y₀' },
+          { key: 'CA', title: 'Cuenta corriente (CA)', unit: 'puntos de Y₀ (NX + NFI)', icon: 'globe', v0: E0.CA, v2: E2.CA, dec: 1, delta: E2.CA - E0.CA, dUnit: ' pts Y₀' },
+          islm.regime === 'fixed' || Math.abs(E2.M - E0.M) > 0.01
+            ? { key: 'M', title: 'Saldos reales (M/P)', unit: 'unidades reales (P = 1)', icon: 'money', v0: E0.M, v2: E2.M, dec: 1, delta: comparison.M?.pct, dUnit: '%' }
+            : { key: 'I', title: 'Inversión privada (I)', unit: 'puntos de Y₀', icon: 'fiscal', v0: E0.I, v2: E2.I, dec: 1, delta: comparison.I?.abs, dUnit: ' pts Y₀' }
+        ] : [
+          { key: 'Y', title: 'Producción (Y)', unit: 'índice (base = 100)', icon: 'confidence', v0: E0.Y, v2: E2.Y, dec: 1, delta: comparison.Y?.pct, dUnit: '%' },
+          { key: 'i', title: 'Tasa de interés (i)', unit: '% anual', icon: 'rate', v0: E0.i, v2: E2.i, dec: 2, delta: comparison.i?.abs, dUnit: ' pp' },
+          { key: 'C', title: 'Consumo privado (C)', unit: 'puntos de Y₀', icon: 'tax', v0: E0.C, v2: E2.C, dec: 1, delta: comparison.C?.abs, dUnit: ' pts Y₀' },
+          { key: 'I', title: 'Inversión privada (I)', unit: 'puntos de Y₀', icon: 'fiscal', v0: E0.I, v2: E2.I, dec: 1, delta: comparison.I?.abs, dUnit: ' pts Y₀' },
+          { key: 'G', title: 'Gasto público (G)', unit: 'puntos de Y₀', icon: 'fiscal', v0: E0.G, v2: E2.G, dec: 1, delta: E2.G - E0.G, dUnit: ' pts Y₀' },
+          { key: 'M', title: 'Saldos reales (M/P)', unit: 'unidades reales (P = 1)', icon: 'money', v0: E0.M, v2: E2.M, dec: 1, delta: comparison.M?.pct, dUnit: '%' }
+        ];
+        cardsHost.innerHTML = cardDefs.map(c => {
+          const moved = Number.isFinite(c.delta) && Math.abs(c.delta) > 0.005;
+          const tone = !moved ? 'neutral' : c.delta > 0 ? 'up' : 'down';
+          const arrow = !moved ? '•' : c.delta > 0 ? '▲' : '▼';
+          const deltaTxt = !moved ? 'Sin cambio' : `${arrow} ${fmtSigned(c.delta, c.dec)}${c.dUnit}`;
+          return `<article class="lab-res-card" data-res-var="${c.key}">
+            <div class="lab-res-head">
+              <span class="lab-res-icon" aria-hidden="true">${paramSvg(c.icon)}</span>
+              <span class="lab-res-title">${escapeHTML(c.title)}</span>
+            </div>
+            <div class="lab-res-values">
+              <span class="val-base">${fmtNum(c.v0, c.dec)}</span>
+              <span class="val-arrow" aria-hidden="true">→</span>
+              <strong class="val-sim ${tone}">${fmtNum(c.v2, c.dec)}</strong>
+            </div>
+            <div class="lab-res-foot">
+              <span class="lab-res-unit">${escapeHTML(c.unit)}</span>
+              <span class="lab-res-delta ${tone}">${escapeHTML(deltaTxt)}</span>
+            </div>
+          </article>`;
+        }).join('');
+      }
+      const deltaBadge = document.getElementById('islmScenarioDeltaBadge');
+      if (deltaBadge) {
+        const dY = comparison.Y?.pct ?? 0;
+        const di = comparison.i?.abs ?? 0;
+        const perturbed = Object.entries(islm.model.baseline).some(([key, initial]) =>
+          Number.isFinite(initial) && Number.isFinite(islm.u[key]) && Math.abs(islm.u[key] - initial) > 1e-9);
+        const sameEquilibrium = Object.values(comparison).every(delta => !delta || Math.abs(delta.abs) < 1e-7);
+        const sameYAndI = Math.abs(E2.Y - E0.Y) < 1e-7 && Math.abs(E2.i - E0.i) < 1e-7;
+        deltaBadge.textContent = !perturbed
+          ? 'E₂ = E₀ · Escenario base'
+          : sameEquilibrium
+            ? 'Perturbaciones compensadas · E₂ ≈ E₀'
+            : sameYAndI
+              ? 'Y e i sin cambio · cambia la composición'
+              : `ΔY: ${fmtSigned(dY, 1)}% · Δi: ${fmtSigned(di, 2)} pp`;
+      }
     }
     function renderIslmMultipliers() {
       const mult = islm.model.multipliers();
@@ -483,48 +558,80 @@
       const iRange = axisRange([...pts.map(p => p.i), u.ipol, u.istar + u.rho], m.i0, 4);
       const eRange = axisRange([...pts.map(p => p.e), u.ebar], 100, 20);
       const mRange = axisRange(pts.map(p => p.M), m.M0, Math.max(8, m.M0 * 0.4));
-      const points = (fx, fy) => [
-        { x: fx(E0), y: fy(E0), label: 'E₀', color: '--subtle' },
-        { x: fx(E1), y: fy(E1), label: 'E₁', hollow: true, color: '--muted' },
-        { x: fx(E2), y: fy(E2), label: 'E₂', guides: true }
-      ];
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      const e0Color = isDark ? '#58a4ff' : '#1b64e8';
+      const e2Color = isDark ? '#ff6e7e' : '#dc3f52';
+      const points = (fx, fy) => {
+        const moved = Math.hypot(fx(E2) - fx(E0), fy(E2) - fy(E0)) > 1e-4;
+        return [
+          { x: fx(E0), y: fy(E0), label: 'E₀', color: '--blue', stroke: e0Color, coords: !moved },
+          { x: fx(E1), y: fy(E1), label: 'E₁', hollow: true, color: '--muted', coords: false },
+          { x: fx(E2), y: fy(E2), label: 'E₂', guides: true, color: '--ink-deep', stroke: moved ? e2Color : e0Color, coords: true }
+        ];
+      };
       const lmLabel = islm.instrument === 'rate' && islm.regime !== 'fixed' ? 'LM (i fija)' : 'LM';
       drawDiagram(document.getElementById('islmPanelISLM'), {
-        x: { range: yRange, label: 'Y (índice)' }, y: { range: iRange, label: 'i (%)' },
+        x: { range: yRange, label: 'Producción (Y, base = 100)', sym: 'Y', decimals: 1 },
+        y: { range: iRange, label: 'Tasa i (%)', sym: 'i', decimals: 1 },
         lines: [
           ...islmLinePair(c.IS(u0, 100), c.IS(u, E2.e), '--blue', 'IS'),
           ...islmLinePair(c.LM(u0, m.M0), c.LM(u, E2.M), '--teal', lmLabel),
           ...(open ? islmLinePair(c.BP(u0, 100), c.BP(u, E2.e), '--amber', 'BP') : [])
         ],
-        points: points(p => p.Y, p => p.i)
+        points: points(p => p.Y, p => p.i),
+        legend: [
+          { label: 'IS inicial', color: '--blue', dashed: true },
+          { label: 'IS simulada', color: '--blue' },
+          { label: lmLabel, color: '--teal' },
+          ...(open ? [{ label: 'BP', color: '--amber' }] : [])
+        ]
       });
       const mfLabel = m.kappa === Infinity ? 'LM*' : m.kappa === 0 ? 'BP*' : 'LM–BP';
       drawDiagram(document.getElementById('islmPanelMF'), open ? {
-        x: { range: yRange, label: 'Y (índice)' }, y: { range: eRange, label: 'e índice ↑ = depreciación' },
+        x: { range: yRange, label: 'Producción (Y, base = 100)', sym: 'Y', decimals: 1 },
+        y: { range: eRange, label: 'e (↑ = deprec.)', sym: 'e', decimals: 1 },
         lines: [
           ...islmLinePair(c.ISstar(u0, E0.i), c.ISstar(u, E2.i), '--blue', 'IS*'),
           ...islmLinePair(c.LMstar(u0, m.M0), c.LMstar(u, E2.M), '--teal', mfLabel),
           ...(islm.regime === 'fixed' ? islmLinePair({ a: 0, b: 1, c: 100 }, { a: 0, b: 1, c: u.ebar }, '--amber', 'ē') : [])
         ],
-        points: points(p => p.Y, p => p.e)
+        points: points(p => p.Y, p => p.e),
+        legend: [
+          { label: 'IS* inicial', color: '--blue', dashed: true },
+          { label: 'IS* simulada', color: '--blue' },
+          { label: mfLabel, color: '--teal' },
+          ...(islm.regime === 'fixed' ? [{ label: 'Paridad ē', color: '--amber' }] : [])
+        ]
       } : { message: 'En una economía cerrada no hay tipo de cambio. Elige un régimen abierto para ver el diagrama de Mundell–Fleming.' });
       const rateRule = islm.instrument === 'rate' && islm.regime !== 'fixed';
       drawDiagram(document.getElementById('islmPanelMoney'), {
-        x: { range: mRange, label: 'M/P' }, y: { range: iRange, label: 'i (%)' },
+        x: { range: mRange, label: 'Saldos reales (M/P)', sym: 'M/P', decimals: 1 },
+        y: { range: iRange, label: 'Tasa i (%)', sym: 'i', decimals: 1 },
         lines: [
           ...islmLinePair(c.moneyDemand(E0.Y), c.moneyDemand(E2.Y), '--blue', 'L(Y)'),
           ...islmLinePair({ a: 1, b: 0, c: E0.M }, { a: 1, b: 0, c: E2.M }, '--teal', 'Mˢ'),
           ...(rateRule ? islmLinePair({ a: 0, b: 1, c: u0.ipol }, { a: 0, b: 1, c: u.ipol }, '--amber', 'i política') : [])
         ],
-        points: points(p => p.M, p => p.i)
+        points: points(p => p.M, p => p.i),
+        legend: [
+          { label: 'L(Y₀)', color: '--blue', dashed: true },
+          { label: 'L(Y₂)', color: '--blue' },
+          { label: 'Oferta M/P', color: '--teal' }
+        ]
       });
       drawDiagram(document.getElementById('islmPanelCross'), {
-        x: { range: yRange, label: 'Y (índice)' }, y: { range: yRange, label: 'DA (puntos de Y₀)' },
+        x: { range: yRange, label: 'Producción (Y, base = 100)', sym: 'Y', decimals: 1 },
+        y: { range: yRange, label: 'Demanda agregada DA', sym: 'DA', decimals: 1 },
         lines: [
           { line: { a: -1, b: 1, c: 0 }, color: '--subtle', label: '45°' },
           ...islmLinePair(c.aggregateDemand(u0, E0.i, E0.e), c.aggregateDemand(u, E2.i, E2.e), '--violet', 'DA')
         ],
-        points: points(p => p.Y, p => p.Y)
+        points: points(p => p.Y, p => p.Y),
+        legend: [
+          { label: 'Y = DA (45°)', color: '--subtle' },
+          { label: 'DA inicial', color: '--violet', dashed: true },
+          { label: 'DA simulada', color: '--violet' }
+        ]
       });
       const summary = `inicial Y = 100, i = ${fmtNum(E0.i, 2)}%; final Y = ${fmtNum(E2.Y)}, i = ${fmtNum(E2.i, 2)}%${open ? `, e = ${fmtNum(E2.e)}` : ''}`;
       document.getElementById('islmPanelISLM').setAttribute('aria-label', `Diagrama IS-LM-BP: ${summary}`);
@@ -537,14 +644,24 @@
       if (!islm.model || islm.country !== state.country || islm.calKey !== islmCalibrationKey()) islmSyncCountry();
       renderIslmInputs();
       syncIslmControls();
-      const m = islm.model, u = islm.u;
+      const m = islm.model, u = islm.u, u0 = m.baseline;
       const E0 = m.solve(m.baseline), E1 = m.solve(u, 'impact'), E2 = m.solve(u);
       document.getElementById('islmTrilemma').textContent = islmRegimeText();
       const { imp, nx, cab, target, i0 } = islmCalibrationData();
       const observed = (label,code,data) => `${label}: ${formatValue(data.value,code)} — ${Number.isFinite(data.value)?'Dato observado':'N/D'} (WDI, ${code}, observación ${data.year}; ${cellSource(state.country,code,data.year)==='wdi'?'extracción '+(wdiFetchedAt[code]||'N/D'):'Respaldo local — no actualizado; extracción '+(FALLBACK_EXTRACTED_AT[code]||'no registrada')})`;
       document.getElementById('islmCalibration').textContent = `${COUNTRIES[state.country].name}: ${observed('Importaciones','NE.IMP.GNFS.ZS',imp)}. ${observed('NX bienes y servicios','NE.RSB.GNFS.ZS',nx)}. ${observed('Cuenta corriente','BN.CAB.XOKA.GD.ZS',cab)}. NX: ${m.provenance.nx==='observed'?'Dato observado':'aproximación con CA, no NX observado'}. m = ${fmtNum(islm.params.m,2)} — ${islm.mTouched||!Number.isFinite(imp.value)?'Valor ilustrativo':'Parámetro calibrado; aproximación: propensión media × elasticidad-ingreso supuesta = 1'}. i₀ = ${fmtNum(i0,2)}% = meta ${target?.bank||'genérica'} + tasa real neutral — supuesto ilustrativo. i* = ${Math.min(ISLM_FOREIGN_RATE,i0)}% — Supuesto teórico. NFI = CA − NX — Parámetro calibrado (cortes de cada serie indicados arriba). Y₀ = e₀ = 100 — normalización ilustrativa. G₀ = 18, I₀ = 20, k = 0,5 y f = 0,15 — Valor ilustrativo. C₀, Ī, M₀, ρ₀ y KF₀ — Parámetro calibrado.`;
-      document.getElementById('islmRegimeBadge').textContent = ({ closed: 'CERRADA', flex: 'FLEXIBLE', fixed: 'FIJO' })[islm.regime];
+      const regimeName = ({ closed: 'CERRADA', flex: 'FLEXIBLE', fixed: 'FIJO' })[islm.regime];
+      document.getElementById('islmRegimeBadge').textContent = regimeName;
       document.querySelectorAll('#islmPolicyTable [data-regime]').forEach(el => el.classList.toggle('is-current', el.dataset.regime === islm.regime));
+
+      const changed = ISLM_INPUTS.filter(d => d.group !== 'param' && !islmDisabledReason(d) && Math.abs(u[d.key] - u0[d.key]) > 1e-9);
+      const scenPill = document.getElementById('labActiveScenarioPill');
+      if (scenPill) {
+        scenPill.innerHTML = changed.length
+          ? `<strong>Escenario:</strong> ${changed.map(d => `${escapeHTML(d.key)} ${u[d.key] > u0[d.key] ? '↑' : '↓'}`).join(' · ')}`
+          : '<strong>Escenario:</strong> Equilibrio base (E₀)';
+      }
+
       if (!E0 || !E1 || !E2) {
         document.getElementById('islmNarrative').innerHTML = '<li>El sistema no tiene solución con esta combinación de parámetros. Prueba otros valores.</li>';
         return;
@@ -552,7 +669,50 @@
       renderIslmResults(E0, E1, E2);
       renderIslmMultipliers();
       renderLearning(E0, E2);
-      document.getElementById('islmNarrative').innerHTML = islmNarrative(E0, E1, E2).map(s => `<li>${s}</li>`).join('');
+      const steps = islmNarrative(E0, E1, E2);
+      const formatStep = s => {
+        const idx = s.indexOf(':');
+        return idx > 0 && idx < 42
+          ? `<strong>${escapeHTML(s.slice(0, idx + 1))}</strong> ${escapeHTML(s.slice(idx + 1).trim())}`
+          : escapeHTML(s);
+      };
+      const primarySteps = steps.slice(0, 5);
+      const extraSteps = steps.slice(5);
+      document.getElementById('islmNarrative').innerHTML = primarySteps.map(s => `<li>${formatStep(s)}</li>`).join('') +
+        (extraSteps.length ? `<li class="islm-more-notes"><details><summary>Notas analíticas y supuestos (${extraSteps.length}) <span aria-hidden="true">⌄</span></summary><div class="islm-extra-list">${extraSteps.map(s => `<p>${formatStep(s)}</p>`).join('')}</div></details></li>` : '');
+
+      const highlightEl = document.getElementById('islmReadingHighlight');
+      if (highlightEl) {
+        const dY = E2.Y - E0.Y, di = E2.i - E0.i;
+        const summaryTitle = !changed.length
+          ? `Equilibrio calibrado (${COUNTRIES[state.country].name} · ${regimeName.toLowerCase()})`
+          : `Transmisión en régimen ${regimeName.toLowerCase()} (${ISLM.MOBILITY[islm.mobility].label.toLowerCase()})`;
+        const summaryBody = !changed.length
+          ? `En E₀, Y = 100.0 e i = ${fmtNum(E0.i, 2)}%${m.open ? ` con e = 100.0 y NX = ${fmtNum(E0.NX, 1)}` : ''}. Ajusta un deslizador o aplica un escenario rápido.`
+          : `Y pasa de 100.0 a ${fmtNum(E2.Y, 1)} (${fmtSigned(dY, 1)}%), i pasa de ${fmtNum(E0.i, 2)}% a ${fmtNum(E2.i, 2)}% (${fmtSigned(di, 2)} pp)${m.open ? ` y e cierra en ${fmtNum(E2.e, 1)}` : ''}.`;
+        highlightEl.innerHTML = `<span class="lab-rh-icon" aria-hidden="true">${paramSvg('confidence')}</span><div><strong>${escapeHTML(summaryTitle)}</strong><p>${escapeHTML(summaryBody)}</p></div>`;
+      }
+
+      const keyIdeaEl = document.getElementById('islmKeyIdea');
+      if (keyIdeaEl) {
+        let ideaTitle = 'Idea clave · Corto plazo (P = 1)';
+        let ideaBody = '';
+        if (islm.regime === 'flex' && islm.mobility === 'perfect') {
+          ideaTitle = 'Idea clave · Trilema con flotación y movilidad perfecta';
+          ideaBody = 'Con i anclada en i* + ρ, una expansión fiscal aprecia la moneda (e ↓) y desplaza exportaciones netas hasta anular el efecto sobre Y (ΔY = 0), mientras la política monetaria es plenamente eficaz.';
+        } else if (islm.regime === 'fixed') {
+          ideaTitle = 'Idea clave · Oferta monetaria endógena en tipo fijo';
+          ideaBody = `Para sostener la paridad ē = ${fmtNum(u.ebar, 0)}, el banco central interviene con reservas y M/P se ajusta endógenamente (${fmtNum(E0.M, 1)} → ${fmtNum(E2.M, 1)}).`;
+        } else if (islm.regime === 'closed') {
+          ideaTitle = 'Idea clave · Multiplicador y crowding out doméstico';
+          ideaBody = `En economía cerrada, el aumento de la tasa de interés frena la inversión privada (−b·Δi). Multiplicador fiscal efectivo: ${fmtSigned(m.multipliers().fiscal, 2)}.`;
+        } else {
+          ideaTitle = 'Idea clave · Ajuste compartido con movilidad imperfecta';
+          ideaBody = `El equilibrio externo (BP = 0) reparte el ajuste entre la tasa de interés doméstica (i) y el tipo de cambio (e ↑ = depreciación). Multiplicador fiscal efectivo: ${fmtSigned(m.multipliers().fiscal, 2)}.`;
+        }
+        keyIdeaEl.innerHTML = `<span class="lab-ki-icon" aria-hidden="true">${paramSvg('risk')}</span><div><strong>${escapeHTML(ideaTitle)}</strong><p>${escapeHTML(ideaBody)}</p></div>`;
+      }
+
       renderIslmClasses();
       drawIslmPanels(E0, E1, E2);
     }

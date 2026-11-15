@@ -8,7 +8,7 @@ Los archivos originales `1.png` a `7.png` se conservan intactos en este director
 | `2.png` | `02-panorama.png` | Panorama macroeconómico / Exploración macroeconómica (Módulo 04) | `#exploracion` (alias `#panorama`) |
 | `3.png` | `03-comparador.png` | Comparador de economías (Módulo 05) | `#comparacion` |
 | `4.png` | *(Referencia adicional 07)* | Observatorio del Perú (Sección transversal con énfasis nacional BCRP/INEI) | `#observatorio` |
-| `5.png` | `04-laboratorio.png` | Laboratorio IS–LM–BP / Simulación de escenarios (Módulo 06) | `#simulacion` (alias `#laboratorio`) |
+| `5.png` | `04-laboratorio.png` | Laboratorio IS–LM–BP / Simulación de escenarios (Módulo 06 · ver detalle y correspondencia en [`docs/ux/laboratorio-referencia.md`](../laboratorio-referencia.md)) | `#simulacion` (alias `#laboratorio`) |
 | `6.png` | `05-aprendizaje.png` | Aprendizaje guiado (Módulo 01) | `#aprendizaje` |
 | `7.png` | `06-fuentes.png` | Biblioteca de fuentes (Sección transversal de organismos, bases, APIs y ficha lateral) | `#fuentes` |
 

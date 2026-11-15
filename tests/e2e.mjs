@@ -733,7 +733,7 @@ for (const width of [1440,768,390,360]) {
     await settleLab(page);
     await page.locator('#tab-simulator').screenshot({path:`test-results/fase3/laboratorio-${width}.png`,style:'.topbar,.mobile-nav,.scroll-progress{visibility:hidden!important}.reveal{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}'});
     await page.locator('.islm-panel').first().scrollIntoViewIfNeeded();
-    await page.waitForFunction(() => { const s=getComputedStyle(document.querySelector('.islm-main>.chart-card'));return s.opacity==='1' && ['none','blur(0px)'].includes(s.filter); });
+    await page.waitForFunction(() => { const s=getComputedStyle(document.querySelector('.lab-center>.chart-card'));return s.opacity==='1' && ['none','blur(0px)'].includes(s.filter); });
     await page.screenshot({path:`test-results/fase3/laboratorio-viewport-${width}.png`});
   });
 }
@@ -920,18 +920,26 @@ await check('panorama: un indicador activo para tarjetas, evolución y comparado
   assert.equal(await page.inputValue('#compareIndicator'),'FP.CPI.TOTL.ZG');
 });
 await check('laboratorio: contexto, diagramas, lectura lateral y parámetros accesibles',async page=>{
+  await page.setViewportSize({width:1672,height:941});
   await openOffline(page);
   await page.evaluate(()=>{location.hash='laboratorio';});
   await page.waitForFunction(()=>!document.querySelector('#tab-simulator').hidden);
-  const sections=await page.$$eval('.islm-main > article',list=>list.map(a=>a.getAttribute('aria-label')));
-  assert.deepEqual(sections,['Diagramas del modelo','Mecanismo de transmisión','Resultados del modelo']);
+  const sections=await page.$$eval('.islm-main article[aria-label]',list=>list.map(a=>a.getAttribute('aria-label')));
+  assert.deepEqual(sections,['Diagramas del modelo','Resultados del modelo','Mecanismo de transmisión']);
   assert.equal(await page.locator('.lab-context-bar select').count(),5);
+  assert.equal(await page.locator('.lab-policy-tabs [data-policy-tab]').count(),4);
+  assert.equal(await page.locator('#islmScenarioCards .lab-res-card').count(),6);
   const boxes=await page.evaluate(()=>{
-    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top};};
-    return {controls:box('.islm-controls'),diagrams:box('.islm-main>.chart-card'),reading:box('.lab-reading')};
+    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+    return {controls:box('.islm-controls'),diagrams:box('.lab-center>.chart-card'),reading:box('.lab-reading'),cards:box('#islmScenarioCards')};
   });
   assert.ok(boxes.controls.right<=boxes.diagrams.left);
   assert.ok(boxes.reading.left>=boxes.diagrams.right);
+  assert.ok(boxes.cards.bottom<=941,'las 6 tarjetas E0->E2 caben en el tamaño de la referencia (1672x941)');
+  await page.click('[data-policy-tab="monetary"]');
+  assert.equal(await page.getAttribute('[data-policy-tab="monetary"]','aria-pressed'),'true');
+  assert.ok(await page.locator('.islm-control.is-group-highlighted').count()>=1);
+  assert.match(await page.textContent('#islmKeyIdea'),/Idea clave/);
   const before=await page.evaluate(()=>MacroScope.labs.islm.snapshot().E2);
   await page.locator('#islmResetBtn').scrollIntoViewIfNeeded();
   await page.locator('#islmResetBtn').focus();
@@ -1365,6 +1373,24 @@ await check('navegación unificada: menú móvil, siete experiencias y escenario
   await page.screenshot({path:'test-results/experiencias/simulacion-360-escenario-guardado.png'});
   await page.locator('[data-del-sim]').first().click();
   assert.equal(await page.locator('[data-load-sim]').count(), 0);
+});
+
+await check('laboratorio: neutralidad fiscal conserva los cambios de composición y M/P no mide reservas', async page => {
+  await openModel(page);
+  await page.selectOption('#islmRegime','flex');
+  await page.selectOption('#islmMobility','perfect');
+  assert.match(await page.textContent('#islmScenarioDeltaBadge'),/Escenario base|Sin perturbación/);
+  await clickPreset(page,'fiscal');
+  const {E0,E2} = await page.evaluate(() => MacroScope.labs.islm.snapshot());
+  assert.ok(Math.abs(E2.Y-E0.Y)<1e-7 && Math.abs(E2.i-E0.i)<1e-7);
+  assert.ok(Math.abs(E2.e-E0.e)>0.1 && Math.abs(E2.NX-E0.NX)>0.1);
+  assert.doesNotMatch(await page.textContent('#islmScenarioDeltaBadge'),/E₂ = E₀|Sin perturbación/);
+  assert.match(await page.textContent('#islmScenarioDeltaBadge'),/composición/);
+  await page.selectOption('#islmRegime','fixed');
+  assert.equal(await page.textContent('[data-res-var="M"] .lab-res-title'),'Saldos reales (M/P)');
+  assert.doesNotMatch(await page.textContent('[data-res-var="M"]'),/reservas/);
+  await page.click('#islmResetBtn');
+  assert.match(await page.textContent('#islmScenarioDeltaBadge'),/Escenario base|Sin perturbación/);
 });
 
 await check('navegación móvil: fuentes alternativas no desbordan enlaces ni selectores', async page => {
