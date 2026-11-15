@@ -31,7 +31,8 @@
     model: 'm12 3 9 17H3L12 3zm0 0v17M3 20l15-10M6 10l15 10',
     globe: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM3 12h18M12 3c-5 5-5 13 0 18 5-5 5-13 0-18',
     database: 'M4 5c0-4 16-4 16 0s-16 4-16 0zm0 0v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0',
-    info: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM12 11v6m0-10v1'
+    info: 'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM12 11v6m0-10v1',
+    expand: 'M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'
   };
   const icon = key => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[key] || paths.grid}"/></svg>`;
   const esc = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -129,7 +130,11 @@
     // Place the 2x2 diagram grid at the top of the center column so it aligns with Parameters and Reading.
     diagramsCard.prepend(grid);
     const panelIcons = ['chart', 'globe', 'database', 'model'];
-    grid.querySelectorAll('.islm-panel figcaption').forEach((cap, idx) => {
+    grid.querySelectorAll('.islm-panel').forEach((panel, idx) => {
+      const cap = panel.querySelector('figcaption');
+      const canvas = panel.querySelector('canvas');
+      if (canvas) panel.dataset.panelCanvas = canvas.id;
+      panel.title = 'Clic para ampliar los gráficos';
       const strong = cap.querySelector('strong');
       const span = cap.querySelector('span');
       const copy = document.createElement('div');
@@ -140,7 +145,12 @@
       badge.className = 'lab-panel-icon';
       badge.setAttribute('aria-hidden', 'true');
       badge.innerHTML = icon(panelIcons[idx] || 'chart');
+      const zoomHint = document.createElement('span');
+      zoomHint.className = 'lab-panel-zoom-hint';
+      zoomHint.setAttribute('aria-hidden', 'true');
+      zoomHint.innerHTML = icon('expand');
       cap.prepend(badge, copy);
+      cap.append(zoomHint);
     });
 
     const reading = main.querySelector('[aria-label="Mecanismo de transmisión"]');
@@ -168,6 +178,10 @@
     keyIdea.className = 'lab-key-idea';
     keyIdea.id = 'islmKeyIdea';
     narrative.after(keyIdea);
+    const readingContext = document.createElement('div');
+    readingContext.className = 'lab-reading-context';
+    readingContext.id = 'islmReadingContext';
+    keyIdea.after(readingContext);
 
     const resultsCard = main.querySelector('[aria-label="Resultados del modelo"]');
     resultsCard.classList.add('lab-results-section');
@@ -207,17 +221,34 @@
     lab.querySelectorAll('.islm-controls .islm-select, .islm-controls .islm-selects').forEach(el => el.remove());
     const controls = lab.querySelector('.islm-controls');
     const presets = document.createElement('details'); presets.className = 'lab-assumptions';
+    presets.id = 'islmPresetsDetails';
     presets.innerHTML = '<summary>Escenarios rápidos</summary>';
     presets.append(document.getElementById('islmPresets')); controls.append(presets);
     const assumptions = document.createElement('details'); assumptions.className = 'lab-assumptions';
+    assumptions.id = 'islmAssumptionsDetails';
     assumptions.innerHTML = '<summary>Régimen y supuestos del modelo</summary>';
-    assumptions.append(document.getElementById('islmTrilemma')); controls.append(assumptions);
+    const assumptionsExtra = document.createElement('div');
+    assumptionsExtra.className = 'islm-note lab-assumptions-extra';
+    assumptionsExtra.id = 'islmAssumptionsExtra';
+    assumptions.append(document.getElementById('islmTrilemma'), assumptionsExtra);
+    controls.append(assumptions);
     controls.querySelector('.sim-section-heading')?.remove();
     controls.querySelector('p.data-note')?.remove();
     const layers = document.getElementById('islmLayers');
+    const diagramsBar = document.createElement('div');
+    diagramsBar.className = 'lab-diagrams-bar';
     const options = document.createElement('details'); options.className = 'lab-diagram-options';
     options.innerHTML = '<summary><span>Capas, glosario y comparación A/B</span> <span aria-hidden="true">⌄</span></summary>';
-    layers.before(options);
+    const expandBtn = document.createElement('button');
+    expandBtn.type = 'button';
+    expandBtn.className = 'control-action lab-expand-btn';
+    expandBtn.id = 'islmExpandChartsBtn';
+    expandBtn.setAttribute('aria-haspopup', 'dialog');
+    expandBtn.setAttribute('aria-controls', 'islmZoomDialog');
+    expandBtn.setAttribute('aria-expanded', 'false');
+    expandBtn.innerHTML = `${icon('expand')}<span>Ampliar gráficos</span>`;
+    diagramsBar.append(options, expandBtn);
+    layers.before(diagramsBar);
     const chartCardTop = diagramsCard.querySelector(':scope > .card-top');
     const shiftsEl = document.getElementById('islmShifts');
     const abStatusEl = document.getElementById('islmABStatus');
@@ -227,6 +258,143 @@
     if (shiftsEl) options.append(shiftsEl);
     if (abStatusEl) options.append(abStatusEl);
     if (chartCardTop) options.append(chartCardTop);
+
+    // Expanded 4-chart dialog synchronized with the live laboratory model
+    const zoomDialog = document.createElement('dialog');
+    zoomDialog.id = 'islmZoomDialog';
+    zoomDialog.className = 'lab-zoom-dialog';
+    zoomDialog.setAttribute('aria-labelledby', 'islmZoomTitle');
+    zoomDialog.hidden = true;
+    zoomDialog.innerHTML = `
+      <div class="lab-zoom-head">
+        <div class="lab-zoom-title-block">
+          <span class="lab-hero-eyebrow">VISTA AMPLIADA · SINCRONIZACIÓN EN VIVO (P = 1)</span>
+          <h2 id="islmZoomTitle">Diagramas del equilibrio IS–LM–BP y Mundell–Fleming</h2>
+        </div>
+        <div class="lab-zoom-actions">
+          <div class="lab-zoom-modes" role="group" aria-label="Selector de diagrama ampliado">
+            <button type="button" class="lab-zoom-mode" data-zoom-mode="all" aria-pressed="true">Vista 2×2 (4 gráficos)</button>
+            <button type="button" class="lab-zoom-mode" data-zoom-mode="islmPanelISLM" aria-pressed="false">1 · IS–LM–BP</button>
+            <button type="button" class="lab-zoom-mode" data-zoom-mode="islmPanelMF" aria-pressed="false">2 · Mundell–Fleming</button>
+            <button type="button" class="lab-zoom-mode" data-zoom-mode="islmPanelMoney" aria-pressed="false">3 · Mercado de dinero</button>
+            <button type="button" class="lab-zoom-mode" data-zoom-mode="islmPanelCross" aria-pressed="false">4 · Mercado de bienes</button>
+          </div>
+          <button type="button" class="control-action lab-zoom-close" id="islmCloseZoom" aria-label="Cerrar vista ampliada">Cerrar <span aria-hidden="true">×</span></button>
+        </div>
+      </div>
+      <div class="lab-zoom-meta" id="islmZoomMeta" aria-live="polite"></div>
+      <div class="lab-zoom-grid" id="islmZoomGrid" data-zoom-active="all">
+        <figure class="lab-zoom-panel" data-zoom-card="islmPanelISLM">
+          <figcaption><span class="lab-panel-icon" aria-hidden="true">${icon('chart')}</span><div class="lab-panel-heading"><strong>1 · IS–LM–BP</strong><span>Tasa de interés (i) vs. producto (Y)</span></div></figcaption>
+          <canvas id="islmZoomISLM" data-animating="false" role="img" aria-label="Diagrama IS-LM-BP ampliado"></canvas>
+        </figure>
+        <figure class="lab-zoom-panel" data-zoom-card="islmPanelMF">
+          <figcaption><span class="lab-panel-icon" aria-hidden="true">${icon('globe')}</span><div class="lab-panel-heading"><strong>2 · Mundell–Fleming</strong><span>Tipo de cambio (e) vs. producto (Y)</span></div></figcaption>
+          <canvas id="islmZoomMF" data-animating="false" role="img" aria-label="Diagrama Mundell-Fleming ampliado"></canvas>
+        </figure>
+        <figure class="lab-zoom-panel" data-zoom-card="islmPanelMoney">
+          <figcaption><span class="lab-panel-icon" aria-hidden="true">${icon('database')}</span><div class="lab-panel-heading"><strong>3 · Mercado de dinero</strong><span>Tasa de interés (i) vs. saldos reales (M/P)</span></div></figcaption>
+          <canvas id="islmZoomMoney" data-animating="false" role="img" aria-label="Mercado de dinero ampliado"></canvas>
+        </figure>
+        <figure class="lab-zoom-panel" data-zoom-card="islmPanelCross">
+          <figcaption><span class="lab-panel-icon" aria-hidden="true">${icon('model')}</span><div class="lab-panel-heading"><strong>4 · Mercado de bienes</strong><span>Demanda agregada (DA) vs. producto (Y)</span></div></figcaption>
+          <canvas id="islmZoomCross" data-animating="false" role="img" aria-label="Cruz keynesiana ampliada"></canvas>
+        </figure>
+      </div>`;
+    lab.append(zoomDialog);
+
+    let lastZoomTrigger = expandBtn;
+    const setZoomMode = (mode = 'all') => {
+      const zoomGrid = document.getElementById('islmZoomGrid');
+      if (zoomGrid) zoomGrid.dataset.zoomActive = mode;
+      zoomDialog.querySelectorAll('[data-zoom-mode]').forEach(btn => {
+        btn.setAttribute('aria-pressed', String(btn.dataset.zoomMode === mode));
+      });
+      M.renderIslmZoom?.();
+    };
+    const openIslmZoom = (triggerEl, mode = 'all', highlightCard = '') => {
+      lastZoomTrigger = triggerEl || document.activeElement || expandBtn;
+      zoomDialog.hidden = false;
+      zoomDialog.dataset.highlightedPanel = highlightCard || '';
+      if (!zoomDialog.open) zoomDialog.showModal();
+      document.documentElement.classList.add('has-lab-zoom');
+      expandBtn.setAttribute('aria-expanded', 'true');
+      setZoomMode(mode);
+      requestAnimationFrame(() => {
+        M.renderIslmZoom?.();
+        document.getElementById('islmCloseZoom')?.focus({ preventScroll: true });
+      });
+    };
+    const finalizeZoomClose = () => {
+      zoomDialog.hidden = true;
+      document.documentElement.classList.remove('has-lab-zoom');
+      expandBtn.setAttribute('aria-expanded', 'false');
+      if (lastZoomTrigger && typeof lastZoomTrigger.focus === 'function') {
+        lastZoomTrigger.focus({ preventScroll: true });
+      }
+    };
+    const closeIslmZoom = () => {
+      if (zoomDialog.open) zoomDialog.close();
+      finalizeZoomClose();
+    };
+    zoomDialog.addEventListener('cancel', e => {
+      e.preventDefault();
+      closeIslmZoom();
+    });
+    zoomDialog.addEventListener('close', finalizeZoomClose);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && zoomDialog.open) {
+        e.preventDefault();
+        closeIslmZoom();
+      }
+    });
+    expandBtn.addEventListener('click', () => openIslmZoom(expandBtn, 'all'));
+    grid.addEventListener('click', e => {
+      const panel = e.target.closest('.islm-panel');
+      if (!panel) return;
+      openIslmZoom(expandBtn, 'all', panel.dataset.panelCanvas || '');
+    });
+    zoomDialog.querySelector('#islmCloseZoom').addEventListener('click', closeIslmZoom);
+    zoomDialog.addEventListener('click', e => {
+      const modeBtn = e.target.closest('[data-zoom-mode]');
+      if (modeBtn) { setZoomMode(modeBtn.dataset.zoomMode); return; }
+      if (e.target === zoomDialog) closeIslmZoom();
+    });
+    M.openIslmZoom = openIslmZoom;
+    M.closeIslmZoom = closeIslmZoom;
+
+    // Keep lateral panels independently scrollable within the visible viewport on desktop
+    const syncLabStickyBounds = () => {
+      if (lab.hidden) return;
+      if (window.innerWidth <= 1120) {
+        lab.style.removeProperty('--lab-panel-max-h');
+        return;
+      }
+      const headerBottom = Math.round(document.getElementById('platformHeader')?.getBoundingClientRect().bottom || 72);
+      const stickyTop = headerBottom + 10;
+      const layoutRect = layout.getBoundingClientRect();
+      const effectiveTop = Math.max(stickyTop, Math.min(window.innerHeight - 360, Math.round(layoutRect.top)));
+      const maxH = Math.max(420, Math.round(window.innerHeight - effectiveTop - 12));
+      lab.style.setProperty('--lab-panel-max-h', `${maxH}px`);
+    };
+    M.syncLabStickyBounds = syncLabStickyBounds;
+    window.addEventListener('scroll', syncLabStickyBounds, { passive: true });
+    window.addEventListener('hashchange', () => requestAnimationFrame(syncLabStickyBounds));
+    window.addEventListener('resize', () => {
+      syncLabStickyBounds();
+      if (zoomDialog.open) M.renderIslmZoom?.();
+    }, { passive: true });
+    for (const sidePanel of [controls, reading]) {
+      sidePanel.addEventListener('wheel', e => {
+        if (window.innerWidth <= 1120 || e.ctrlKey || e.metaKey) return;
+        if (sidePanel.scrollHeight <= sidePanel.clientHeight + 1) return;
+        const maxScroll = sidePanel.scrollHeight - sidePanel.clientHeight;
+        const next = Math.max(0, Math.min(maxScroll, sidePanel.scrollTop + e.deltaY));
+        if (next !== sidePanel.scrollTop) sidePanel.scrollTop = next;
+        e.preventDefault();
+      }, { passive: false });
+    }
+    requestAnimationFrame(syncLabStickyBounds);
 
     policyBar.addEventListener('click', e => {
       const btn = e.target.closest('[data-policy-tab]');

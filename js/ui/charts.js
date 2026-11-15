@@ -246,53 +246,76 @@
       const isDark = document.documentElement.dataset.theme === 'dark';
       const color = name => css.getPropertyValue(name).trim() || M.color('--text-muted');
       const font = (size, weight = 500) => `${weight} ${size}px 'DM Sans', system-ui, sans-serif`;
+      const isZoom = Boolean(canvas.closest('.lab-zoom-dialog')) || w >= 540 || h >= 270;
       if (spec.message) {
-        ctx.fillStyle = color('--muted'); ctx.font = font(12, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = color('--muted'); ctx.font = font(isZoom ? 14 : 12, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         const words = spec.message.split(' '); let line = '', y = h / 2 - 18;
-        words.forEach(word => { if (ctx.measureText(`${line}${word} `).width > w - 40) { ctx.fillText(line.trim(), w / 2, y); line = ''; y += 18; } line += `${word} `; });
+        words.forEach(word => { if (ctx.measureText(`${line}${word} `).width > w - 40) { ctx.fillText(line.trim(), w / 2, y); line = ''; y += isZoom ? 22 : 18; } line += `${word} `; });
         ctx.fillText(line.trim(), w / 2, y);
         return;
       }
       const hasLegend = Array.isArray(spec.legend) && spec.legend.length > 0;
-      const pad = { l: 50, r: 14, t: 10, b: hasLegend ? 50 : 36 };
-      const pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
       const [x0, x1] = spec.x.range, [y0, y1] = spec.y.range;
+      const tickFontPx = isZoom ? 12.2 : 11;
+      const axisTitlePx = isZoom ? 12.4 : 11;
+      const badgeFontPx = isZoom ? 11.8 : 10.6;
+      const curveFontPx = isZoom ? 11.8 : 10.6;
+      const legendFontPx = isZoom ? 11.5 : 10.4;
+      const xt = niceTicks(x0, x1, isZoom ? 5 : 4), yt = niceTicks(y0, y1, isZoom ? 5 : 4);
+      ctx.font = font(tickFontPx, 650);
+      const maxYTickW = Math.max(18, ...yt.ticks.map(yv => ctx.measureText(fmtNum(yv, yt.decimals)).width));
+      const pad = {
+        l: Math.max(isZoom ? 64 : 55, Math.ceil(maxYTickW + (isZoom ? 32 : 27))),
+        r: isZoom ? 18 : 14,
+        t: isZoom ? 12 : 9,
+        b: hasLegend ? (isZoom ? 56 : 48) : (isZoom ? 38 : 33)
+      };
+      const pw = Math.max(40, w - pad.l - pad.r), ph = Math.max(40, h - pad.t - pad.b);
       const sx = x => pad.l + (x - x0) / (x1 - x0) * pw, sy = y => pad.t + ph - (y - y0) / (y1 - y0) * ph;
 
       // Subtle tinted plot background
       ctx.save();
-      ctx.fillStyle = isDark ? 'rgba(15, 29, 51, 0.55)' : 'rgba(242, 247, 255, 0.72)';
+      ctx.fillStyle = isDark ? 'rgba(15, 29, 51, 0.58)' : 'rgba(242, 247, 255, 0.76)';
       ctx.beginPath();
       if (ctx.roundRect) ctx.roundRect(pad.l, pad.t, pw, ph, 6);
       else ctx.rect(pad.l, pad.t, pw, ph);
       ctx.fill();
       ctx.restore();
 
-      ctx.lineWidth = 1; ctx.font = font(9.5, 600); ctx.fillStyle = color('--chart-tick');
-      const xt = niceTicks(x0, x1, 4), yt = niceTicks(y0, y1, 4);
+      ctx.lineWidth = 1; ctx.font = font(tickFontPx, 650); ctx.fillStyle = color('--chart-tick');
+      let lastXTickRight = -Infinity;
       xt.ticks.forEach(xv => {
         const px = sx(xv);
         ctx.strokeStyle = color('--grid');
         ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
-        ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(fmtNum(xv, xt.decimals), px, pad.t + ph + 4);
+        const txt = fmtNum(xv, xt.decimals);
+        const tw = ctx.measureText(txt).width;
+        const clampedX = Math.min(Math.max(px, pad.l + tw / 2), pad.l + pw - tw / 2);
+        if (clampedX - tw / 2 >= lastXTickRight + 6) {
+          ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          ctx.fillText(txt, clampedX, pad.t + ph + (isZoom ? 5 : 4));
+          lastXTickRight = clampedX + tw / 2;
+        }
       });
       yt.ticks.forEach(yv => {
         const py = sy(yv);
         ctx.strokeStyle = color('--grid');
         ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + pw, py); ctx.stroke();
-        ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmtNum(yv, yt.decimals), pad.l - 6, py);
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillText(fmtNum(yv, yt.decimals), pad.l - (isZoom ? 8 : 6), py);
       });
-      ctx.strokeStyle = color('--line-strong'); ctx.lineWidth = 1.15;
+      ctx.strokeStyle = color('--line-strong'); ctx.lineWidth = isZoom ? 1.35 : 1.2;
       ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + ph); ctx.lineTo(pad.l + pw, pad.t + ph); ctx.stroke();
 
       // Axis titles outside plot area
-      ctx.fillStyle = color('--muted'); ctx.font = font(9.5, 700);
+      ctx.fillStyle = color('--muted'); ctx.font = font(axisTitlePx, 700);
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText(spec.x.label, pad.l + pw / 2, pad.t + ph + 17);
+      ctx.fillText(spec.x.label, pad.l + pw / 2, pad.t + ph + (isZoom ? 21 : 18));
       ctx.save();
-      ctx.translate(12, pad.t + ph / 2);
+      const yTitleX = Math.max(isZoom ? 13 : 11, Math.round((pad.l - maxYTickW - (isZoom ? 10 : 8)) / 2));
+      ctx.translate(yTitleX, pad.t + ph / 2);
       ctx.rotate(-Math.PI / 2);
-      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(spec.y.label, 0, 0);
       ctx.restore();
 
@@ -304,8 +327,8 @@
         if (!seg) return;
         const cHex = l.stroke || color(l.color);
         ctx.strokeStyle = cHex;
-        ctx.globalAlpha = l.initial ? 0.62 : 1;
-        ctx.lineWidth = l.initial ? 1.75 : 2.5;
+        ctx.globalAlpha = l.initial ? 0.65 : 1;
+        ctx.lineWidth = l.initial ? (isZoom ? 2.1 : 1.85) : (isZoom ? 3 : 2.65);
         ctx.setLineDash(l.initial || l.dashed ? [5, 4] : []);
         ctx.beginPath(); ctx.moveTo(sx(seg[0][0]), sy(seg[0][1])); ctx.lineTo(sx(seg[1][0]), sy(seg[1][1])); ctx.stroke();
         ctx.setLineDash([]); ctx.globalAlpha = 1;
@@ -330,115 +353,144 @@
             const dir = Math.sign(px2 - px1);
             const ax1 = px1 + dir * 5, ax2 = px2 - dir * 5;
             ctx.save();
-            ctx.strokeStyle = finD.cHex; ctx.fillStyle = finD.cHex; ctx.globalAlpha = 0.78; ctx.lineWidth = 1.4;
+            ctx.strokeStyle = finD.cHex; ctx.fillStyle = finD.cHex; ctx.globalAlpha = 0.8; ctx.lineWidth = isZoom ? 1.7 : 1.45;
             ctx.beginPath(); ctx.moveTo(ax1, py); ctx.lineTo(ax2, py); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(ax2, py); ctx.lineTo(ax2 - dir * 5, py - 3.5); ctx.lineTo(ax2 - dir * 5, py + 3.5); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(ax2, py); ctx.lineTo(ax2 - dir * 5.5, py - 3.8); ctx.lineTo(ax2 - dir * 5.5, py + 3.8); ctx.closePath(); ctx.fill();
             ctx.restore();
           }
         }
       });
 
       const placedCallouts = [];
+      const dotBoxes = [];
+      (spec.points || []).forEach(p => {
+        if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+        const px = sx(p.x), py = sy(p.y);
+        dotBoxes.push({ x: px - 7, y: py - 7, w: 14, h: 14 });
+      });
+
       (spec.points || []).forEach((p, idx) => {
         if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
         const px = sx(p.x), py = sy(p.y);
         const ptColor = p.stroke || color(p.color || '--ink-deep');
         if (p.guides) {
-          ctx.strokeStyle = ptColor; ctx.globalAlpha = p.hollow ? 0.32 : 0.45; ctx.setLineDash([3, 3]); ctx.lineWidth = 1.1;
+          ctx.strokeStyle = ptColor; ctx.globalAlpha = p.hollow ? 0.34 : 0.48; ctx.setLineDash([3, 3]); ctx.lineWidth = 1.15;
           ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, pad.t + ph); ctx.moveTo(px, py); ctx.lineTo(pad.l, py); ctx.stroke();
           ctx.setLineDash([]); ctx.globalAlpha = 1;
         }
         // Subtle glow halo
+        const outerR = isZoom ? (p.hollow ? 8.5 : 9.8) : (p.hollow ? 7.8 : 8.8);
+        const innerR = isZoom ? (p.hollow ? 4.8 : 5.5) : (p.hollow ? 4.4 : 5.0);
         ctx.save();
-        ctx.beginPath(); ctx.arc(px, py, p.hollow ? 7.5 : 8.5, 0, Math.PI * 2);
+        ctx.beginPath(); ctx.arc(px, py, outerR, 0, Math.PI * 2);
         ctx.fillStyle = ptColor; ctx.globalAlpha = p.hollow ? 0.14 : 0.2; ctx.fill();
         ctx.restore();
 
-        ctx.beginPath(); ctx.arc(px, py, p.hollow ? 4.2 : 4.8, 0, Math.PI * 2);
+        ctx.beginPath(); ctx.arc(px, py, innerR, 0, Math.PI * 2);
         ctx.lineWidth = 2; ctx.strokeStyle = ptColor;
         if (p.hollow) { ctx.fillStyle = color('--paper-3'); ctx.fill(); ctx.stroke(); }
-        else { ctx.fillStyle = ptColor; ctx.fill(); ctx.strokeStyle = isDark ? '#0b1526' : '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke(); }
+        else { ctx.fillStyle = ptColor; ctx.fill(); ctx.strokeStyle = isDark ? '#0b1526' : '#ffffff'; ctx.lineWidth = 1.6; ctx.stroke(); }
 
         const xSym = spec.x.sym || 'Y', ySym = spec.y.sym || 'i';
         const xDec = spec.x.decimals ?? 1, yDec = spec.y.decimals ?? 1;
         const showCoords = p.coords !== false && (p.label === 'E₀' || p.label === 'E₂');
         const badgeText = showCoords ? `${p.label} (${xSym}: ${fmtNum(p.x, xDec)}, ${ySym}: ${fmtNum(p.y, yDec)})` : p.label;
-        ctx.font = font(9.5, 800);
-        const bw = ctx.measureText(badgeText).width + 10, bh = 16;
+        ctx.font = font(badgeFontPx, 800);
+        const padX = isZoom ? 6 : 5;
+        const bw = Math.min(pw - 6, ctx.measureText(badgeText).width + padX * 2), bh = isZoom ? 21 : 18;
         const candidates = [
-          { bx: px - bw - 7, by: py - bh - 5 },
-          { bx: px + 7, by: py - bh - 5 },
-          { bx: px + 7, by: py + 5 },
-          { bx: px - bw - 7, by: py + 5 },
-          { bx: px - bw / 2, by: py - bh - 8 }
+          { bx: px - bw - 8, by: py - bh - 6 },
+          { bx: px + 8, by: py - bh - 6 },
+          { bx: px + 8, by: py + 6 },
+          { bx: px - bw - 8, by: py + 6 },
+          { bx: px - bw / 2, by: py - bh - 9 },
+          { bx: px - bw / 2, by: py + 9 },
+          { bx: px - bw - 10, by: py - bh / 2 },
+          { bx: px + 10, by: py - bh / 2 }
         ];
         if (p.label === 'E₂' || idx > 0) candidates.reverse();
-        let chosen = candidates[0];
+        let chosen = null;
         for (const cand of candidates) {
           const cx = Math.min(Math.max(cand.bx, pad.l + 3), pad.l + pw - bw - 3);
           const cy = Math.min(Math.max(cand.by, pad.t + 3), pad.t + ph - bh - 3);
-          const overlaps = placedCallouts.some(r => !(cx + bw + 2 < r.x || r.x + r.w + 2 < cx || cy + bh + 2 < r.y || r.y + r.h + 2 < cy));
-          if (!overlaps) { chosen = { bx: cx, by: cy }; break; }
-          chosen = { bx: cx, by: cy };
+          const overlapsCallout = placedCallouts.some(r => !(cx + bw + 2 < r.x || r.x + r.w + 2 < cx || cy + bh + 2 < r.y || r.y + r.h + 2 < cy));
+          const overlapsDot = dotBoxes.some(r => !(cx + bw < r.x || r.x + r.w < cx || cy + bh < r.y || r.y + r.h < cy));
+          if (!overlapsCallout && !overlapsDot) { chosen = { bx: cx, by: cy }; break; }
+          if (!overlapsCallout && !chosen) chosen = { bx: cx, by: cy };
         }
-        placedCallouts.push({ x: chosen.bx, y: chosen.by, w: bw, h: bh });
+        if (!chosen) {
+          const fallback = candidates[0];
+          chosen = {
+            bx: Math.min(Math.max(fallback.bx, pad.l + 3), pad.l + pw - bw - 3),
+            by: Math.min(Math.max(fallback.by, pad.t + 3), pad.t + ph - bh - 3)
+          };
+        }
+        placedCallouts.push({ x: chosen.bx, y: chosen.by, w: bw, h: bh, kind: 'point', text: badgeText });
         ctx.save();
-        ctx.fillStyle = isDark ? 'rgba(12, 22, 39, 0.88)' : 'rgba(255, 255, 255, 0.92)';
-        ctx.strokeStyle = ptColor; ctx.lineWidth = 1;
+        ctx.fillStyle = isDark ? 'rgba(12, 22, 39, 0.9)' : 'rgba(255, 255, 255, 0.94)';
+        ctx.strokeStyle = ptColor; ctx.lineWidth = isZoom ? 1.25 : 1.1;
         ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(chosen.bx, chosen.by, bw, bh, 4);
+        if (ctx.roundRect) ctx.roundRect(chosen.bx, chosen.by, bw, bh, 5);
         else ctx.rect(chosen.bx, chosen.by, bw, bh);
         ctx.fill(); ctx.stroke();
         ctx.fillStyle = ptColor; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillText(badgeText, chosen.bx + 5, chosen.by + bh / 2 + 0.5);
+        ctx.fillText(badgeText, chosen.bx + padX, chosen.by + bh / 2 + 0.5);
         ctx.restore();
       });
       ctx.restore();
 
       labels.forEach(l => {
-        ctx.font = font(9.5, 800);
-        const tw = ctx.measureText(l.text).width + 6, th = 13;
+        ctx.font = font(curveFontPx, 800);
+        const tw = ctx.measureText(l.text).width + (isZoom ? 8 : 6), th = isZoom ? 17 : 15;
         const baseX = Math.min(Math.max(l.x + 3, pad.l + 3), pad.l + pw - tw - 3);
         const baseY = Math.min(Math.max(l.y - th + 2, pad.t + 3), pad.t + ph - th - 3);
         const labelCands = [
           [baseX, baseY],
-          [baseX, Math.min(baseY + 16, pad.t + ph - th - 2)],
-          [baseX, Math.max(baseY - 16, pad.t + 2)],
+          [baseX, Math.min(baseY + 18, pad.t + ph - th - 2)],
+          [baseX, Math.max(baseY - 18, pad.t + 2)],
           [Math.max(baseX - tw - 12, pad.l + 3), baseY],
           [Math.min(baseX + tw + 12, pad.l + pw - tw - 3), baseY],
           [pad.l + 5, baseY],
-          [baseX, Math.max(baseY - 28, pad.t + 2)],
+          [baseX, Math.max(baseY - 30, pad.t + 2)],
           [pad.l + pw - tw - 5, baseY]
         ];
         let [x, y] = labelCands[0];
         for (const [cx, cy] of labelCands) {
-          if (!placedCallouts.some(r => !(cx + tw < r.x || r.x + r.w < cx || cy + th < r.y || r.y + r.h < cy))) {
+          const hitsCallout = placedCallouts.some(r => !(cx + tw < r.x || r.x + r.w < cx || cy + th < r.y || r.y + r.h < cy));
+          const hitsDot = dotBoxes.some(r => !(cx + tw < r.x || r.x + r.w < cx || cy + th < r.y || r.y + r.h < cy));
+          if (!hitsCallout && !hitsDot) {
             x = cx; y = cy; break;
           }
         }
-        placedCallouts.push({ x, y, w: tw, h: th });
+        placedCallouts.push({ x, y, w: tw, h: th, kind: 'curve', text: l.text });
         ctx.save();
-        ctx.fillStyle = isDark ? 'rgba(12, 22, 39, 0.78)' : 'rgba(255, 255, 255, 0.82)';
+        ctx.fillStyle = isDark ? 'rgba(12, 22, 39, 0.82)' : 'rgba(255, 255, 255, 0.86)';
         ctx.fillRect(x, y, tw, th);
-        ctx.fillStyle = l.color; ctx.globalAlpha = l.initial ? 0.8 : 1;
+        ctx.fillStyle = l.color; ctx.globalAlpha = l.initial ? 0.84 : 1;
         ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillText(l.text, x + 3, y + th / 2);
+        ctx.fillText(l.text, x + (isZoom ? 4 : 3), y + th / 2);
         ctx.restore();
       });
 
       // Bottom legend row
       if (hasLegend) {
         ctx.save();
-        ctx.font = font(9, 700);
+        ctx.font = font(legendFontPx, 700);
         const items = spec.legend;
-        const gap = 10, sampleW = 13;
-        const widths = items.map(it => sampleW + 4 + ctx.measureText(it.label).width);
-        const totalW = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, items.length - 1);
-        let lx = Math.max(pad.l, pad.l + (pw - totalW) / 2);
-        const ly = h - 9;
+        let gap = isZoom ? 14 : 10, sampleW = isZoom ? 16 : 13;
+        let widths = items.map(it => sampleW + 4 + ctx.measureText(it.label).width);
+        let totalW = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, items.length - 1);
+        if (totalW > w - 12) {
+          ctx.font = font(Math.max(9.2, legendFontPx - 1), 700);
+          gap = 7; sampleW = 11;
+          widths = items.map(it => sampleW + 3 + ctx.measureText(it.label).width);
+          totalW = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, items.length - 1);
+        }
+        let lx = Math.max(6, Math.min(w - totalW - 6, pad.l + (pw - totalW) / 2));
+        const ly = h - (isZoom ? 10 : 8.5);
         items.forEach((it, idx) => {
           const cHex = it.stroke || color(it.color || '--blue');
-          ctx.strokeStyle = cHex; ctx.lineWidth = it.dashed ? 1.6 : 2.2;
+          ctx.strokeStyle = cHex; ctx.lineWidth = it.dashed ? 1.8 : 2.4;
           ctx.setLineDash(it.dashed ? [4, 3] : []);
           ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + sampleW, ly); ctx.stroke();
           ctx.setLineDash([]);
@@ -448,6 +500,11 @@
         });
         ctx.restore();
       }
+      canvas.dataset.layoutAudit = JSON.stringify({
+        w: Math.round(w), h: Math.round(h), pw: Math.round(pw), ph: Math.round(ph),
+        pad, tickFontPx, axisTitlePx, badgeFontPx, legendFontPx,
+        calloutsInBounds: placedCallouts.every(r => r.x >= pad.l && r.x + r.w <= pad.l + pw && r.y >= pad.t && r.y + r.h <= pad.t + ph)
+      });
     }
 
   Object.assign(M, { axisRange, chartTheme, clipLine, drawDiagram, niceTicks, renderCharts, sameLine });

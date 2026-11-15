@@ -930,12 +930,27 @@ await check('laboratorio: contexto, diagramas, lectura lateral y parámetros acc
   assert.equal(await page.locator('.lab-policy-tabs [data-policy-tab]').count(),4);
   assert.equal(await page.locator('#islmScenarioCards .lab-res-card').count(),6);
   const boxes=await page.evaluate(()=>{
-    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
-    return {controls:box('.islm-controls'),diagrams:box('.lab-center>.chart-card'),reading:box('.lab-reading'),cards:box('#islmScenarioCards')};
+    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,height:r.height};};
+    return {
+      controls:box('.islm-controls'),
+      diagrams:box('.lab-center>.chart-card'),
+      reading:box('.lab-reading'),
+      cards:box('#islmScenarioCards'),
+      canvases:['#islmPanelISLM','#islmPanelMF','#islmPanelMoney','#islmPanelCross'].map(box)
+    };
   });
   assert.ok(boxes.controls.right<=boxes.diagrams.left);
   assert.ok(boxes.reading.left>=boxes.diagrams.right);
-  assert.ok(boxes.cards.bottom<=941,'las 6 tarjetas E0->E2 caben en el tamaño de la referencia (1672x941)');
+  // First-fold ergonomics with enlarged canvases (>=228px): all 4 diagrams and the expand bar fit completely in the initial fold (<=941px), and when anchored at the sticky top both the 4 diagrams and the 6 E0->E2 cards fit inside the viewport simultaneously.
+  assert.ok(boxes.canvases.every(c=>c.height>=228 && c.top>=72 && c.bottom<=941),'los 4 canvases ampliados caben íntegros en el primer pliegue (1672x941)');
+  assert.ok(boxes.diagrams.bottom<=941,'el bloque completo de 4 diagramas y barra de ampliación cabe en el primer pliegue (1672x941)');
+  await page.evaluate(()=>window.scrollTo({top:135,behavior:'instant'}));
+  const stickyBoxes=await page.evaluate(()=>{
+    const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom};};
+    return {diagrams:box('.lab-center>.chart-card'),cards:box('#islmScenarioCards')};
+  });
+  assert.ok(stickyBoxes.diagrams.top>=72 && stickyBoxes.cards.bottom<=941,'al anclar la mesa de trabajo bajo la cabecera, los 4 diagramas ampliados y las 6 tarjetas E0->E2 caben juntos en pantalla');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await page.click('[data-policy-tab="monetary"]');
   assert.equal(await page.getAttribute('[data-policy-tab="monetary"]','aria-pressed'),'true');
   assert.ok(await page.locator('.islm-control.is-group-highlighted').count()>=1);
@@ -1411,6 +1426,161 @@ await check('navegación móvil: fuentes alternativas no desbordan enlaces ni se
       return ctx.measureText(el.selectedOptions[0].textContent).width <= el.clientWidth-38;
     })), font);
   }
+});
+
+await check('laboratorio: gráficos ampliados, escalas legibles y región central sticky ante scroll lateral', async page => {
+  for (const [width, height] of [[1672, 941], [1440, 900]]) {
+    await page.setViewportSize({ width, height });
+    await openModel(page);
+    await clickPreset(page, 'fiscal');
+    await settleLab(page);
+
+    // 1. Verificar área de trazado ampliada, escalas legibles y globos dentro de límites
+    const audit = await page.evaluate(() => ['islmPanelISLM', 'islmPanelMF', 'islmPanelMoney', 'islmPanelCross'].map(id => {
+      const c = document.getElementById(id);
+      const r = c.getBoundingClientRect();
+      return { id, top: Math.round(r.top), bottom: Math.round(r.bottom), width: Math.round(r.width), height: Math.round(r.height), dprW: c.width, dprH: c.height, layout: JSON.parse(c.dataset.layoutAudit) };
+    }));
+    for (const item of audit) {
+      assert.ok(item.height >= 225, `${item.id} alto >= 225px en ${width}x${height}: ${item.height}`);
+      assert.ok(item.layout.ph >= 168, `${item.id} área útil vertical ph >= 168px: ${item.layout.ph}`);
+      assert.ok(item.layout.tickFontPx >= 11 && item.layout.axisTitlePx >= 11 && item.layout.badgeFontPx >= 10.5, 'escalas y globos legibles');
+      assert.equal(item.layout.calloutsInBounds, true, `${item.id} sin etiquetas ni globos cortados`);
+      assert.ok(item.top >= 72 && item.bottom <= height, `${item.id} visible dentro del viewport inicial`);
+    }
+
+    // 2. Desplazar columna izquierda (.islm-controls) hasta el final (con todas las secciones abiertas) y con rueda del mouse
+    await page.evaluate(() => {
+      document.querySelectorAll('.islm-controls details').forEach(d => { d.open = true; });
+    });
+    const beforeControlsScroll = await page.evaluate(() =>
+      ['islmPanelISLM', 'islmPanelMF', 'islmPanelMoney', 'islmPanelCross'].map(id => {
+        const r = document.getElementById(id).getBoundingClientRect();
+        return { id, top: Math.round(r.top), bottom: Math.round(r.bottom) };
+      })
+    );
+    await page.locator('.islm-controls').hover();
+    await page.mouse.wheel(0, 1200);
+    await page.evaluate(() => {
+      const el = document.querySelector('.islm-controls');
+      el.scrollTop = el.scrollHeight;
+    });
+    const afterControlsScroll = await page.evaluate(() => {
+      const ctrl = document.querySelector('.islm-controls');
+      const lastParam = document.getElementById('islm-p-n').getBoundingClientRect();
+      const presets = document.getElementById('islmPresets').getBoundingClientRect();
+      const canvases = ['islmPanelISLM', 'islmPanelMF', 'islmPanelMoney', 'islmPanelCross'].map(id => {
+        const r = document.getElementById(id).getBoundingClientRect();
+        return { id, top: Math.round(r.top), bottom: Math.round(r.bottom) };
+      });
+      return { scrollTop: ctrl.scrollTop, maxScroll: ctrl.scrollHeight - ctrl.clientHeight, lastParamBottom: lastParam.bottom, presetsBottom: presets.bottom, canvases };
+    });
+    assert.ok(afterControlsScroll.scrollTop > 100 && Math.abs(afterControlsScroll.scrollTop - afterControlsScroll.maxScroll) <= 2, 'el panel de parámetros se desplaza hasta su final');
+    assert.deepEqual(afterControlsScroll.canvases, beforeControlsScroll, 'los 4 gráficos permanecen estáticos al desplazar parámetros hasta el final');
+    assert.ok(afterControlsScroll.canvases.every(c => c.top >= 72 && c.bottom <= height), 'los 4 gráficos siguen en foco dentro del viewport');
+    assert.ok(afterControlsScroll.presetsBottom <= height, 'los escenarios y controles finales quedan accesibles dentro del viewport');
+
+    // 3. Desplazar columna derecha (.lab-reading) hasta el final con rueda y scrollTop
+    await page.evaluate(() => {
+      document.querySelectorAll('.lab-reading details').forEach(d => { d.open = true; });
+    });
+    await page.locator('.lab-reading').hover();
+    await page.mouse.wheel(0, 900);
+    await page.evaluate(() => {
+      const el = document.querySelector('.lab-reading');
+      el.scrollTop = el.scrollHeight;
+    });
+    const afterReadingScroll = await page.evaluate(() => {
+      const read = document.querySelector('.lab-reading');
+      const keyIdea = document.getElementById('islmKeyIdea').getBoundingClientRect();
+      const ctxCard = document.getElementById('islmReadingContext').getBoundingClientRect();
+      const canvases = ['islmPanelISLM', 'islmPanelMF', 'islmPanelMoney', 'islmPanelCross'].map(id => {
+        const r = document.getElementById(id).getBoundingClientRect();
+        return { id, top: Math.round(r.top), bottom: Math.round(r.bottom) };
+      });
+      return { scrollTop: read.scrollTop, maxScroll: read.scrollHeight - read.clientHeight, keyIdeaBottom: keyIdea.bottom, ctxBottom: ctxCard.bottom, canvases };
+    });
+    assert.ok(afterReadingScroll.scrollTop > 20 && Math.abs(afterReadingScroll.scrollTop - afterReadingScroll.maxScroll) <= 2, 'la lectura del mecanismo se desplaza hasta su final');
+    assert.deepEqual(afterReadingScroll.canvases, beforeControlsScroll, 'los 4 gráficos permanecen estáticos al desplazar la lectura hasta el final');
+    assert.ok(afterReadingScroll.keyIdeaBottom <= height && afterReadingScroll.ctxBottom <= height, 'la última lectura e idea clave quedan visibles en el viewport');
+
+    // 4. Al avanzar fuera de la zona de trabajo hacia secciones inferiores, se libera el anclaje sin tapar contenido
+    await page.locator('#islmPolicyTable').scrollIntoViewIfNeeded();
+    const lowerCheck = await page.evaluate(() => {
+      const table = document.getElementById('islmPolicyTable').getBoundingClientRect();
+      const center = document.querySelector('.lab-center').getBoundingClientRect();
+      return { tableTop: table.top, centerBottom: center.bottom };
+    });
+    assert.ok(lowerCheck.centerBottom <= lowerCheck.tableTop + 20, 'la región sticky libera el anclaje al bajar a las secciones inferiores');
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  }
+
+  // 5. Acción «Ampliar gráficos»: clic en botón, teclado, clic en panel, sincronización en vivo, modos, Escape y foco
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const expandBtn = page.locator('#islmExpandChartsBtn');
+  await expandBtn.focus();
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => document.getElementById('islmZoomDialog')?.open === true);
+  assert.equal(await expandBtn.getAttribute('aria-expanded'), 'true');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).overflow), 'hidden');
+
+  const zoomMetrics = await page.evaluate(() => {
+    const pairs = [
+      ['islmPanelISLM', 'islmZoomISLM'],
+      ['islmPanelMF', 'islmZoomMF'],
+      ['islmPanelMoney', 'islmZoomMoney'],
+      ['islmPanelCross', 'islmZoomCross']
+    ];
+    return pairs.map(([baseId, zoomId]) => {
+      const b = document.getElementById(baseId), z = document.getElementById(zoomId);
+      const br = b.getBoundingClientRect(), zr = z.getBoundingClientRect();
+      return {
+        zoomId,
+        wider: zr.width > br.width * 1.4,
+        taller: zr.height > br.height * 1.08,
+        samePoints: b.dataset.points === z.dataset.points,
+        sameCurves: b.dataset.curves === z.dataset.curves,
+        layout: JSON.parse(z.dataset.layoutAudit)
+      };
+    });
+  });
+  assert.ok(zoomMetrics.every(m => m.wider && m.taller && m.samePoints && m.sameCurves && m.layout.calloutsInBounds), 'los 4 gráficos ampliados tienen mayor superficie y coinciden exactamente con el estado vivo');
+
+  // Cambiar a vista individual de un gráfico dentro del diálogo y volver a 2x2
+  await page.click('[data-zoom-mode="islmPanelISLM"]');
+  assert.equal(await page.getAttribute('#islmZoomGrid', 'data-zoom-active'), 'islmPanelISLM');
+  assert.equal(await page.isVisible('[data-zoom-card="islmPanelISLM"]'), true);
+  assert.equal(await page.isVisible('[data-zoom-card="islmPanelMF"]'), false);
+  await page.click('[data-zoom-mode="all"]');
+  assert.equal(await page.isVisible('[data-zoom-card="islmPanelMF"]'), true);
+
+  // Cerrar con Escape y verificar restauración de foco y desbloqueo de scroll
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.getElementById('islmZoomDialog')?.open);
+  assert.equal(await expandBtn.getAttribute('aria-expanded'), 'false');
+  assert.equal(await page.evaluate(() => document.activeElement?.id), 'islmExpandChartsBtn');
+  assert.notEqual(await page.evaluate(() => getComputedStyle(document.documentElement).overflow), 'hidden');
+
+  // Abrir haciendo clic directamente sobre un panel de la grilla 2x2 y cerrar con botón Cerrar
+  await page.locator('#islmPanelMF').click();
+  await page.waitForFunction(() => document.getElementById('islmZoomDialog')?.open === true);
+  await page.click('#islmCloseZoom');
+  await page.waitForFunction(() => !document.getElementById('islmZoomDialog')?.open);
+
+  // Adaptación móvil del diálogo ampliado (sin grilla 2x2 ilegible ni overflow)
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.click('#islmExpandChartsBtn');
+  await page.waitForFunction(() => document.getElementById('islmZoomDialog')?.open === true);
+  const mobileZoom = await page.evaluate(() => {
+    const rects = [...document.querySelectorAll('#islmZoomGrid .lab-zoom-panel')].map(el => el.getBoundingClientRect());
+    return {
+      overflow: document.documentElement.scrollWidth - innerWidth,
+      stacked: rects.length === 4 && rects[1].top >= rects[0].bottom && rects[0].width > 300
+    };
+  });
+  assert.ok(mobileZoom.overflow <= 2 && mobileZoom.stacked, 'en móvil la vista ampliada usa flujo vertical legible de 1 columna');
+  await page.click('#islmCloseZoom');
+  await page.waitForFunction(() => !document.getElementById('islmZoomDialog')?.open);
 });
 
 await browser.close();
