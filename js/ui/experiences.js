@@ -209,88 +209,81 @@
     });
   }
 
-  function renderLearningEquilibriumSvg(model, inputPatch) {
-    const u0 = model.baseline;
-    const u1 = { ...u0, ...inputPatch };
-    const E0 = model.solve(u0, 'final');
-    const E1 = model.solve(u1, 'final');
-    const is0 = model.curves.IS(u0, 100);
-    const is1 = model.curves.IS(u1, Number.isFinite(E1.e) ? E1.e : 100);
-    const lm0 = model.curves.LM(u0, model.M0);
-    const lm1 = model.curves.LM(u1, Number.isFinite(E1.M) ? E1.M : model.M0);
+  function learningPatch(model) {
+    const fixed = learningState.simRegime === 'fixed';
+    if (fixed) learningState.simM = 0;
+    return model
+      ? {
+          G: model.baseline.G + learningState.simG,
+          Mpct: fixed ? 0 : learningState.simM,
+          istar: model.baseline.istar + learningState.simIstar
+        }
+      : {};
+  }
 
-    const xMin = Math.min(82, E0.Y - 12, E1.Y - 12);
-    const xMax = Math.max(118, E0.Y + 12, E1.Y + 12);
-    const evalLineY = (line, x) => (Math.abs(line.b) > 1e-6 ? (line.c - line.a * x) / line.b : E0.i);
-    const sampleY = [
-      E0.i,
-      E1.i,
-      evalLineY(is0, xMin),
-      evalLineY(is0, xMax),
-      evalLineY(is1, xMin),
-      evalLineY(is1, xMax),
-      evalLineY(lm0, xMin),
-      evalLineY(lm0, xMax),
-      evalLineY(lm1, xMin),
-      evalLineY(lm1, xMax)
-    ].filter(Number.isFinite);
-    const yMin = Math.min(...sampleY) - 0.8;
-    const yMax = Math.max(...sampleY) + 0.8;
-    const xL = 52;
-    const xR = 426;
-    const yT = 22;
-    const yB = 204;
-    const mapX = x => xL + ((x - xMin) / Math.max(1e-6, xMax - xMin)) * (xR - xL);
-    const mapY = y => yB - ((y - yMin) / Math.max(1e-6, yMax - yMin)) * (yB - yT);
-    const lineCoords = line => ({
-      x1: mapX(xMin).toFixed(2),
-      y1: mapY(evalLineY(line, xMin)).toFixed(2),
-      x2: mapX(xMax).toFixed(2),
-      y2: mapY(evalLineY(line, xMax)).toFixed(2)
+  function refreshLearningDiagram() {
+    const host = document.getElementById('aprendizaje');
+    if (!host) return;
+    const scenario = currentLearningScenario();
+    const fixed = learningState.simRegime === 'fixed';
+    if (fixed) learningState.simM = 0;
+
+    const sliderM = host.querySelector('#apSliderM');
+    if (sliderM) {
+      sliderM.disabled = fixed;
+      if (fixed) sliderM.value = '0';
+    }
+    const outG = host.querySelector('#apOutG');
+    if (outG) outG.textContent = `${learningState.simG >= 0 ? '+' : ''}${learningState.simG.toFixed(1)} pts`;
+    const outM = host.querySelector('#apOutM');
+    if (outM) outM.textContent = fixed ? '0.0 % (endógena)' : `${learningState.simM >= 0 ? '+' : ''}${learningState.simM.toFixed(1)} %`;
+    const outIstar = host.querySelector('#apOutIstar');
+    if (outIstar) outIstar.textContent = `${learningState.simIstar >= 0 ? '+' : ''}${learningState.simIstar.toFixed(1)} p.p.`;
+
+    const subtitle = host.querySelector('#apDiagramSubtitle');
+    if (subtitle) {
+      const regimeLabel =
+        learningState.simRegime === 'flex'
+          ? 'tipo de cambio flexible'
+          : learningState.simRegime === 'fixed'
+            ? 'tipo de cambio fijo'
+            : 'economía cerrada';
+      subtitle.textContent = `Efecto del cambio de parámetros sobre el equilibrio IS–LM (${regimeLabel})`;
+    }
+
+    const model = buildCalibratedIslm({
+      regime: learningState.simRegime,
+      mobility: learningState.simMobility,
+      instrument: 'money'
     });
-    const L_is0 = lineCoords(is0);
-    const L_is1 = lineCoords(is1);
-    const L_lm0 = lineCoords(lm0);
-    const L_lm1 = lineCoords(lm1);
-    const pE0 = { cx: mapX(E0.Y).toFixed(2), cy: mapY(E0.i).toFixed(2) };
-    const pE1 = { cx: mapX(E1.Y).toFixed(2), cy: mapY(E1.i).toFixed(2) };
+    if (!model || !M.EconomicDiagramSpecs) return;
+    const patch = learningPatch(model);
+    const spec = M.EconomicDiagramSpecs.islm(model, patch);
+    const diagramHost = host.querySelector('#apDiagramContainer');
+    M.EconomicDiagrams?.mount(
+      diagramHost,
+      'learning-equilibrium',
+      'Equilibrio del mercado de bienes y dinero (IS–LM–BP)',
+      spec,
+      { kind: 'Simulación guiada · IS–LM–BP' }
+    );
 
-    return `<svg viewBox="0 0 460 250" role="img" aria-label="Equilibrio interactivo del mercado de bienes y dinero IS-LM">
-      <defs>
-        <linearGradient id="apGridBg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#f7fbff" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#edf5ff" stop-opacity="0.4"/>
-        </linearGradient>
-      </defs>
-      <rect x="44" y="16" width="390" height="196" rx="10" fill="url(#apGridBg)" stroke="#d5e5fb"/>
-      <g stroke="#dce9fb" stroke-width="1">
-        <line x1="44" y1="65" x2="434" y2="65"/>
-        <line x1="44" y1="114" x2="434" y2="114"/>
-        <line x1="44" y1="163" x2="434" y2="163"/>
-        <line x1="140" y1="16" x2="140" y2="212"/>
-        <line x1="239" y1="16" x2="239" y2="212"/>
-        <line x1="338" y1="16" x2="338" y2="212"/>
-      </g>
-      <!-- Curva LM inicial y desplazada -->
-      <line data-curve="lm0" x1="${L_lm0.x1}" y1="${L_lm0.y1}" x2="${L_lm0.x2}" y2="${L_lm0.y2}" stroke="#e05263" stroke-width="2.4" stroke-linecap="round"/>
-      <line data-curve="lm1" x1="${L_lm1.x1}" y1="${L_lm1.y1}" x2="${L_lm1.x2}" y2="${L_lm1.y2}" stroke="#e05263" stroke-width="2" stroke-dasharray="6 4"/>
-      <text x="392" y="36" fill="#d43f52" font-size="11" font-weight="800">LM</text>
-      <!-- Curva IS inicial y simulada -->
-      <line data-curve="is0" x1="${L_is0.x1}" y1="${L_is0.y1}" x2="${L_is0.x2}" y2="${L_is0.y2}" stroke="#1864ea" stroke-width="2.5" stroke-linecap="round"/>
-      <text x="392" y="198" fill="#1864ea" font-size="11" font-weight="800">IS₀</text>
-      <line data-curve="is1" x1="${L_is1.x1}" y1="${L_is1.y1}" x2="${L_is1.x2}" y2="${L_is1.y2}" stroke="#3b8cff" stroke-width="2.3" stroke-dasharray="6 4" stroke-linecap="round"/>
-      <text x="355" y="198" fill="#297bf4" font-size="11" font-weight="800">IS₁</text>
-      <!-- Punto E0 -->
-      <line x1="${pE0.cx}" y1="${pE0.cy}" x2="${pE0.cx}" y2="212" stroke="#8aa8d6" stroke-dasharray="3 3"/>
-      <line x1="44" y1="${pE0.cy}" x2="${pE0.cx}" y2="${pE0.cy}" stroke="#8aa8d6" stroke-dasharray="3 3"/>
-      <circle data-point="E0" cx="${pE0.cx}" cy="${pE0.cy}" r="5" fill="#1864ea" stroke="#ffffff" stroke-width="2"/>
-      <!-- Punto E1 -->
-      <circle data-point="E1" cx="${pE1.cx}" cy="${pE1.cy}" r="6" fill="#e0485a" stroke="#ffffff" stroke-width="2"/>
-      <rect x="${Math.min(315, Math.max(52, Number(pE1.cx) - 54)).toFixed(1)}" y="${Math.max(22, Number(pE1.cy) - 30).toFixed(1)}" width="112" height="22" rx="7" fill="#ffffff" stroke="#bcd6fa"/>
-      <text x="${Math.min(371, Math.max(108, Number(pE1.cx))).toFixed(1)}" y="${Math.max(37, Number(pE1.cy) - 15).toFixed(1)}" text-anchor="middle" fill="#0c2352" font-size="10" font-weight="800">E₁ (Y:${E1.Y.toFixed(1)}, i:${E1.i.toFixed(1)}%)</text>
-      <text x="239" y="234" text-anchor="middle" fill="#4b6794" font-size="11" font-weight="700">Producción de equilibrio (Y, base = 100)</text>
-      <text x="18" y="114" text-anchor="middle" transform="rotate(-90 18 114)" fill="#4b6794" font-size="11" font-weight="700">Tasa de interés i (%)</text>
-    </svg>`;
+    const chain = host.querySelector('.ap-chain');
+    if (chain && spec.equilibria) {
+      const { E0, E1, E2 } = spec.equilibria;
+      const openDiff = model.open && Math.hypot(E2.Y - E1.Y, E2.i - E1.i) > 0.05;
+      const yText = openDiff ? `Y: ${E0.Y.toFixed(1)} → ${E1.Y.toFixed(1)} → ${E2.Y.toFixed(1)}` : `Y: ${E0.Y.toFixed(1)} → ${E2.Y.toFixed(1)}`;
+      const iText = openDiff ? `i: ${E0.i.toFixed(1)}% → ${E1.i.toFixed(1)}% → ${E2.i.toFixed(1)}%` : `i: ${E0.i.toFixed(1)}% → ${E2.i.toFixed(1)}%`;
+      chain.innerHTML = `
+        <span class="ap-chain-chip">Shock inicial</span>
+        <span>→</span>
+        <span class="ap-chain-chip">${esc(scenario?.shifts?.[0]?.curve || 'IS')} (${esc(scenario?.shifts?.[0]?.direction || 'right')})</span>
+        <span>→</span>
+        <span class="ap-chain-chip">${esc(yText)}</span>
+        <span>→</span>
+        <span class="ap-chain-chip">${esc(iText)}</span>
+      `;
+    }
   }
 
   function renderAprendizajeView() {
@@ -302,6 +295,8 @@
     const totalLessons = route.scenarioIds.length;
     const completedInRoute = route.scenarioIds.filter(id => learningState.completedIds.includes(id)).length;
     const pct = Math.round((completedInRoute / totalLessons) * 100);
+    const fixed = learningState.simRegime === 'fixed';
+    if (fixed) learningState.simM = 0;
 
     const model = buildCalibratedIslm({
       regime: learningState.simRegime,
@@ -309,15 +304,9 @@
       instrument: 'money'
     });
 
-    const patch = model
-      ? {
-          G: model.baseline.G + learningState.simG,
-          Mpct: learningState.simM,
-          istar: model.baseline.istar + learningState.simIstar
-        }
-      : {};
+    const patch = learningPatch(model);
     const E0 = model ? model.solve(model.baseline, 'final') : { Y: 100, i: 3.5, e: 100, NX: 0 };
-    const E1 = model ? model.solve({ ...model.baseline, ...patch }, 'final') : { Y: 102, i: 4.1, e: 98, NX: -0.5 };
+    const E2 = model ? model.solve({ ...model.baseline, ...patch }, 'final') : { Y: 102, i: 4.1, e: 98, NX: -0.5 };
     const options = buildQuizOptionsForScenario(scenario);
     if (!learningState.selectedOption && options[1]) {
       learningState.selectedOption = options[1].id;
@@ -448,12 +437,10 @@
                   <div class="ms-panel-head" style="margin-bottom:6px">
                     <div>
                       <h3 style="font-size:14px">Equilibrio del mercado de bienes y dinero</h3>
-                      <p>Efecto del cambio de parámetros sobre el equilibrio IS–LM (${learningState.simRegime === 'flex' ? 'tipo de cambio flexible' : learningState.simRegime === 'fixed' ? 'tipo de cambio fijo' : 'economía cerrada'})</p>
+                      <p id="apDiagramSubtitle">Efecto del cambio de parámetros sobre el equilibrio IS–LM (${learningState.simRegime === 'flex' ? 'tipo de cambio flexible' : learningState.simRegime === 'fixed' ? 'tipo de cambio fijo' : 'economía cerrada'})</p>
                     </div>
                   </div>
-                  <div class="ap-canvas-wrap" id="apDiagramContainer">
-                    ${model ? renderLearningEquilibriumSvg(model, patch) : ''}
-                  </div>
+                  <div class="ap-canvas-wrap" id="apDiagramContainer"></div>
                 </div>
 
                 <div class="ap-controls-box" aria-label="Controles de simulación de la lección">
@@ -468,9 +455,9 @@
                   <div class="ap-slider-group">
                     <div class="ap-slider-head">
                       <label for="apSliderM">Oferta monetaria (ΔM)</label>
-                      <output id="apOutM">${learningState.simM >= 0 ? '+' : ''}${learningState.simM.toFixed(1)} %</output>
+                      <output id="apOutM">${fixed ? '0.0 % (endógena)' : `${learningState.simM >= 0 ? '+' : ''}${learningState.simM.toFixed(1)} %`}</output>
                     </div>
-                    <input id="apSliderM" type="range" min="-6" max="6" step="0.5" value="${learningState.simM}">
+                    <input id="apSliderM" type="range" min="-6" max="6" step="0.5" value="${fixed ? 0 : learningState.simM}"${fixed ? ' disabled' : ''}>
                   </div>
                   <div class="ap-slider-group">
                     <div class="ap-slider-head">
@@ -567,9 +554,9 @@
                 <span>→</span>
                 <span class="ap-chain-chip">${esc(scenario?.shifts?.[0]?.curve || 'IS')} (${esc(scenario?.shifts?.[0]?.direction || 'right')})</span>
                 <span>→</span>
-                <span class="ap-chain-chip">Y: ${E0.Y.toFixed(1)} → ${E1.Y.toFixed(1)}</span>
+                <span class="ap-chain-chip">Y: ${E0.Y.toFixed(1)} → ${E2.Y.toFixed(1)}</span>
                 <span>→</span>
-                <span class="ap-chain-chip">i: ${E0.i.toFixed(1)}% → ${E1.i.toFixed(1)}%</span>
+                <span class="ap-chain-chip">i: ${E0.i.toFixed(1)}% → ${E2.i.toFixed(1)}%</span>
               </div>
               ${
                 scenario?.caveats?.length
@@ -637,21 +624,28 @@
     });
     const updateSliders = () => {
       learningState.simG = Number(host.querySelector('#apSliderG')?.value || 0);
-      learningState.simM = Number(host.querySelector('#apSliderM')?.value || 0);
-      learningState.simIstar = Number(host.querySelector('#apSliderIstar')?.value || 0);
       learningState.simRegime = host.querySelector('#apRegimeSelect')?.value || 'flex';
-      renderAprendizajeView();
+      learningState.simM = learningState.simRegime === 'fixed' ? 0 : Number(host.querySelector('#apSliderM')?.value || 0);
+      learningState.simIstar = Number(host.querySelector('#apSliderIstar')?.value || 0);
+      refreshLearningDiagram();
     };
     ['#apSliderG', '#apSliderM', '#apSliderIstar', '#apRegimeSelect'].forEach(sel => {
-      host.querySelector(sel)?.addEventListener('change', updateSliders);
+      const el = host.querySelector(sel);
+      el?.addEventListener('input', updateSliders);
+      el?.addEventListener('change', updateSliders);
     });
     host.querySelector('#apResetSimBtn')?.addEventListener('click', () => {
       learningState.simG = 2.0;
       learningState.simM = 0.0;
       learningState.simIstar = 0.0;
       learningState.simRegime = scenario?.setup?.regime || 'flex';
-      renderAprendizajeView();
+      if (host.querySelector('#apSliderG')) host.querySelector('#apSliderG').value = String(learningState.simG);
+      if (host.querySelector('#apSliderM')) host.querySelector('#apSliderM').value = String(learningState.simM);
+      if (host.querySelector('#apSliderIstar')) host.querySelector('#apSliderIstar').value = String(learningState.simIstar);
+      if (host.querySelector('#apRegimeSelect')) host.querySelector('#apRegimeSelect').value = learningState.simRegime;
+      refreshLearningDiagram();
     });
+    refreshLearningDiagram();
     host.querySelectorAll('[data-ap-option]').forEach(btn => {
       btn.addEventListener('click', () => {
         learningState.selectedOption = btn.dataset.apOption;
@@ -1393,6 +1387,8 @@
   const modelsState = {
     selectedModelId: 'islm',
     country: 'PER',
+    // Controles para IS-LM-BP (islm)
+    islmM: 0,
     // Controles para OA-DA (asad)
     asadG: 2.0,
     asadM: 0.0,
@@ -1406,130 +1402,77 @@
   };
   let modelsTrendChart = null;
 
-  function renderModelDiagramSvg(modelMeta) {
-    if (modelMeta.id === 'asad') {
-      const engine = M.createAsAdModel();
-      const { E0, E1, E2, ad0, ad1, as0, as1, as2, lras } = engine.curves({
+  function modelDiagramSpec(modelId) {
+    const Specs = M.EconomicDiagramSpecs;
+    if (!Specs) return null;
+    if (modelId === 'asad') {
+      return Specs.asad({
         dG: modelsState.asadG,
         dM: modelsState.asadM,
         dz: modelsState.asadZ
       });
-      const allPts = [...ad0, ...ad1, ...as0, ...as1, ...(as2 || []), E0, E1, E2];
-      const xMin = Math.min(75, ...allPts.map(p => p.x ?? p.Y));
-      const xMax = Math.max(125, ...allPts.map(p => p.x ?? p.Y));
-      const yMin = Math.min(70, ...allPts.map(p => p.y ?? p.P)) - 4;
-      const yMax = Math.max(130, ...allPts.map(p => p.y ?? p.P)) + 4;
-      const xL = 55;
-      const xR = 395;
-      const yT = 22;
-      const yB = 192;
-      const mapX = x => xL + ((x - xMin) / Math.max(1e-6, xMax - xMin)) * (xR - xL);
-      const mapY = y => yB - ((y - yMin) / Math.max(1e-6, yMax - yMin)) * (yB - yT);
-      const seg = (pts, name, stroke, width, dash = '') =>
-        `<line data-curve="${name}" x1="${mapX(pts[0].x).toFixed(2)}" y1="${mapY(pts[0].y).toFixed(2)}" x2="${mapX(
-          pts[1].x
-        ).toFixed(2)}" y2="${mapY(pts[1].y).toFixed(2)}" stroke="${stroke}" stroke-width="${width}"${
-          dash ? ` stroke-dasharray="${dash}"` : ''
-        }/>`;
-      const showAs2 = as2 && Math.abs(E2.Pe - E1.Pe) > 1e-3;
-      const lrasX = mapX(lras[0].x).toFixed(2);
-      return `<svg viewBox="0 0 440 245" role="img" aria-label="Diagrama Oferta y Demanda Agregada OA-DA">
-        <rect x="40" y="15" width="375" height="190" rx="10" fill="#f7fbff" stroke="#d5e5fb"/>
-        <!-- OALP vertical -->
-        <line data-curve="lras" x1="${lrasX}" y1="${yT}" x2="${lrasX}" y2="${yB}" stroke="#0f6d48" stroke-width="2.2" stroke-dasharray="4 4"/>
-        <text x="${(Number(lrasX) + 5).toFixed(1)}" y="32" fill="#0f6d48" font-size="10.5" font-weight="800">OALP (Yn=${E1.Yn.toFixed(0)})</text>
-        <!-- DA0 y DA1 -->
-        ${seg(ad0, 'ad0', '#1864ea', '2.4')}
-        ${seg(ad1, 'ad1', '#297bf4', '2.2', '6 4')}
-        <text x="${mapX(ad0[1].x).toFixed(1)}" y="${Math.min(198, mapY(ad0[1].y) + 12).toFixed(1)}" fill="#1864ea" font-size="10.5" font-weight="800">DA₀</text>
-        <text x="${mapX(ad1[1].x).toFixed(1)}" y="${Math.max(30, mapY(ad1[1].y) - 6).toFixed(1)}" fill="#297bf4" font-size="10.5" font-weight="800">DA₁</text>
-        <!-- OACP0, OACP1 y OACP2 (ajuste medio plazo) -->
-        ${seg(as0, 'as0', '#d43f52', '2.4')}
-        ${seg(as1, 'as1', '#e86b79', '2.1', '6 4')}
-        ${showAs2 ? seg(as2, 'as2', '#8a3ab9', '1.9', '3 3') : ''}
-        <text x="${mapX(as0[1].x).toFixed(1)}" y="${Math.max(30, mapY(as0[1].y) - 4).toFixed(1)}" fill="#d43f52" font-size="10.5" font-weight="800">OACP₀</text>
-        <!-- Equilibrios E0, E1, E2 -->
-        <circle data-point="E0" cx="${mapX(E0.Y).toFixed(2)}" cy="${mapY(E0.P).toFixed(2)}" r="5" fill="#1864ea" stroke="#fff" stroke-width="1.8"/>
-        <circle data-point="E1" cx="${mapX(E1.Y).toFixed(2)}" cy="${mapY(E1.P).toFixed(2)}" r="6" fill="#d43f52" stroke="#fff" stroke-width="2"/>
-        <circle data-point="E2" cx="${mapX(E2.Y).toFixed(2)}" cy="${mapY(E2.P).toFixed(2)}" r="5" fill="#0f6d48" stroke="#fff" stroke-width="1.8"/>
-        <text x="239" y="228" text-anchor="middle" fill="#4b6794" font-size="11" font-weight="700">Producción real (Y) · E₁=(Y:${E1.Y.toFixed(1)}, P:${E1.P.toFixed(1)}) · E₂=(Y:${E2.Y.toFixed(1)}, P:${E2.P.toFixed(1)})</text>
-      </svg>`;
     }
-    if (modelMeta.id === 'micro-sd') {
-      const engine = M.createSupplyDemandModel();
-      const { E0, E1, d0, d1, s0, s1 } = engine.curves({
+    if (modelId === 'micro-sd') {
+      return Specs.supplyDemand({
         dD: modelsState.sdDemand,
         dS: modelsState.sdSupply,
         tau: modelsState.sdTax
       });
-      const allPts = [...d0, ...d1, ...s0, ...s1, { x: E0.Q, y: E0.Pd }, { x: E1.Q, y: E1.Pd }, { x: E1.Q, y: E1.Ps }];
-      const xMin = Math.min(20, ...allPts.map(p => p.x));
-      const xMax = Math.max(180, ...allPts.map(p => p.x));
-      const yMin = Math.min(0, ...allPts.map(p => p.y)) - 6;
-      const yMax = Math.max(200, ...allPts.map(p => p.y)) + 6;
-      const xL = 55;
-      const xR = 395;
-      const yT = 22;
-      const yB = 192;
-      const mapX = x => xL + ((x - xMin) / Math.max(1e-6, xMax - xMin)) * (xR - xL);
-      const mapY = y => yB - ((y - yMin) / Math.max(1e-6, yMax - yMin)) * (yB - yT);
-      const seg = (pts, name, stroke, width, dash = '') =>
-        `<line data-curve="${name}" x1="${mapX(pts[0].x).toFixed(2)}" y1="${mapY(pts[0].y).toFixed(2)}" x2="${mapX(
-          pts[1].x
-        ).toFixed(2)}" y2="${mapY(pts[1].y).toFixed(2)}" stroke="${stroke}" stroke-width="${width}"${
-          dash ? ` stroke-dasharray="${dash}"` : ''
-        }/>`;
-      return `<svg viewBox="0 0 440 245" role="img" aria-label="Diagrama de Oferta y Demanda de Mercado">
-        <rect x="40" y="15" width="375" height="190" rx="10" fill="#f7fbff" stroke="#d5e5fb"/>
-        ${seg(d0, 'd0', '#1864ea', '2.4')}
-        ${seg(d1, 'd1', '#297bf4', '2.2', '6 4')}
-        <text x="${mapX(d0[1].x).toFixed(1)}" y="${Math.min(198, mapY(d0[1].y) + 12).toFixed(1)}" fill="#1864ea" font-size="10.5" font-weight="800">Demanda D</text>
-        ${seg(s0, 's0', '#0f6d48', '2.4')}
-        ${seg(s1, 's1', '#28a878', '2.2', '6 4')}
-        <text x="${mapX(s0[1].x).toFixed(1)}" y="${Math.max(30, mapY(s0[1].y) - 4).toFixed(1)}" fill="#0f6d48" font-size="10.5" font-weight="800">Oferta S</text>
-        <circle data-point="E0" cx="${mapX(E0.Q).toFixed(2)}" cy="${mapY(E0.Pd).toFixed(2)}" r="5" fill="#1864ea" stroke="#fff" stroke-width="1.8"/>
-        <circle data-point="E1" cx="${mapX(E1.Q).toFixed(2)}" cy="${mapY(E1.Pd).toFixed(2)}" r="6" fill="#d43f52" stroke="#fff" stroke-width="2"/>
-        ${
-          modelsState.sdTax > 0
-            ? `<circle data-point="Ps" cx="${mapX(E1.Q).toFixed(2)}" cy="${mapY(E1.Ps).toFixed(2)}" r="4.5" fill="#0f6d48" stroke="#fff" stroke-width="1.6"/>`
-            : ''
-        }
-        <text x="235" y="228" text-anchor="middle" fill="#4b6794" font-size="11" font-weight="700">Cantidad Q*=${E1.Q.toFixed(1)} · Precio consumidor Pd=${E1.Pd.toFixed(1)} · Excedente Cons.=${E1.consumerSurplus.toFixed(0)}</text>
-      </svg>`;
     }
-    if (modelMeta.id === 'phillips') {
-      const shift = modelsState.conceptualShift * 18;
-      return `<svg viewBox="0 0 440 245" role="img" aria-label="Esquema conceptual de la Curva de Phillips con expectativas">
-        <rect x="40" y="15" width="375" height="190" rx="10" fill="#f7fbff" stroke="#d5e5fb"/>
-        <line x1="228" y1="20" x2="228" y2="200" stroke="#0f6d48" stroke-width="2.2" stroke-dasharray="4 4"/>
-        <text x="234" y="34" fill="#0f6d48" font-size="10.5" font-weight="800">CPLP (u = uₙ NAIRU)</text>
-        <path d="M 95 52 Q 210 120 360 176" fill="none" stroke="#1864ea" stroke-width="2.5"/>
-        <path d="M 95 ${52 - shift} Q 210 ${120 - shift} 360 ${176 - shift}" fill="none" stroke="#d43f52" stroke-width="2.2" stroke-dasharray="6 4"/>
-        <circle cx="228" cy="118" r="5" fill="#1864ea" stroke="#fff" stroke-width="2"/>
-        <circle cx="185" cy="${100 - shift}" r="5.5" fill="#d43f52" stroke="#fff" stroke-width="2"/>
-        <text x="235" y="228" text-anchor="middle" fill="#4b6794" font-size="11" font-weight="700">Tasa de desempleo (u) vs. Inflación (π) · Esquema conceptual</text>
-      </svg>`;
+    if (modelId === 'phillips' || modelId === 'solow') {
+      return Specs.conceptual(modelId, modelsState.conceptualShift);
     }
-    if (modelMeta.id === 'solow') {
-      const shift = modelsState.conceptualShift * 14;
-      return `<svg viewBox="0 0 440 245" role="img" aria-label="Esquema conceptual del Modelo de Crecimiento de Solow-Swan">
-        <rect x="40" y="15" width="375" height="190" rx="10" fill="#f7fbff" stroke="#d5e5fb"/>
-        <!-- Depreciación (n+g+d)k -->
-        <line x1="65" y1="192" x2="375" y2="42" stroke="#d43f52" stroke-width="2.3"/>
-        <text x="315" y="38" fill="#d43f52" font-size="10.5" font-weight="800">(n + g + δ)·k</text>
-        <!-- Producción f(k) -->
-        <path d="M 65 192 Q 160 55 380 35" fill="none" stroke="#0f6d48" stroke-width="2.2"/>
-        <text x="348" y="54" fill="#0f6d48" font-size="10.5" font-weight="800">y = A·k^α</text>
-        <!-- Inversión s*f(k) -->
-        <path d="M 65 192 Q 165 ${115 - shift} 380 ${92 - shift}" fill="none" stroke="#1864ea" stroke-width="2.5"/>
-        <text x="335" y="${108 - shift}" fill="#1864ea" font-size="10.5" font-weight="800">s·f(k)</text>
-        <circle cx="${225 + shift * 1.4}" cy="${114 - shift * 0.7}" r="6" fill="#1864ea" stroke="#fff" stroke-width="2"/>
-        <text x="235" y="228" text-anchor="middle" fill="#4b6794" font-size="11" font-weight="700">Capital por trabajador efectivo (k*) · Estado estacionario</text>
-      </svg>`;
-    }
-    // Default IS-LM-BP
     const m = buildCalibratedIslm({ regime: 'flex', mobility: 'high', instrument: 'money' });
-    return m ? renderLearningEquilibriumSvg(m, { G: m.baseline.G + modelsState.asadG }) : '';
+    return m ? Specs.islm(m, { G: m.baseline.G + modelsState.asadG, Mpct: modelsState.islmM }) : null;
+  }
+
+  function formatModelReading(activeModel) {
+    if (activeModel.id === 'asad') {
+      return M.createAsAdModel()
+        .explain({ dG: modelsState.asadG, dM: modelsState.asadM, dz: modelsState.asadZ })
+        .map((step, i) => `<div><strong>${i + 1}.</strong> ${esc(step)}</div>`)
+        .join('');
+    }
+    return `<div><strong>1. Mecanismo central:</strong> ${esc(activeModel.question)}</div>
+       <div><strong>2. Horizonte temporal:</strong> ${esc(activeModel.horizon)}.</div>
+       <div><strong>3. Distinción metodológica:</strong> ${
+         activeModel.status === 'functional'
+           ? 'Este modelo cuenta con un motor matemático puro verificado en pruebas unitarias.'
+           : 'Esta vista presenta la estructura conceptual y geométrica del modelo sin simular calibraciones econométricas no verificadas.'
+       }</div>`;
+  }
+
+  function refreshModelDiagram(activeModel) {
+    const host = document.getElementById('modelos');
+    if (!host || !activeModel) return;
+    const spec = modelDiagramSpec(activeModel.id);
+    if (spec) {
+      M.EconomicDiagrams?.mount(
+        host.querySelector('#modSvgContainer'),
+        `models-${activeModel.id}`,
+        `Relaciones entre variables: ${activeModel.title}`,
+        spec,
+        {
+          group: `models-${activeModel.id}`,
+          kind: activeModel.status === 'functional' ? 'Simulación matemática' : 'Esquema conceptual'
+        }
+      );
+    }
+    const outG = host.querySelector('#modAsadGOut');
+    if (outG) outG.textContent = `${modelsState.asadG >= 0 ? '+' : ''}${modelsState.asadG}`;
+    const outIslmM = host.querySelector('#modIslmMOut');
+    if (outIslmM) outIslmM.textContent = `${modelsState.islmM >= 0 ? '+' : ''}${modelsState.islmM}%`;
+    const outZ = host.querySelector('#modAsadZOut');
+    if (outZ) outZ.textContent = `${modelsState.asadZ >= 0 ? '+' : ''}${modelsState.asadZ}`;
+    const outD = host.querySelector('#modSdDOut');
+    if (outD) outD.textContent = String(modelsState.sdDemand);
+    const outTax = host.querySelector('#modSdTaxOut');
+    if (outTax) outTax.textContent = String(modelsState.sdTax);
+    host.querySelectorAll('[data-mod-shift]').forEach(btn => {
+      btn.setAttribute('aria-pressed', String(Number(btn.dataset.modShift) === modelsState.conceptualShift));
+    });
+    const reading = host.querySelector('#modReadingBody');
+    if (reading) reading.innerHTML = formatModelReading(activeModel);
   }
 
   function renderModelosView() {
@@ -1618,43 +1561,52 @@
                 <span class="ms-badge ${activeModel.status === 'functional' ? 'live' : ''}">${esc(activeModel.statusBadge)}</span>
               </div>
 
-              <div class="mod-diagram-box" id="modSvgContainer">
-                ${renderModelDiagramSvg(activeModel)}
-              </div>
+              <div class="mod-diagram-box" id="modSvgContainer"></div>
 
               ${
-                activeModel.id === 'asad' || activeModel.id === 'islm'
+                activeModel.id === 'islm'
                   ? `<div class="ms-filter-bar" style="margin-bottom:0">
                       <div class="ms-filter-field">
-                        <label for="modAsadG">Impulso fiscal / demanda (ΔG): <strong>${modelsState.asadG >= 0 ? '+' : ''}${modelsState.asadG}</strong></label>
+                        <label for="modAsadG">Impulso fiscal / demanda (ΔG): <strong id="modAsadGOut">${modelsState.asadG >= 0 ? '+' : ''}${modelsState.asadG}</strong></label>
                         <input id="modAsadG" type="range" min="-4" max="4" step="0.5" value="${modelsState.asadG}">
                       </div>
                       <div class="ms-filter-field">
-                        <label for="modAsadZ">Shock de costos / oferta (Δz): <strong>${modelsState.asadZ >= 0 ? '+' : ''}${modelsState.asadZ}</strong></label>
-                        <input id="modAsadZ" type="range" min="-3" max="3" step="0.5" value="${modelsState.asadZ}">
+                        <label for="modIslmM">Oferta monetaria (ΔM): <strong id="modIslmMOut">${modelsState.islmM >= 0 ? '+' : ''}${modelsState.islmM}%</strong></label>
+                        <input id="modIslmM" type="range" min="-10" max="10" step="1" value="${modelsState.islmM}">
                       </div>
                     </div>`
-                  : activeModel.id === 'micro-sd'
+                  : activeModel.id === 'asad'
                     ? `<div class="ms-filter-bar" style="margin-bottom:0">
                         <div class="ms-filter-field">
-                          <label for="modSdD">Desplazamiento Demanda (ΔD): <strong>${modelsState.sdDemand}</strong></label>
-                          <input id="modSdD" type="range" min="-30" max="30" step="5" value="${modelsState.sdDemand}">
+                          <label for="modAsadG">Impulso fiscal / demanda (ΔG): <strong id="modAsadGOut">${modelsState.asadG >= 0 ? '+' : ''}${modelsState.asadG}</strong></label>
+                          <input id="modAsadG" type="range" min="-4" max="4" step="0.5" value="${modelsState.asadG}">
                         </div>
                         <div class="ms-filter-field">
-                          <label for="modSdTax">Impuesto por unidad (τ): <strong>${modelsState.sdTax}</strong></label>
-                          <input id="modSdTax" type="range" min="0" max="30" step="5" value="${modelsState.sdTax}">
+                          <label for="modAsadZ">Shock de costos / oferta (Δz): <strong id="modAsadZOut">${modelsState.asadZ >= 0 ? '+' : ''}${modelsState.asadZ}</strong></label>
+                          <input id="modAsadZ" type="range" min="-3" max="3" step="0.5" value="${modelsState.asadZ}">
                         </div>
                       </div>`
-                    : `<div class="ms-filter-bar" style="margin-bottom:0">
-                        <div class="ms-filter-field">
-                          <span class="ms-filter-label">Exploración conceptual del desplazamiento (no estimación econométrica)</span>
-                          <div class="ms-seg-group">
-                            <button type="button" class="ms-seg-btn" data-mod-shift="0" aria-pressed="${modelsState.conceptualShift === 0}">Equilibrio base</button>
-                            <button type="button" class="ms-seg-btn" data-mod-shift="1" aria-pressed="${modelsState.conceptualShift === 1}">Desplazamiento positivo</button>
-                            <button type="button" class="ms-seg-btn" data-mod-shift="-1" aria-pressed="${modelsState.conceptualShift === -1}">Desplazamiento adverso</button>
+                    : activeModel.id === 'micro-sd'
+                      ? `<div class="ms-filter-bar" style="margin-bottom:0">
+                          <div class="ms-filter-field">
+                            <label for="modSdD">Desplazamiento Demanda (ΔD): <strong id="modSdDOut">${modelsState.sdDemand}</strong></label>
+                            <input id="modSdD" type="range" min="-30" max="30" step="5" value="${modelsState.sdDemand}">
                           </div>
-                        </div>
-                      </div>`
+                          <div class="ms-filter-field">
+                            <label for="modSdTax">Impuesto por unidad (τ): <strong id="modSdTaxOut">${modelsState.sdTax}</strong></label>
+                            <input id="modSdTax" type="range" min="0" max="30" step="5" value="${modelsState.sdTax}">
+                          </div>
+                        </div>`
+                      : `<div class="ms-filter-bar" style="margin-bottom:0">
+                          <div class="ms-filter-field">
+                            <span class="ms-filter-label">Exploración conceptual del desplazamiento (no estimación econométrica)</span>
+                            <div class="ms-seg-group">
+                              <button type="button" class="ms-seg-btn" data-mod-shift="0" aria-pressed="${modelsState.conceptualShift === 0}">Equilibrio base</button>
+                              <button type="button" class="ms-seg-btn" data-mod-shift="1" aria-pressed="${modelsState.conceptualShift === 1}">Desplazamiento positivo</button>
+                              <button type="button" class="ms-seg-btn" data-mod-shift="-1" aria-pressed="${modelsState.conceptualShift === -1}">Desplazamiento adverso</button>
+                            </div>
+                          </div>
+                        </div>`
               }
             </article>
 
@@ -1690,21 +1642,8 @@
                 <p>Transmisión teórica y referencias académicas</p>
               </div>
             </div>
-            <div style="display:grid;gap:10px;font-size:12px;line-height:1.55">
-              ${
-                activeModel.id === 'asad'
-                  ? M.createAsAdModel()
-                      .explain({ dG: modelsState.asadG, dM: modelsState.asadM, dz: modelsState.asadZ })
-                      .map((step, i) => `<div><strong>${i + 1}.</strong> ${esc(step)}</div>`)
-                      .join('')
-                  : `<div><strong>1. Mecanismo central:</strong> ${esc(activeModel.question)}</div>
-                     <div><strong>2. Horizonte temporal:</strong> ${esc(activeModel.horizon)}.</div>
-                     <div><strong>3. Distinción metodológica:</strong> ${
-                       activeModel.status === 'functional'
-                         ? 'Este modelo cuenta con un motor matemático puro verificado en pruebas unitarias.'
-                         : 'Esta vista presenta la estructura conceptual y geométrica del modelo sin simular calibraciones econométricas no verificadas.'
-                     }</div>`
-              }
+            <div id="modReadingBody" style="display:grid;gap:10px;font-size:12px;line-height:1.55">
+              ${formatModelReading(activeModel)}
             </div>
             <div class="ms-exp-eyebrow" style="margin-top:14px">REFERENCIAS CLÁSICAS</div>
             <p style="font-size:11.5px;color:var(--exp-muted);margin:4px 0 14px">${esc(activeModel.refs.join(' · '))}</p>
@@ -1719,6 +1658,7 @@
     `;
 
     modelsTrendChart?.destroy();
+    modelsTrendChart = null;
     const canvas = host.querySelector('#modTrendCanvas');
     if (canvas && typeof globalThis.Chart === 'function' && empPoints.length) {
       modelsTrendChart = new globalThis.Chart(canvas, {
@@ -1754,32 +1694,32 @@
         renderModelosView();
       });
     });
-    host.querySelector('#modAsadG')?.addEventListener('change', e => {
-      modelsState.asadG = Number(e.target.value);
-      renderModelosView();
-    });
-    host.querySelector('#modAsadZ')?.addEventListener('change', e => {
-      modelsState.asadZ = Number(e.target.value);
-      renderModelosView();
-    });
-    host.querySelector('#modSdD')?.addEventListener('change', e => {
-      modelsState.sdDemand = Number(e.target.value);
-      renderModelosView();
-    });
-    host.querySelector('#modSdTax')?.addEventListener('change', e => {
-      modelsState.sdTax = Number(e.target.value);
-      renderModelosView();
-    });
+    const bindModelControl = (sel, key) => {
+      const el = host.querySelector(sel);
+      if (!el) return;
+      const onUpdate = e => {
+        modelsState[key] = Number(e.target.value);
+        refreshModelDiagram(activeModel);
+      };
+      el.addEventListener('input', onUpdate);
+      el.addEventListener('change', onUpdate);
+    };
+    bindModelControl('#modAsadG', 'asadG');
+    bindModelControl('#modIslmM', 'islmM');
+    bindModelControl('#modAsadZ', 'asadZ');
+    bindModelControl('#modSdD', 'sdDemand');
+    bindModelControl('#modSdTax', 'sdTax');
     host.querySelectorAll('[data-mod-shift]').forEach(btn => {
       btn.addEventListener('click', () => {
         modelsState.conceptualShift = Number(btn.dataset.modShift);
-        renderModelosView();
+        refreshModelDiagram(activeModel);
       });
     });
     host.querySelector('#modEmpiricalCountry')?.addEventListener('change', e => {
       modelsState.country = e.target.value;
       renderModelosView();
     });
+    refreshModelDiagram(activeModel);
   }
 
   /* ==========================================================================
@@ -2214,10 +2154,24 @@
   }
 
   function renderAllExperiences() {
-    renderAprendizajeView();
+    if (!document.getElementById('aprendizaje')?.querySelector('#apDiagramContainer')) {
+      renderAprendizajeView();
+    }
     renderHistoricoView();
     renderIndicadoresView();
-    renderModelosView();
+    if (!document.getElementById('modelos')?.querySelector('#modSvgContainer')) {
+      renderModelosView();
+    } else if (modelsTrendChart?.data?.datasets?.[0] && typeof modelsTrendChart.update === 'function') {
+      const library = M.MODELS_LIBRARY || [];
+      const activeModel = library.find(m => m.id === modelsState.selectedModelId) || library[0];
+      const empInd = (M.INDICATORS_CATALOG || []).find(i => i.id === activeModel?.empiricalIndicator) || M.INDICATORS_CATALOG?.[0];
+      if (empInd) {
+        const empResolved = M.resolveIndicatorSeries(empInd, modelsState.country);
+        modelsTrendChart.data.labels = empResolved.series.map(p => p.date);
+        modelsTrendChart.data.datasets[0].data = empResolved.series.map(p => p.value);
+        modelsTrendChart.update('none');
+      }
+    }
     renderObservatorioView();
     renderSimulatorScenarioSaver();
   }

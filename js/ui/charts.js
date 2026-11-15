@@ -261,7 +261,7 @@
       const badgeFontPx = isZoom ? 11.8 : 10.6;
       const curveFontPx = isZoom ? 11.8 : 10.6;
       const legendFontPx = isZoom ? 11.5 : 10.4;
-      const xt = niceTicks(x0, x1, isZoom ? 5 : 4), yt = niceTicks(y0, y1, isZoom ? 5 : 4);
+      const xt = spec.x.categories ? {ticks:Object.keys(spec.x.categories).map(Number),decimals:0} : niceTicks(x0, x1, isZoom ? 5 : 4), yt = niceTicks(y0, y1, isZoom ? 5 : 4);
       ctx.font = font(tickFontPx, 650);
       const maxYTickW = Math.max(18, ...yt.ticks.map(yv => ctx.measureText(fmtNum(yv, yt.decimals)).width));
       const pad = {
@@ -282,21 +282,23 @@
       ctx.fill();
       ctx.restore();
 
-      ctx.lineWidth = 1; ctx.font = font(tickFontPx, 650); ctx.fillStyle = color('--chart-tick');
+      ctx.lineWidth = 1; ctx.font = font(spec.x.categories && pw < 300 ? 9.8 : tickFontPx, 650); ctx.fillStyle = color('--chart-tick');
       let lastXTickRight = -Infinity;
+      const xTickGap = spec.x.categories ? 3 : 6;
       xt.ticks.forEach(xv => {
         const px = sx(xv);
         ctx.strokeStyle = color('--grid');
         ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
-        const txt = fmtNum(xv, xt.decimals);
+        const txt = spec.x.categories?.[xv] ?? fmtNum(xv, xt.decimals);
         const tw = ctx.measureText(txt).width;
         const clampedX = Math.min(Math.max(px, pad.l + tw / 2), pad.l + pw - tw / 2);
-        if (clampedX - tw / 2 >= lastXTickRight + 6) {
+        if (clampedX - tw / 2 >= lastXTickRight + xTickGap) {
           ctx.textAlign = 'center'; ctx.textBaseline = 'top';
           ctx.fillText(txt, clampedX, pad.t + ph + (isZoom ? 5 : 4));
           lastXTickRight = clampedX + tw / 2;
         }
       });
+      ctx.font = font(tickFontPx, 650);
       yt.ticks.forEach(yv => {
         const py = sy(yv);
         ctx.strokeStyle = color('--grid');
@@ -322,15 +324,38 @@
       ctx.save(); ctx.beginPath(); ctx.rect(pad.l, pad.t, pw, ph); ctx.clip();
       const labels = [];
       const drawnSegments = [];
+      const bars = spec.bars || [];
+      if (bars.length && y0 < 0 && y1 > 0) {
+        const zeroY = sy(0);
+        ctx.strokeStyle = color('--line-strong');
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pad.l, zeroY); ctx.lineTo(pad.l + pw, zeroY); ctx.stroke();
+      }
+      const barLabelSize = pw < 300 ? 9.5 : tickFontPx;
+      bars.forEach(bar => {
+        const x=sx(bar.x),zero=sy(0),top=sy(bar.value),width=Math.min(50,pw/8);
+        ctx.fillStyle=color(bar.color);ctx.globalAlpha=.83;ctx.fillRect(x-width/2,Math.min(zero,top),width,Math.max(1,Math.abs(zero-top)));ctx.globalAlpha=1;
+        const label=fmtNum(bar.value,Math.abs(bar.value)>=1000&&pw<300?0:1);ctx.font=font(barLabelSize,700);
+        if(ctx.measureText(label).width<pw/Math.max(3,bars.length)-2){
+          ctx.fillStyle=color('--ink');
+          ctx.textAlign='center';
+          const above=bar.value>=0;
+          ctx.textBaseline=above?'bottom':'top';
+          const labelY=above?Math.max(pad.t+barLabelSize+2,top-4):Math.min(pad.t+ph-barLabelSize-2,top+4);
+          ctx.fillText(label,Math.min(Math.max(x,pad.l+ctx.measureText(label).width/2+2),pad.l+pw-ctx.measureText(label).width/2-2),labelY);
+        }
+      });
       spec.lines.forEach(l => {
-        const seg = clipLine(l.line, spec.x.range, spec.y.range);
+        const seg = l.path ? [l.path[0],l.path.at(-1)].map(p=>[p.x,p.y]) : clipLine(l.line, spec.x.range, spec.y.range);
         if (!seg) return;
         const cHex = l.stroke || color(l.color);
         ctx.strokeStyle = cHex;
         ctx.globalAlpha = l.initial ? 0.65 : 1;
         ctx.lineWidth = l.initial ? (isZoom ? 2.1 : 1.85) : (isZoom ? 3 : 2.65);
         ctx.setLineDash(l.dash || (l.initial || l.dashed ? [5, 4] : []));
-        ctx.beginPath(); ctx.moveTo(sx(seg[0][0]), sy(seg[0][1])); ctx.lineTo(sx(seg[1][0]), sy(seg[1][1])); ctx.stroke();
+        ctx.beginPath();
+        if(l.path)l.path.forEach((p,i)=>i?ctx.lineTo(sx(p.x),sy(p.y)):ctx.moveTo(sx(p.x),sy(p.y)));
+        else{ctx.moveTo(sx(seg[0][0]), sy(seg[0][1]));ctx.lineTo(sx(seg[1][0]), sy(seg[1][1]));}ctx.stroke();
         ctx.setLineDash([]); ctx.globalAlpha = 1;
         drawnSegments.push({ l, seg, cHex });
         if (l.label) {
@@ -343,17 +368,19 @@
       // Arrows connect consecutive curve positions, including a return to the base.
       const families = [...new Set(drawnSegments.map(d => d.l.family).filter(Boolean))];
       families.forEach((family, fi) => {
-        for (let stage = 0; stage < 2; stage++) {
-          const from = drawnSegments.find(d => d.l.family === family && d.l.stages.includes(stage));
-          const to = drawnSegments.find(d => d.l.family === family && d.l.stages.includes(stage + 1));
+        const order=spec.stageOrder||[0,1,2];
+        for (let stage = 0; stage < order.length-1; stage++) {
+          const from = drawnSegments.find(d => d.l.family === family && d.l.stages.includes(order[stage]));
+          const to = drawnSegments.find(d => d.l.family === family && d.l.stages.includes(order[stage+1]));
           if (!from || !to || from === to) continue;
           const l = from.l.line, r = to.l.line;
           const yy = y0 + (y1-y0) * (0.62 - stage*.2 + (fi%2)*.07);
           const xx = x0 + (x1-x0) * (0.62 - stage*.2);
           let a,b;
-          if(Math.abs(l.a)>1e-9 && Math.abs(r.a)>1e-9) {
+          if(from.l.path&&to.l.path){const i=Math.floor(from.l.path.length*.6),p=from.l.path[i],q=to.l.path[i];if(!p||!q)continue;a=[sx(p.x),sy(p.y)];b=[sx(q.x),sy(q.y)];}
+          else if(l&&r&&Math.abs(l.a)>1e-9 && Math.abs(r.a)>1e-9) {
             a=[sx((l.c-l.b*yy)/l.a),sy(yy)];b=[sx((r.c-r.b*yy)/r.a),sy(yy)];
-          } else if(Math.abs(l.b)>1e-9 && Math.abs(r.b)>1e-9) {
+          } else if(l&&r&&Math.abs(l.b)>1e-9 && Math.abs(r.b)>1e-9) {
             a=[sx(xx),sy((l.c-l.a*xx)/l.b)];b=[sx(xx),sy((r.c-r.a*xx)/r.b)];
           } else continue;
           const len=Math.hypot(b[0]-a[0],b[1]-a[1]);
