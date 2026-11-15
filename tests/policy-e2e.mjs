@@ -22,10 +22,17 @@ try {
  await page.locator('[data-policy-load]').first().click();assert.match(await page.textContent('#policy-regime'),/vinculante/);
  const download=page.waitForEvent('download');await page.click('#policy-export');const file=await download;assert.match(file.suggestedFilename(),/\.csv$/);
  const csv=await readFile(await file.path(),'utf8');assert.match(csv,/resultado_teorico,price,UM\/unidad/);assert.match(csv,/fao.org/);
+ for(const [key,value] of [['worldPrice',80],['demandSlope',1.4],['supplySlope',1.4]])await page.locator('#policy-'+key).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));},value);
+ assert.ok(await page.locator('#policy-error').isVisible());assert.ok(await page.locator('#policy-save').isDisabled());
+ await page.click('[data-policy-section="packages"]');assert.ok(await page.locator('[data-policy-capture="A"]').isDisabled());
+ await page.click('[data-policy-section="trade"]');await page.selectOption('#policy-preset','mix');
  await page.click('[data-policy-section="macro"]');
  await page.selectOption('#policy-macro-mobility','perfect');
  await page.locator('#policy-macro-G').evaluate(el=>{el.value=3;el.dispatchEvent(new Event('input',{bubbles:true}));});
  assert.equal(await page.locator('#policy-macro-result').getAttribute('data-dy'),'0.000000');
+ await page.selectOption('#policy-macro-regime','closed');assert.ok(await page.locator('#policy-macro-mobility').isDisabled());
+ await page.selectOption('#policy-macro-regime','fixed');assert.ok(await page.locator('#policy-macro-M').isDisabled());
+ await page.selectOption('#policy-macro-regime','flex');
  await page.click('[data-policy-section="library"]');await page.fill('#policy-search','arancel');assert.ok(await page.locator('#policy-library .policy-instrument').count()<12);assert.match(await page.textContent('#policy-library'),/Arancel/);
  await page.click('[data-policy-section="cases"]');await page.selectOption('#policy-case-answer','subsidy');await page.click('#policy-case-check');assert.match(await page.textContent('#policy-case-feedback'),/Correcto/);
  await page.click('[data-policy-section="trade"]');

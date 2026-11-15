@@ -48,6 +48,7 @@
     for(const f of [...fields,...advanced])document.getElementById('policy-value-'+f[0]).textContent=fmt(input[f[0]]);
     document.getElementById('policy-quota').disabled=!input.quotaEnabled;document.getElementById('policy-rent').disabled=!input.quotaEnabled;
     document.getElementById('policy-save').disabled=!current;document.getElementById('policy-export').disabled=!current;document.getElementById('policy-json').disabled=!current;
+    document.querySelectorAll('[data-policy-capture]').forEach(button=>button.disabled=!current);
     if(!current)return;
     const r=current;
     document.getElementById('policy-regime').textContent=r.regime;
@@ -75,6 +76,7 @@
   }
   function renderMacro(){
     const fixed=macro.regime==='fixed';document.getElementById('policy-macro-M').disabled=fixed;
+    document.getElementById('policy-macro-mobility').disabled=macro.regime==='closed';
     if(fixed){macro.M=0;document.getElementById('policy-macro-M').value=0;}
     const model=M.ISLM.createModel({regime:macro.regime,mobility:macro.mobility,instrument:'money',i0:4,istar0:3,nx0:0,cab:0});
     const base=model.baseline, u={...base,G:base.G+macro.G,T0:macro.T,Mpct:fixed?0:macro.M};
