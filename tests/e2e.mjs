@@ -1237,52 +1237,59 @@ await check('módulo 06 y 07 simulación y modelos: persistencia completa de esc
   for(const modId of ['islm','asad','micro-sd','phillips','solow']){
     await page.click(`[data-mod-select="${modId}"]`);
     assert.equal(await page.getAttribute(`[data-mod-select="${modId}"]`,'aria-selected'),'true');
-    assert.equal(await page.locator('#modSvgContainer svg').count(),1);
+    await page.waitForFunction(()=>document.querySelector('#modSvgContainer canvas')?.dataset.curves);
+    assert.equal(await page.locator('#modSvgContainer canvas').count(),1);
+    assert.equal(await page.locator('#modSvgContainer svg').count(),0);
   }
 
-  // Verificar coherencia matemática de intersección de curvas y puntos de equilibrio en el SVG de OA-DA y Oferta-Demanda
+  // Verificar coherencia matemática de intersección de curvas y puntos de equilibrio enviados al renderer canvas de OA-DA y Oferta-Demanda
   await page.click('[data-mod-select="asad"]');
   await page.evaluate(()=>{
     const g=document.getElementById('modAsadG');g.value='4';g.dispatchEvent(new Event('change',{bubbles:true}));
     const z=document.getElementById('modAsadZ');z.value='2';z.dispatchEvent(new Event('change',{bubbles:true}));
   });
+  await page.waitForFunction(()=>document.querySelector('#modSvgContainer canvas')?.dataset.animating==='false');
   const asadCheck=await page.evaluate(()=>{
-    const svg=document.querySelector('#modSvgContainer svg');
-    const line=name=>{const el=svg.querySelector(`[data-curve="${name}"]`);return {x1:+el.getAttribute('x1'),y1:+el.getAttribute('y1'),x2:+el.getAttribute('x2'),y2:+el.getAttribute('y2')};};
-    const pt=name=>{const el=svg.querySelector(`[data-point="${name}"]`);return {cx:+el.getAttribute('cx'),cy:+el.getAttribute('cy')};};
+    const canvas=document.querySelector('#modSvgContainer canvas');
+    const curves=JSON.parse(canvas.dataset.curves||'[]');
+    const points=JSON.parse(canvas.dataset.points||'[]');
+    const findLine=(family,stage)=>curves.find(l=>l.family===family&&l.stages?.includes(stage))?.line;
+    const pt=label=>points.find(p=>p.label===label);
     const intersect=(a,b)=>{
-      const d=(a.x1-a.x2)*(b.y1-b.y2)-(a.y1-a.y2)*(b.x1-b.x2);
-      const x=((a.x1*a.y2-a.y1*a.x2)*(b.x1-b.x2)-(a.x1-a.x2)*(b.x1*b.y2-b.y1*b.x2))/d;
-      const y=((a.x1*a.y2-a.y1*a.x2)*(b.y1-b.y2)-(a.y1-a.y2)*(b.x1*b.y2-b.y1*b.x2))/d;
-      return {x,y};
+      const d=a.a*b.b-b.a*a.b;
+      return {x:(a.c*b.b-b.c*a.b)/d,y:(a.a*b.c-b.a*a.c)/d};
     };
-    const i1=intersect(line('ad1'),line('as1'));
-    const i2=intersect(line('ad1'),line('as2'));
-    const e1=pt('E1'),e2=pt('E2');
-    return Math.hypot(i1.x-e1.cx,i1.y-e1.cy)<0.2 && Math.hypot(i2.x-e2.cx,i2.y-e2.cy)<0.2;
+    const ad1=findLine('DA',1),as1=findLine('OACP',1),as2=findLine('OACP',2),lras=curves.find(l=>l.label==='OALP')?.line;
+    const e1=pt('E₁'),e2=pt('E₂');
+    if(!ad1||!as1||!as2||!lras||!e1||!e2)return false;
+    const i1=intersect(ad1,as1),i2=intersect(ad1,as2);
+    return Math.hypot(i1.x-e1.x,i1.y-e1.y)<1e-3 && Math.hypot(i2.x-e2.x,i2.y-e2.y)<1e-3 && Math.abs(lras.a*e2.x+lras.b*e2.y-lras.c)<1e-3;
   });
-  assert.equal(asadCheck,true,'E1 y E2 en el SVG de OA-DA deben coincidir con las intersecciones de DA1/OACP1 y DA1/OACP2');
+  assert.equal(asadCheck,true,'E₁ y E₂ en el canvas de OA-DA deben coincidir con las intersecciones de DA₁/OACP₁ y DA₁/OACP₂');
 
   await page.click('[data-mod-select="micro-sd"]');
   await page.evaluate(()=>{
     const d=document.getElementById('modSdD');d.value='30';d.dispatchEvent(new Event('change',{bubbles:true}));
     const t=document.getElementById('modSdTax');t.value='20';t.dispatchEvent(new Event('change',{bubbles:true}));
   });
+  await page.waitForFunction(()=>document.querySelector('#modSvgContainer canvas')?.dataset.animating==='false');
   const sdCheck=await page.evaluate(()=>{
-    const svg=document.querySelector('#modSvgContainer svg');
-    const line=name=>{const el=svg.querySelector(`[data-curve="${name}"]`);return {x1:+el.getAttribute('x1'),y1:+el.getAttribute('y1'),x2:+el.getAttribute('x2'),y2:+el.getAttribute('y2')};};
-    const pt=name=>{const el=svg.querySelector(`[data-point="${name}"]`);return {cx:+el.getAttribute('cx'),cy:+el.getAttribute('cy')};};
+    const canvas=document.querySelector('#modSvgContainer canvas');
+    const curves=JSON.parse(canvas.dataset.curves||'[]');
+    const points=JSON.parse(canvas.dataset.points||'[]');
+    const findLine=(family,stage)=>curves.find(l=>l.family===family&&l.stages?.includes(stage))?.line;
+    const pt=label=>points.find(p=>p.label===label);
     const intersect=(a,b)=>{
-      const d=(a.x1-a.x2)*(b.y1-b.y2)-(a.y1-a.y2)*(b.x1-b.x2);
-      const x=((a.x1*a.y2-a.y1*a.x2)*(b.x1-b.x2)-(a.x1-a.x2)*(b.x1*b.y2-b.y1*b.x2))/d;
-      const y=((a.x1*a.y2-a.y1*a.x2)*(b.y1-b.y2)-(a.y1-a.y2)*(b.x1*b.y2-b.y1*b.x2))/d;
-      return {x,y};
+      const d=a.a*b.b-b.a*a.b;
+      return {x:(a.c*b.b-b.c*a.b)/d,y:(a.a*b.c-b.a*a.c)/d};
     };
-    const i1=intersect(line('d1'),line('s1'));
-    const e1=pt('E1');
-    return Math.hypot(i1.x-e1.cx,i1.y-e1.cy)<0.2;
+    const d0=findLine('D',0),s0=findLine('S',0),d2=findLine('D',2),s2=findLine('S',2);
+    const e0=pt('E₀'),e2=pt('E₂'),ps=pt('Pₛ');
+    if(!d0||!s0||!d2||!s2||!e0||!e2||!ps)return false;
+    const i0=intersect(d0,s0),i2=intersect(d2,s2);
+    return Math.hypot(i0.x-e0.x,i0.y-e0.y)<1e-3 && Math.hypot(i2.x-e2.x,i2.y-e2.y)<1e-3 && Math.abs((e2.y-ps.y)-20)<1e-3 && Math.abs(e2.x-ps.x)<1e-3;
   });
-  assert.equal(sdCheck,true,'E1 en el SVG de Oferta-Demanda debe coincidir con la intersección de D1 y S1');
+  assert.equal(sdCheck,true,'E₀ y E₂ en el canvas de Oferta-Demanda deben coincidir con las intersecciones de D/S y la cuña fiscal τ');
 });
 
 await check('observatorio del Perú y ficha de la fuente: series nacionales BCRP y colecciones académicas',async page=>{

@@ -5,50 +5,13 @@
   const ISLM = M.ISLM = globalThis.ISLM;
   // Resolve cross-view callbacks when invoked, after every deferred script has loaded.
   const axisRange = (...args) => M.axisRange(...args);
-  const diagramFrames = new Map();
-  // Keep the canvas and renderer; interpolate only declarative lines and points.
+  // Apply Laboratory-specific layer controls, then use the shared motion renderer.
   function drawDiagram(canvas, target) {
-    const old = diagramFrames.get(canvas.id);
-    if (old) cancelAnimationFrame(old.frame);
     const hidden = new Set([...document.querySelectorAll('#islmLayers [data-curve]:not(:checked)')].map(el => el.dataset.curve));
     if (hidden.has('--blue')) hidden.add('--violet');
     const showInit = document.getElementById('islmInitial')?.checked !== false;
     if (target.lines) target = {...target, lines: target.lines.filter(l => !hidden.has(l.color) && (showInit || !l.initial))};
-    const entry = { spec: old?.spec, frame: 0 };
-    diagramFrames.set(canvas.id, entry);
-    const start = performance.now();
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const previous = old?.spec;
-    const animate = previous && !previous.message && !target.message && !reduced && JSON.stringify(previous) !== JSON.stringify(target);
-    canvas.dataset.animating = String(Boolean(animate));
-    canvas.dataset.motion = reduced ? 'reduced' : 'full';
-    const mix = (a, b, t) => a + (b - a) * t;
-    const paint = now => {
-      const t = animate ? Math.min(1, (now - start) / 400) : 1;
-      const f = 1 - (1 - t) ** 3;
-      const spec = t === 1 ? target : { ...target,
-        lines: target.lines.map(l => {
-          const lKey = l.family || l.color;
-          const lStage = l.stage || (l.initial ? 'initial' : 'final');
-          const before = previous.lines.find(v => (v.family || v.color) === lKey && (v.stage || (v.initial ? 'initial' : 'final')) === lStage)
-            || previous.lines.find(v => (v.family || v.color) === lKey && v.initial === l.initial)
-            || l;
-          return { ...l, line: Object.fromEntries(['a', 'b', 'c'].map(k => [k, mix(before.line[k], l.line[k], f)])) };
-        }),
-        points: target.points.map(p => {
-          const before = previous.points.find(v => v.label === p.label) || p;
-          return { ...p, x: mix(before.x, p.x, f), y: mix(before.y, p.y, f) };
-        })
-      };
-      M.drawDiagram(canvas, spec);
-      entry.spec = spec;
-      // These are the coordinates actually sent to the renderer, not a separate prediction.
-      canvas.dataset.points = JSON.stringify(spec.points || []);
-      canvas.dataset.curves = JSON.stringify(spec.lines || []);
-      if (t < 1) entry.frame = requestAnimationFrame(paint);
-      else canvas.dataset.animating = 'false';
-    };
-    paint(start);
+    M.animateEconomicDiagram(canvas, target);
   }
   const fmtNum = (...args) => M.fmtNum(...args);
   const fmtSigned = (...args) => M.fmtSigned(...args);
@@ -555,20 +518,7 @@
     function islmLinePair(initial, final, color, base) {
       return islmStageLines(initial, final, final, color, base);
     }
-    function islmStageLines(initial, impact, final, color, family) {
-      const groups = [];
-      [initial, impact, final].forEach((line, stage) => {
-        const group = groups.find(g => sameLine(g.line, line));
-        if (group) group.stages.push(stage);
-        else groups.push({line, stages:[stage], color, family});
-      });
-      return groups.map(g => ({...g,
-        label:g.stages.map(n => family + ['₀','₁','₂'][n]).join('='),
-        initial:g.stages.length === 1 && g.stages[0] === 0,
-        stage:g.stages.includes(2) ? 'final' : g.stages.includes(1) ? 'impact' : 'initial',
-        dash:g.stages.includes(2) ? [] : g.stages.includes(1) ? [9,3,2,3] : [5,4]
-      }));
-    }
+    const islmStageLines = (...args) => M.diagramStageLines(...args);
     let lastIslmSpecs = null;
     let lastIslmEquilibria = null;
     function renderIslmZoom() {
