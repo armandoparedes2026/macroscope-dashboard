@@ -64,3 +64,21 @@ Suite completa ejecutada tras la integración de código y actualización de pru
 
 - **Safari / iOS físico:** no verificado en dispositivo físico Apple/WebKit; las pruebas automatizadas corrieron en Chromium/Playwright sobre Windows.
 - **Vista previa / producción remota (Vercel):** se amplió el utilitario local ignorado `test-results/verify-release.mjs` con los nuevos assets (`js/ui/economic-diagrams.js`, `js/ui/economic-diagram-specs.js`, `css/economic-diagrams.css`) y `tests/economic-diagrams.mjs`, pero no se ejecutó despliegue ni verificación contra URL pública/preview al no contar con despliegue/tokens en esta sesión; requiere verificación en CI / preview del PR.
+
+
+## Correcciones de la revisi?n t?cnica (2026-11-15)
+
+- **Lectura de Aprendizaje:** el mecanismo se deriva de las mismas rectas IS, LM y BP y de los equilibrios E?/E?/E? que recibe el renderer. Distingue desplazamientos de curvas, movimientos del producto/tasa y ajuste externo; contempla gasto negativo/positivo, pol?tica monetaria, combinaciones, shocks externos y ausencia de cambios. La teor?a y la evaluaci?n del escenario original de la lecci?n permanecen identificadas aparte. En econom?a cerrada se deshabilita y reinicia el shock i*; con cambio fijo se conserva el control monetario deshabilitado por dinero end?geno.
+- **Ampliaci?n m?vil compartida:** di?logo de pantalla completa hasta 860 px, encabezado compacto, selector ?nicamente cuando hay varios gr?ficos, cierre accesible y explicaci?n desplegable bajo el gr?fico. El canvas tiene entre 360 y 520 px de altura seg?n el viewport. Las escalas ampliadas son de 13,4 px y las etiquetas de barras/categor?as aumentan tambi?n. El Laboratorio conserva sus dimensiones y tipograf?a existentes.
+- **Medici?n local en Chromium:** en 360?800 el trazado de Modelos pasa de 216?242 a 252?412 px (1,99 veces el ?rea); en Pol?tica de 220?242 a 252?412 px (1,95 veces). En 390?800 Pol?tica pasa de 250?242 a 282?412 px (1,92 veces). Estos valores corresponden a las configuraciones del recorrido de regresi?n, con fuentes locales sin conexi?n.
+- **Regresi?n:** `node tests/learning-reading-zoom.mjs`, integrado en `npm test`, comprueba direcci?n y ausencia de cambios, combinaci?n fiscal/monetaria, shocks i* positivos/negativos, reg?menes, ?rea ?til ampliada, escalas, etiquetas dentro del lienzo, acceso a supuestos, selector individual, foco y ausencia de desbordamiento en 360/390 px claro/oscuro. El test espera el repintado real de ResizeObserver antes de comparar geometr?a tras cambiar el viewport.
+
+Evidencia de las correcciones:
+
+- [Lectura din?mica ante una contracci?n fiscal](../evidence/diagramas-compartidos/lectura-contraccion.png)
+- [Modelos ampliados a 360 px](../evidence/diagramas-compartidos/ampliacion-modelos-360.png)
+- [Pol?tica ampliada a 390 px, tema oscuro](../evidence/diagramas-compartidos/ampliacion-politica-390-oscuro.png)
+
+Se mantiene el l?mite de verificaci?n: sin comprobaci?n en Safari/iOS f?sico. La actualizaci?n del PR no equivale a publicaci?n en producci?n.
+
+Validaci?n local de las correcciones: `npm test` termin? con c?digo 0 (smoke, 85 unitarias, 89 E2E, 7 t?ctiles, 7 escenarios de etapas, Pol?tica, diagramas compartidos y los 15 casos nuevos). Los tres motores econ?micos permanecen sin diferencias.

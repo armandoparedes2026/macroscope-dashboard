@@ -247,6 +247,7 @@
       const color = name => css.getPropertyValue(name).trim() || M.color('--text-muted');
       const font = (size, weight = 500) => `${weight} ${size}px 'DM Sans', system-ui, sans-serif`;
       const isZoom = Boolean(canvas.closest('.lab-zoom-dialog')) || w >= 540 || h >= 270;
+      const mobileExpanded = Boolean(canvas.closest('.economic-zoom-dialog')) && window.matchMedia('(max-width: 860px)').matches;
       if (spec.message) {
         ctx.fillStyle = color('--muted'); ctx.font = font(isZoom ? 14 : 12, 600); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         const words = spec.message.split(' '); let line = '', y = h / 2 - 18;
@@ -256,11 +257,11 @@
       }
       const hasLegend = Array.isArray(spec.legend) && spec.legend.length > 0;
       const [x0, x1] = spec.x.range, [y0, y1] = spec.y.range;
-      const tickFontPx = isZoom ? 12.2 : 11;
-      const axisTitlePx = isZoom ? 12.4 : 11;
-      const badgeFontPx = isZoom ? 11.8 : 10.6;
-      const curveFontPx = isZoom ? 11.8 : 10.6;
-      const legendFontPx = isZoom ? 11.5 : 10.4;
+      const tickFontPx = mobileExpanded ? 13.4 : isZoom ? 12.2 : 11;
+      const axisTitlePx = mobileExpanded ? 13.4 : isZoom ? 12.4 : 11;
+      const badgeFontPx = mobileExpanded ? 12.4 : isZoom ? 11.8 : 10.6;
+      const curveFontPx = mobileExpanded ? 12.4 : isZoom ? 11.8 : 10.6;
+      const legendFontPx = mobileExpanded ? 12 : isZoom ? 11.5 : 10.4;
       const xt = spec.x.categories ? {ticks:Object.keys(spec.x.categories).map(Number),decimals:0} : niceTicks(x0, x1, isZoom ? 5 : 4), yt = niceTicks(y0, y1, isZoom ? 5 : 4);
       ctx.font = font(tickFontPx, 650);
       const maxYTickW = Math.max(18, ...yt.ticks.map(yv => ctx.measureText(fmtNum(yv, yt.decimals)).width));
@@ -282,7 +283,7 @@
       ctx.fill();
       ctx.restore();
 
-      ctx.lineWidth = 1; ctx.font = font(spec.x.categories && pw < 300 ? 9.8 : tickFontPx, 650); ctx.fillStyle = color('--chart-tick');
+      ctx.lineWidth = 1; ctx.font = font(spec.x.categories && pw < 300 ? mobileExpanded ? 11.5 : 9.8 : tickFontPx, 650); ctx.fillStyle = color('--chart-tick');
       let lastXTickRight = -Infinity;
       const xTickGap = spec.x.categories ? 3 : 6;
       xt.ticks.forEach(xv => {
@@ -331,7 +332,7 @@
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(pad.l, zeroY); ctx.lineTo(pad.l + pw, zeroY); ctx.stroke();
       }
-      const barLabelSize = pw < 300 ? 9.5 : tickFontPx;
+      const barLabelSize = pw < 300 ? mobileExpanded ? 11.5 : 9.5 : tickFontPx;
       bars.forEach(bar => {
         const x=sx(bar.x),zero=sy(0),top=sy(bar.value),width=Math.min(50,pw/8);
         ctx.fillStyle=color(bar.color);ctx.globalAlpha=.83;ctx.fillRect(x-width/2,Math.min(zero,top),width,Math.max(1,Math.abs(zero-top)));ctx.globalAlpha=1;

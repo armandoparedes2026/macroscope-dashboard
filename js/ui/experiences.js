@@ -221,24 +221,78 @@
       : {};
   }
 
+  function learningTransmission(model, patch, { E0, E1, E2 }) {
+    const u = { ...model.baseline, ...patch }, c = model.curves;
+    const stages = [E0, E1, E2], inputs = [model.baseline, u, u];
+    const sign = value => Math.abs(value) < 0.005 ? 0 : Math.sign(value);
+    const movement = (name, from, to) => {
+      const direction = sign(to - from);
+      return `${name} ${direction > 0 ? 'aumenta' : direction < 0 ? 'disminuye' : 'no cambia'}`;
+    };
+    // Measure the very same affine curves as the plot, at the initial i (IS/LM)
+    // or Y (BP). Moving along a curve is not a shift of that curve.
+    const xAt = line => (line.c - line.b * E0.i) / line.a;
+    const yAt = line => (line.c - line.a * E0.Y) / line.b;
+    const curveAt = n => ({
+      IS: c.IS(inputs[n], stages[n].e),
+      LM: c.LM(inputs[n], stages[n].M),
+      ...(model.open ? { BP: c.BP(inputs[n], stages[n].e) } : {})
+    });
+    const shifts = (from, to) => {
+      const a = curveAt(from), b = curveAt(to);
+      return Object.keys(a).map(name => {
+        const vertical = name === 'BP';
+        const at = vertical ? yAt : xAt;
+        const direction = sign(at(b[name]) - at(a[name]));
+        return `${name} ${direction === 0 ? 'no se desplaza' : vertical
+          ? direction > 0 ? 'se desplaza hacia arriba' : 'se desplaza hacia abajo'
+          : direction > 0 ? 'se desplaza a la derecha' : 'se desplaza a la izquierda'}`;
+      }).join('; ');
+    };
+    const shock = [
+      sign(learningState.simG) ? `ΔG = ${fmtNum(learningState.simG)} puntos del producto inicial` : '',
+      learningState.simRegime !== 'fixed' && sign(learningState.simM) ? `ΔM = ${fmtNum(learningState.simM)} %` : '',
+      model.open && sign(learningState.simIstar) ? `Δi* = ${fmtNum(learningState.simIstar)} p.p.` : ''
+    ].filter(Boolean).join('; ');
+    const impact = shifts(0, 1), adjustment = shifts(1, 2);
+    const result = (from, to) => `${movement('el producto', from.Y, to.Y)} y ${movement('la tasa de interés', from.i, to.i)}`;
+    const external = !model.open
+      ? 'Economía cerrada: E₁ y E₂ coinciden; no hay ajuste externo.'
+      : learningState.simRegime === 'fixed'
+        ? 'El tipo de cambio permanece fijo; los saldos monetarios se ajustan de forma endógena al equilibrio externo.'
+        : `El tipo de cambio ${sign(E2.e - E1.e) < 0 ? 'se aprecia (e disminuye)' : sign(E2.e - E1.e) > 0 ? 'se deprecia (e aumenta)' : 'no cambia'} entre E₁ y E₂. Su efecto sobre las exportaciones netas modifica la IS y la BP cuando corresponde.`;
+    return {
+      impact,
+      text: shock
+        ? `Configuración actual: ${shock}. Entre E₀ y E₁ (impacto): ${impact}; ${result(E0, E1)}. ${external} ${model.open ? `Entre E₁ y E₂ (ajuste externo): ${adjustment}; ${result(E1, E2)}. ` : ''}En E₂ respecto de E₀: ${result(E0, E2)}. Etapas analíticas con precios fijos, no una trayectoria temporal ni una predicción empírica.`
+        : `Sin cambios en los parámetros: las curvas no se desplazan y E₀, E₁ y E₂ coinciden. ${external}`
+    };
+  }
+
   function refreshLearningDiagram() {
     const host = document.getElementById('aprendizaje');
     if (!host) return;
-    const scenario = currentLearningScenario();
     const fixed = learningState.simRegime === 'fixed';
+    const closed = learningState.simRegime === 'closed';
     if (fixed) learningState.simM = 0;
+    if (closed) learningState.simIstar = 0;
 
     const sliderM = host.querySelector('#apSliderM');
     if (sliderM) {
       sliderM.disabled = fixed;
       if (fixed) sliderM.value = '0';
     }
+    const sliderIstar = host.querySelector('#apSliderIstar');
+    if (sliderIstar) {
+      sliderIstar.disabled = closed;
+      if (closed) sliderIstar.value = '0';
+    }
     const outG = host.querySelector('#apOutG');
     if (outG) outG.textContent = `${learningState.simG >= 0 ? '+' : ''}${learningState.simG.toFixed(1)} pts`;
     const outM = host.querySelector('#apOutM');
     if (outM) outM.textContent = fixed ? '0.0 % (endógena)' : `${learningState.simM >= 0 ? '+' : ''}${learningState.simM.toFixed(1)} %`;
     const outIstar = host.querySelector('#apOutIstar');
-    if (outIstar) outIstar.textContent = `${learningState.simIstar >= 0 ? '+' : ''}${learningState.simIstar.toFixed(1)} p.p.`;
+    if (outIstar) outIstar.textContent = closed ? 'No aplica' : `${learningState.simIstar >= 0 ? '+' : ''}${learningState.simIstar.toFixed(1)} p.p.`;
 
     const subtitle = host.querySelector('#apDiagramSubtitle');
     if (subtitle) {
@@ -271,13 +325,16 @@
     const chain = host.querySelector('.ap-chain');
     if (chain && spec.equilibria) {
       const { E0, E1, E2 } = spec.equilibria;
+      const transmission = learningTransmission(model, patch, spec.equilibria);
+      const reading = host.querySelector('#apTheoryExplanation');
+      if (reading) reading.textContent = transmission.text;
       const openDiff = model.open && Math.hypot(E2.Y - E1.Y, E2.i - E1.i) > 0.05;
       const yText = openDiff ? `Y: ${E0.Y.toFixed(1)} → ${E1.Y.toFixed(1)} → ${E2.Y.toFixed(1)}` : `Y: ${E0.Y.toFixed(1)} → ${E2.Y.toFixed(1)}`;
       const iText = openDiff ? `i: ${E0.i.toFixed(1)}% → ${E1.i.toFixed(1)}% → ${E2.i.toFixed(1)}%` : `i: ${E0.i.toFixed(1)}% → ${E2.i.toFixed(1)}%`;
       chain.innerHTML = `
         <span class="ap-chain-chip">Shock inicial</span>
         <span>→</span>
-        <span class="ap-chain-chip">${esc(scenario?.shifts?.[0]?.curve || 'IS')} (${esc(scenario?.shifts?.[0]?.direction || 'right')})</span>
+        <span class="ap-chain-chip">${esc(transmission.impact)}</span>
         <span>→</span>
         <span class="ap-chain-chip">${esc(yText)}</span>
         <span>→</span>
@@ -545,9 +602,7 @@
                   })</h2>
                 </div>
               </div>
-              <p id="apTheoryExplanation" style="font-size:12.5px;line-height:1.6;margin:0 0 10px">
-                ${esc(scenario?.levels?.[learningState.level] || '')}
-              </p>
+              <p id="apTheoryExplanation" style="font-size:12.5px;line-height:1.6;margin:0 0 10px"></p>
               <div class="ms-exp-eyebrow">SECUENCIA DEL MECANISMO</div>
               <div class="ap-chain">
                 <span class="ap-chain-chip">Shock inicial</span>
@@ -558,6 +613,11 @@
                 <span>→</span>
                 <span class="ap-chain-chip">i: ${E0.i.toFixed(1)}% → ${E2.i.toFixed(1)}%</span>
               </div>
+              <details style="margin-top:12px;font-size:12px;line-height:1.6">
+                <summary>Teoría del escenario original de la lección</summary>
+                <p>Para el ejercicio de predicción se conservan los supuestos originales de «${esc(scenario?.title)}». La exploración de parámetros anterior tiene su propia lectura dinámica.</p>
+                <p>${esc(scenario?.levels?.[learningState.level] || '')}</p>
+              </details>
               ${
                 scenario?.caveats?.length
                   ? `<p style="font-size:11px;color:var(--exp-muted);margin:10px 0 0"><strong>Límite del modelo:</strong> ${esc(

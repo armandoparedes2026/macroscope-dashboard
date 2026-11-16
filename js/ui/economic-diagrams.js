@@ -74,6 +74,7 @@
   }
   function syncZoomModeSelect(list){
     const select=dialog?.querySelector('[data-economic-mode]');if(!select)return;
+    select.parentElement.hidden=list.length===1;
     const nextKey=list.map(r=>`${r.id}:${r.title}`).join('|');
     if(select.dataset.optionsKey===nextKey)return;
     select.dataset.optionsKey=nextKey;
@@ -93,7 +94,7 @@
         const card=content.querySelector(`[data-economic-zoom-card="${CSS.escape(r.id)}"]`);
         if(card){
           card.querySelector('h3').textContent=r.title;
-          card.querySelector('figcaption p').textContent=r.spec.description||'';
+          card.querySelector('.economic-zoom-description p').textContent=r.spec.description||'';
           syncControls(card.querySelector('[data-economic-zoom-stages]'),r);
           r.zoomCanvas.setAttribute('aria-label',`${r.title} ampliado`);
         }
@@ -102,7 +103,7 @@
     }
     for(const r of records.values())r.zoomCanvas=null;
     renderedZoomKey=key;
-    content.innerHTML=visible.map(r=>`<figure class="economic-zoom-card" data-economic-zoom-card="${esc(r.id)}"><figcaption><h3>${esc(r.title)}</h3><p>${esc(r.spec.description||'')}</p></figcaption><div data-economic-zoom-stages></div><canvas id="${esc(r.id)}-zoom" role="img" aria-label="${esc(r.title)} ampliado"></canvas></figure>`).join('');
+    content.innerHTML=visible.map(r=>`<figure class="economic-zoom-card" data-economic-zoom-card="${esc(r.id)}"><figcaption><h3>${esc(r.title)}</h3></figcaption><div data-economic-zoom-stages></div><canvas id="${esc(r.id)}-zoom" role="img" aria-label="${esc(r.title)} ampliado"></canvas><details class="economic-zoom-description"><summary>Supuestos y alcance</summary><p>${esc(r.spec.description||'')}</p></details></figure>`).join('');
     content.classList.toggle('is-single',visible.length===1);
     for(const r of visible){
       const card=content.querySelector(`[data-economic-zoom-card="${CSS.escape(r.id)}"]`);
